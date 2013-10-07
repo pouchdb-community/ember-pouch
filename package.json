@@ -1,0 +1,36 @@
+{
+  "name": "ember-data-hal-adapter",
+  "version": "0.1.0",
+  "description": "HAL API adapter for Ember Data",
+  "main": "hal_adapter.js",
+  "dependencies": {
+    "grunt": "~0.4.1"
+  },
+  "devDependencies": {
+    "grunt": "",
+    "grunt-contrib-concat": "",
+    "grunt-contrib-uglify": "",
+    "grunt-contrib-watch": "",
+    "grunt-es6-module-transpiler": "~0.4.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/locks/ember-data-hal-adapter.git"
+  },
+  "keywords": [
+    "Ember",
+    "Ember",
+    "Data",
+    "adapter",
+    "HAL",
+    "Hypermedia"
+  ],
+  "author": "Ricardo Mendes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/locks/ember-data-hal-adapter/issues"
+  }
+}
