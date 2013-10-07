@@ -1,0 +1,9 @@
+# Mac OS
+.DS_Store
+
+# JavaScript
+## Node.js
+node_modules
+
+## Bower.js
+bower_components
