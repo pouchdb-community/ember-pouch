@@ -44,7 +44,7 @@ DS.HALSerializer = DS.RESTSerializer.extend({
 
           return mapped;
         });
-        var reduced = _.reduce(ids, function(a,b) { return _.merge(a,b) });
+        var reduced = _.reduce(ids, function(a,b) { return _.merge(a,b) }, {});
 
         _.extend(resource, reduced);
       });
