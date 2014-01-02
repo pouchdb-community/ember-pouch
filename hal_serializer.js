@@ -1,13 +1,38 @@
 DS.HALSerializer = DS.RESTSerializer.extend({
-  extractSingle: function(store, type, payload, id, requestType) {
-    var kind = type.typeKey;
-    var normalizedPayload     = this._normalizeRootResource(kind, payload);
+  normalize: function(type, hash, property) {
+    for (var prop in hash) {
+      if (prop == '_links' ||
+          prop == '_embedded' ||
+          prop.indexOf('http') === 0) {
+        continue;
+      }
+
+      var camelizedProp = prop.camelize();
+      if (prop != camelizedProp)
+      {
+        hash[camelizedProp] = hash[prop];
+        delete hash[prop];
+      }
+    }
+
+    return this._super(type, hash, property);
+  },
+
+  normalizePayload: function(type, payload) {
+    var normalizedPayload;
+
+    if (type) {
+      normalizedPayload = this._normalizeRootResource(type.typeKey, payload);
+    } else {
+      normalizedPayload = payload;
+    }
+
     var embeddedResources     = this._extractEmbeddedResources(payload);
     var flatEmbeddedResources = this._flattenRelations(embeddedResources);
     var merged = _.extend(normalizedPayload, flatEmbeddedResources);
     var normalizedEmbeddedResources = this._normalizeEmbeddedIds(merged);
 
-    return this._super(store, type, normalizedEmbeddedResources, id, requestType);
+    return normalizedEmbeddedResources;
   },
 
   normalizeId: function(hash) {
@@ -16,13 +41,9 @@ DS.HALSerializer = DS.RESTSerializer.extend({
     return hash;
   },
 
-  _normalizeRootResource: function(type, payload) {
-    var plural =  Ember.String.pluralize(type);
-
-    if (paylay.hasOwnProperty(plural)) return payload;
-
+  _normalizeRootResource: function(typeKey, payload) {
     var resource = {};
-    resource[Ember.String.pluralize(typeKey)] = [payload];
+    resource[typeKey] = payload;
 
     return resource;
   },
