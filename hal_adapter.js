@@ -3,7 +3,7 @@ DS.HALAdapter = DS.RESTAdapter.extend({
 
   find: function(store, type, id) {
     return this.ajax(id, 'GET');
-  }
+  },
   
   updateRecord: function(store, type, record) {
     var data = {};
