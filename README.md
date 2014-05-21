@@ -1,6 +1,7 @@
 # Ember Data HAL Adapter
 
 [![Code Climate](https://codeclimate.com/github/locks/ember-data-hal-adapter.png)](https://codeclimate.com/github/locks/ember-data-hal-adapter)
+[![Gitter chat](https://badges.gitter.im/locks/ember-data-hal-adapter.png)](https://gitter.im/locks/ember-data-hal-adapter)
 
 ## What
 
