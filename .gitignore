@@ -9,5 +9,4 @@ node_modules
 bower_components
 
 # Build artifacts
-dist
 tmp
