@@ -7,3 +7,7 @@ node_modules
 
 ## Bower.js
 bower_components
+
+# Build artifacts
+dist
+tmp
