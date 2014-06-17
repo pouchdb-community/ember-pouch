@@ -22,8 +22,8 @@
     "tests"
   ],
   "dependencies": {
-    "underscore": "",
-    "underscore-contrib": "",
-    "ember-data": "~1.0.0-beta.3"
+    "underscore": "*",
+    "underscore-contrib": "*",
+    "ember-data": "~1.0.0-beta.8"
   }
 }
