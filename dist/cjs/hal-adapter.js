@@ -1,7 +1,7 @@
 "use strict";
 var HALSerializer = require("./hal-serializer")["default"] || require("./hal-serializer");
 
-var HALAdapter = DS.RESTAdapter.extend({
+exports["default"] = DS.RESTAdapter.extend({
   defaultSerializer: HALSerializer,
 
   find: function(store, type, id) {
@@ -21,5 +21,3 @@ var HALAdapter = DS.RESTAdapter.extend({
     return this.ajax(record.id, "DELETE");
   }
 });
-
-exports.HALAdapter = HALAdapter;

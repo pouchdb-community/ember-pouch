@@ -4,7 +4,7 @@ define(
     "use strict";
     var HALSerializer = __dependency1__["default"] || __dependency1__;
 
-    var HALAdapter = DS.RESTAdapter.extend({
+    __exports__["default"] = DS.RESTAdapter.extend({
       defaultSerializer: HALSerializer,
 
       find: function(store, type, id) {
@@ -24,6 +24,4 @@ define(
         return this.ajax(record.id, "DELETE");
       }
     });
-
-    __exports__.HALAdapter = HALAdapter;
   });

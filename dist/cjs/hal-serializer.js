@@ -1,5 +1,5 @@
 "use strict";
-var HALSerializer = DS.RESTSerializer.extend({
+exports["default"] = DS.RESTSerializer.extend({
   normalize: function(type, hash, property) {
     for (var prop in hash) {
       if (prop == '_links' ||
@@ -97,5 +97,3 @@ var HALSerializer = DS.RESTSerializer.extend({
     return self_link;
   }
 });
-
-exports.HALSerializer = HALSerializer;

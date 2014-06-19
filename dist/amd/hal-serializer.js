@@ -2,7 +2,7 @@ define(
   ["exports"],
   function(__exports__) {
     "use strict";
-    var HALSerializer = DS.RESTSerializer.extend({
+    __exports__["default"] = DS.RESTSerializer.extend({
       normalize: function(type, hash, property) {
         for (var prop in hash) {
           if (prop == '_links' ||
@@ -100,6 +100,4 @@ define(
         return self_link;
       }
     });
-
-    __exports__.HALSerializer = HALSerializer;
   });

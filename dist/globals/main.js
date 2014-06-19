@@ -2,7 +2,7 @@
 "use strict";
 var HALSerializer = _dereq_("./hal-serializer")["default"] || _dereq_("./hal-serializer");
 
-var HALAdapter = DS.RESTAdapter.extend({
+exports["default"] = DS.RESTAdapter.extend({
   defaultSerializer: HALSerializer,
 
   find: function(store, type, id) {
@@ -22,11 +22,9 @@ var HALAdapter = DS.RESTAdapter.extend({
     return this.ajax(record.id, "DELETE");
   }
 });
-
-exports.HALAdapter = HALAdapter;
 },{"./hal-serializer":2}],2:[function(_dereq_,module,exports){
 "use strict";
-var HALSerializer = DS.RESTSerializer.extend({
+exports["default"] = DS.RESTSerializer.extend({
   normalize: function(type, hash, property) {
     for (var prop in hash) {
       if (prop == '_links' ||
@@ -124,12 +122,10 @@ var HALSerializer = DS.RESTSerializer.extend({
     return self_link;
   }
 });
-
-exports.HALSerializer = HALSerializer;
 },{}],3:[function(_dereq_,module,exports){
 "use strict";
-var HALAdapter = _dereq_("./hal-adapter").HALAdapter;
-var HALSerializer = _dereq_("./hal-serializer").HALSerializer;
+var HALAdapter = _dereq_("./hal-adapter")["default"] || _dereq_("./hal-adapter");
+var HALSerializer = _dereq_("./hal-serializer")["default"] || _dereq_("./hal-serializer");
 
 exports.HALAdapter = HALAdapter;
 exports.HALSerializer = HALSerializer;
