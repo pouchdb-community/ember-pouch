@@ -3,10 +3,10 @@ var distes6 = require('broccoli-dist-es6-module');
 module.exports = distes6('lib', {
 
   // the entry script, and module that becomes the global
-  main: 'hal-adapter',
+  main: 'index',
 
   // will become window.DS.HALAdapter with the exports from `main`
-  global: 'DS.HALAdapter',
+  global: 'DS',
 
   // the prefix for named-amd modules
   packageName: 'hal-adapter',

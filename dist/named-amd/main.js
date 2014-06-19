@@ -1,10 +1,10 @@
-define("hal-adapter",
+define("hal-adapter/hal-adapter",
   ["./hal-serializer","exports"],
   function(__dependency1__, __exports__) {
     "use strict";
     var HALSerializer = __dependency1__["default"] || __dependency1__;
 
-    __exports__["default"] = DS.RESTAdapter.extend({
+    var HALAdapter = DS.RESTAdapter.extend({
       defaultSerializer: HALSerializer,
 
       find: function(store, type, id) {
@@ -24,12 +24,14 @@ define("hal-adapter",
         return this.ajax(record.id, "DELETE");
       }
     });
+
+    __exports__.HALAdapter = HALAdapter;
   });
 define("hal-adapter/hal-serializer",
   ["exports"],
   function(__exports__) {
     "use strict";
-    __exports__["default"] = DS.RESTSerializer.extend({
+    var HALSerializer = DS.RESTSerializer.extend({
       normalize: function(type, hash, property) {
         for (var prop in hash) {
           if (prop == '_links' ||
@@ -127,4 +129,16 @@ define("hal-adapter/hal-serializer",
         return self_link;
       }
     });
+
+    __exports__.HALSerializer = HALSerializer;
+  });
+define("hal-adapter",
+  ["./hal-adapter","./hal-serializer","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    var HALAdapter = __dependency1__.HALAdapter;
+    var HALSerializer = __dependency2__.HALSerializer;
+
+    __exports__.HALAdapter = HALAdapter;
+    __exports__.HALSerializer = HALSerializer;
   });
