@@ -5,8 +5,8 @@ module.exports = distes6('lib', {
   // the entry script, and module that becomes the global
   main: 'index',
 
-  // will become window.DS.HALAdapter with the exports from `main`
-  global: 'DS',
+  // will become window.HAL with the exports from `main`
+  global: 'HAL',
 
   // the prefix for named-amd modules
   packageName: 'hal-adapter',
