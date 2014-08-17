@@ -1,8 +1,8 @@
 {
-  "name": "ember-data-hal-adapter",
+  "name": "ember-data-pouchdb-adapter",
   "version": "0.1.0",
-  "description": "HAL API adapter for Ember Data",
-  "main": "hal_adapter.js",
+  "description": "PouchDB adapter for Ember Data",
+  "main": "lib/index.js",
   "dependencies": {
   },
   "devDependencies": {
@@ -15,17 +15,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/locks/ember-data-hal-adapter.git"
+    "url": "https://github.com/nolanlawson/ember-data-pouchdb-adapter.git"
   },
   "keywords": [
     "Ember",
     "Data",
     "adapter",
-    "HAL",
-    "Hypermedia"
+    "PouchDB",
+    "CouchDB"
   ],
-  "author": "Ricardo Mendes",
-  "license": "MIT",
+  "author": "Nolan Lawson",
+  "license": "Apache 2",
   "bugs": {
     "url": "https://github.com/locks/ember-data-hal-adapter/issues"
   }

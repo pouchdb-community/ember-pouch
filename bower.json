@@ -1,14 +1,14 @@
 {
-  "name": "ember-data-hal-adapter",
+  "name": "ember-data-pouchdb-adapter",
   "version": "0.1.0",
-  "homepage": "https://github.com/locks/ember-data-hal-adapter",
+  "homepage": "https://github.com/nolanlawson/ember-data-pouchdb-adapter",
   "authors": [
-    "Ricardo Mendes <rokusu@gmail.com>"
+    "Nolan Lawson <nolan.lawson@gmail.com>"
   ],
-  "description": "HAL API adapter for Ember Data",
-  "main": "dist/ember_data_hal_adapter.js",
+  "description": "PouchDB adapter for Ember Data",
+  "main": "dist/ember_data_pouchdb_adapter.js",
   "keywords": [
-    "HAL",
+    "PouchDB",
     "Ember",
     "Data",
     "adapter"
@@ -24,6 +24,8 @@
   "dependencies": {
     "underscore": "*",
     "underscore-contrib": "*",
-    "ember-data": "~1.0.0-beta.8"
+    "ember-data": "~1.0.0-beta.8",
+    "pouchdb": "~3.0.1",
+    "relational-pouch": "*"
   }
 }
