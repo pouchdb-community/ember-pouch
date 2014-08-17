@@ -22,8 +22,6 @@
     "tests"
   ],
   "dependencies": {
-    "underscore": "*",
-    "underscore-contrib": "*",
     "ember-data": "~1.0.0-beta.8",
     "pouchdb": "~3.0.1",
     "relational-pouch": "*"
