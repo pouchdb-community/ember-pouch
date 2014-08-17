@@ -14,12 +14,12 @@ define("pouchdb-adapter/pouchdb-adapter",
     "use strict";
     __exports__["default"] = DS.RESTAdapter.extend({
 
-      init: function() {
+      /*init: function() {
         if (!this.db || typeof this.db !== 'object') {
           throw new Error('Please set the `db` property on the adapter.');
         }
-      },
-
+      },*/
+      /*
       find: function(store, type, id) {
         return this.ajax(id, 'GET');
       },
@@ -35,7 +35,7 @@ define("pouchdb-adapter/pouchdb-adapter",
 
       deleteRecord: function(store, type, record) {
         return this.ajax(record.id, "DELETE");
-      }
+      }*/
     });
   });
 define("pouchdb-adapter/pouchdb-serializer",

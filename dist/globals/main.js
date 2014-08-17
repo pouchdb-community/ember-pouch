@@ -9,12 +9,12 @@ exports.Serializer = Serializer;
 "use strict";
 exports["default"] = DS.RESTAdapter.extend({
 
-  init: function() {
+  /*init: function() {
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
-  },
-
+  },*/
+  /*
   find: function(store, type, id) {
     return this.ajax(id, 'GET');
   },
@@ -30,7 +30,7 @@ exports["default"] = DS.RESTAdapter.extend({
 
   deleteRecord: function(store, type, record) {
     return this.ajax(record.id, "DELETE");
-  }
+  }*/
 });
 },{}],3:[function(_dereq_,module,exports){
 "use strict";
