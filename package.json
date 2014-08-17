@@ -27,6 +27,6 @@
   "author": "Nolan Lawson",
   "license": "Apache 2",
   "bugs": {
-    "url": "https://github.com/locks/ember-data-hal-adapter/issues"
+    "url": "https://github.com/nolanlawson/ember-data-pouchdb-adapter/issues"
   }
 }
