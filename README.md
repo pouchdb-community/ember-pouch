@@ -27,9 +27,11 @@ Or from npm:
 Bower installs the dependencies automatically; the others don't.
 
 Now that you have the `dist/` files locally, to use in your app, you just include
-this in your Brocfile:
+these dependencies in your Brocfile:
 
 ```js
+app.import('vendor/pouchdb/dist/pouchdb.js');
+app.import('vendor/relational-pouch/dist/pouchdb.relational-pouch.js');
 app.import('vendor/ember-pouch/dist/globals/main.js');
 ```
 
@@ -45,6 +47,12 @@ var Todo = DS.Model.extend({
   rev         : DS.attr('string')    // <-- Add this to all your models
 });
 ```
+
+If you forget to do this, you will see the error:
+
+    Failed to load resource: the server responded with a status of 409 (Conflict)
+
+in your console.
 
 Then, in your application, extend `EmberPouch.Adapter` and set your `PouchDB` database:
 

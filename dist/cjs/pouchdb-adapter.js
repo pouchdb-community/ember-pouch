@@ -7,11 +7,26 @@ exports["default"] = DS.RESTAdapter.extend({
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
-    var camelized = Ember.String.camelize(type.typeKey);
-    this.db.setSchema([{
-      singular: camelized,
-      plural: Ember.String.pluralize(camelized)
-    }]);
+
+    this._schema = this._schema || [];
+
+    var singular = type.typeKey;
+    var plural = Ember.String.pluralize(type.typeKey);
+
+    // check that we haven't already registered this model
+    for (var i = 0, len = this._schema.length; i < len; i++) {
+      var schemaDef = this._schema[i];
+      if (schemaDef.singular === singular) {
+        return;
+      }
+    }
+    // else it's new, so update
+    this._schema.push({
+      singular: singular,
+      plural: plural
+    });
+
+    this.db.setSchema(this._schema);
   },
 
   _recordToData: function (store, type, record) {
