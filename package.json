@@ -1,5 +1,5 @@
 {
-  "name": "ember-data-pouchdb-adapter",
+  "name": "ember-pouch",
   "version": "0.1.0",
   "description": "PouchDB adapter for Ember Data",
   "main": "lib/index.js",
@@ -8,14 +8,16 @@
   "devDependencies": {
     "broccoli-cli": "0.0.1",
     "broccoli-dist-es6-module": "^0.2.0",
-    "broccoli": "^0.12.2"
+    "broccoli": "^0.12.2",
+    "rimraf": "^2.2.8"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist && broccoli build dist"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nolanlawson/ember-data-pouchdb-adapter.git"
+    "url": "https://github.com/nolanlawson/ember-pouch.git"
   },
   "keywords": [
     "Ember",
@@ -27,6 +29,6 @@
   "author": "Nolan Lawson",
   "license": "Apache 2",
   "bugs": {
-    "url": "https://github.com/nolanlawson/ember-data-pouchdb-adapter/issues"
+    "url": "https://github.com/nolanlawson/ember-pouch/issues"
   }
 }

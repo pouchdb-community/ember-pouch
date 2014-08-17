@@ -1,19 +1,19 @@
 {
-  "name": "ember-data-pouchdb-adapter",
+  "name": "ember-pouch",
   "version": "0.1.0",
-  "homepage": "https://github.com/nolanlawson/ember-data-pouchdb-adapter",
+  "homepage": "https://github.com/nolanlawson/ember-pouch",
   "authors": [
     "Nolan Lawson <nolan.lawson@gmail.com>"
   ],
   "description": "PouchDB adapter for Ember Data",
-  "main": "dist/ember_data_pouchdb_adapter.js",
+  "main": "dist/globals/main.js",
   "keywords": [
     "PouchDB",
     "Ember",
     "Data",
     "adapter"
   ],
-  "license": "MIT",
+  "license": "Apache 2",
   "ignore": [
     "**/.*",
     "node_modules",
