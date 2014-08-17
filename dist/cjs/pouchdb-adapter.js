@@ -1,4 +1,5 @@
-export default DS.RESTAdapter.extend({
+"use strict";
+exports["default"] = DS.RESTAdapter.extend({
 
   init: function() {
     if (!this.db || typeof this.db !== 'object') {
