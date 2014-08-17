@@ -14,16 +14,20 @@ var YOUR_COMPUTER_WILL_EXPLODE = "maybe";
 
 ## Installation
 
-Download the `dist/` files you want, or install from Bower:
+Download the `dist/` files you want, or install with Bower:
 
-    $ bower install ember-pouch
+    $ bower install ember-pouch --save
 
 Or from npm:
 
-    $ npm install ember-pouch
+    $ npm install ember-pouch --save
+
+**Note:** if you *don't* install with Bower, then you will also have to manually download
+[PouchDB](https://github.com/pouchdb/pouchdb) and [relational-pouch](https://github.com/nolanlawson/relational-pouch).
+Bower installs the dependencies automatically; the others don't.
 
 Now that you have the `dist/` files locally, to use in your app, you just include
-in your Brocfile:
+this in your Brocfile:
 
 ```js
 app.import('vendor/ember-pouch/dist/globals/main.js');
@@ -36,14 +40,13 @@ to manage revisions:
 
 ```js
 var Todo = DS.Model.extend({
-  title: DS.attr('string'),
-  isCompleted: DS.attr('boolean'),
-  rev: DS.attr('string') // <-- ADD THIS TO EVERY MODEL
+  title       : DS.attr('string'),
+  isCompleted : DS.attr('boolean'),
+  rev         : DS.attr('string')    // <-- Add this to all your models
 });
 ```
 
-Then, in your application, extend `EmberPouch.Adapter` and set your `PouchDB`.
-(PouchDB is imported automatically.)
+Then, in your application, extend `EmberPouch.Adapter` and set your `PouchDB` database:
 
 ```js
 export default EmberPouch.Adapter.extend({
