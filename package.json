@@ -1,10 +1,9 @@
 {
   "name": "ember-pouch",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "PouchDB adapter for Ember Data",
   "main": "lib/index.js",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "broccoli-cli": "0.0.1",
     "broccoli-dist-es6-module": "^0.2.0",
