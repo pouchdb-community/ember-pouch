@@ -1,6 +1,6 @@
 # Ember Data PouchDB Adapter
 
-Ember Data adapter for PouchDB/CouchDB.
+Ember Data adapter for PouchDB/CouchDB. Really just a thin layer over [Relational Pouch](https://github.com/nolanlawson/relational-pouch).
 
 **Work in progress! Do not use or your computer might explode!**
 
