@@ -8,10 +8,6 @@ Ember Data adapter for PouchDB/CouchDB. Really just a thin layer over [Relationa
 var YOUR_COMPUTER_WILL_EXPLODE = "maybe";
 ```
 
-## Build
-
-    $ npm run build
-
 ## Installation
 
 Download the `dist/` files you want, or install with Bower:
@@ -91,3 +87,8 @@ export default EmberPouch.Adapter.extend({
 ```
 
 For more info, see the official PouchDB documentation at [PouchDB.com](http://pouchdb.com).
+
+
+## Build
+
+    $ npm run build
