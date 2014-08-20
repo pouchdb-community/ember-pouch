@@ -60,7 +60,7 @@ export default EmberPouch.Adapter.extend({
 
 If you're not familiar with PouchDB, here are some of the different ways you can use it:
 
-**As a direct client to CouchDB**:
+**As a local PouchDB database**:
 
 ```
 export default EmberPouch.Adapter.extend({
