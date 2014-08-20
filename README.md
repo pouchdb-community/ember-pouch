@@ -60,7 +60,7 @@ export default EmberPouch.Adapter.extend({
 
 If you're not familiar with PouchDB, here are some of the different ways you can use it:
 
-**As a local PouchDB database**:
+As a local PouchDB database:
 
 ```js
 export default EmberPouch.Adapter.extend({
@@ -68,7 +68,7 @@ export default EmberPouch.Adapter.extend({
 });
 ```
 
-**As a direct client to CouchDB**:
+As a direct client to CouchDB:
 
 ```js
 export default EmberPouch.Adapter.extend({
@@ -76,7 +76,7 @@ export default EmberPouch.Adapter.extend({
 });
 ```
 
-**As a local database that syncs with CouchDB**:
+As a local database that syncs with CouchDB:
 
 ```js
 var db = new PouchDB('http://localhost:5984/ember-todo');
