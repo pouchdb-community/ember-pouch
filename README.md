@@ -62,7 +62,7 @@ If you're not familiar with PouchDB, here are some of the different ways you can
 
 **As a local PouchDB database**:
 
-```
+```js
 export default EmberPouch.Adapter.extend({
   db: new PouchDB('mydb')
 });
@@ -70,7 +70,7 @@ export default EmberPouch.Adapter.extend({
 
 **As a direct client to CouchDB**:
 
-```
+```js
 export default EmberPouch.Adapter.extend({
   db: new PouchDB('http://localhost:5984/mydb')
 });
@@ -78,7 +78,7 @@ export default EmberPouch.Adapter.extend({
 
 **As a local database that syncs with CouchDB**:
 
-```
+```js
 var db = new PouchDB('http://localhost:5984/ember-todo');
 db.sync('http://localhost:5984/mydb', {live: true});
 export default EmberPouch.Adapter.extend({
