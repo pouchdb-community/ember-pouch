@@ -12,6 +12,7 @@ exports["default"] = DS.RESTAdapter.extend({
   //db: new PouchDB('http://localhost:5984/ember-todo'),
 
   _init: function (type) {
+    var self = this;
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
@@ -28,10 +29,26 @@ exports["default"] = DS.RESTAdapter.extend({
         return;
       }
     }
-    // else it's new, so update
-    this._schema.push({
+
+    var schemaDef = {
       singular: singular,
-      plural: plural
+      plural: plural,
+      relationships: {}
+    };
+
+    // else it's new, so update
+    this._schema.push(schemaDef);
+
+    // check all the subtypes
+    type.eachRelationship(function (_, rel) {
+      if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
+        // TODO: support inverse as well
+        return; // skip
+      }
+      var relDef = {};
+      relDef[rel.kind] = rel.type.typeKey;
+      schemaDef.relationships[rel.key] = relDef;
+      self._init(rel.type);
     });
 
     this.db.setSchema(this._schema);
@@ -44,6 +61,12 @@ exports["default"] = DS.RESTAdapter.extend({
     serializer.serializeIntoHash(data, type, record, { includeId: true });
 
     data = data[type.typeKey];
+
+    // ember sets it to null automatically. don't need it.
+    if (data.rev === null) {
+      delete data.rev;
+    }
+
     return data;
   },
 
