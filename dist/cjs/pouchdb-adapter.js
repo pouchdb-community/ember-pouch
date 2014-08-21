@@ -25,7 +25,7 @@ exports["default"] = DS.RESTAdapter.extend({
     var schemaDef = {
       singular: singular,
       plural: plural,
-      relationships: {}
+      relations: {}
     };
 
     // else it's new, so update
@@ -39,7 +39,7 @@ exports["default"] = DS.RESTAdapter.extend({
       }
       var relDef = {};
       relDef[rel.kind] = rel.type.typeKey;
-      schemaDef.relationships[rel.key] = relDef;
+      schemaDef.relations[rel.key] = relDef;
       self._init(rel.type);
     });
 
