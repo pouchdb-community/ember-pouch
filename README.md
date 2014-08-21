@@ -2,12 +2,6 @@
 
 Ember Data adapter for PouchDB/CouchDB. Really just a thin layer over [Relational Pouch](https://github.com/nolanlawson/relational-pouch).
 
-**Work in progress! Do not use or your computer might explode!**
-
-```js
-var YOUR_COMPUTER_WILL_EXPLODE = "maybe";
-```
-
 ## Installation
 
 Download the `dist/` files you want, or install with Bower:
@@ -33,6 +27,8 @@ app.import('vendor/ember-pouch/dist/globals/main.js');
 
 ## Usage
 
+#### Set up your models
+
 Next, you need to add a `rev` field to all of your Models. This is used by PouchDB/CouchDB
 to manage revisions:
 
@@ -50,30 +46,30 @@ If you forget to do this, you will see the error:
 
 in your console.
 
-Then, in your application, extend `EmberPouch.Adapter` and set your `PouchDB` database:
+#### Set up your adapter
+
+Then, in your `application.js`, extend `EmberPouch.Adapter` and set your `PouchDB` database:
 
 ```js
 export default EmberPouch.Adapter.extend({
   db: new PouchDB('mydb')
 });
 ```
+
+#### Using PouchDB
 
 If you're not familiar with PouchDB, here are some of the different ways you can use it:
 
 As a local PouchDB database:
 
 ```js
-export default EmberPouch.Adapter.extend({
-  db: new PouchDB('mydb')
-});
+var db = new PouchDB('mydb');
 ```
 
 As a direct client to CouchDB:
 
 ```js
-export default EmberPouch.Adapter.extend({
-  db: new PouchDB('http://localhost:5984/mydb')
-});
+ var db = new PouchDB('http://localhost:5984/mydb');
 ```
 
 As a local database that syncs with CouchDB:
@@ -81,13 +77,9 @@ As a local database that syncs with CouchDB:
 ```js
 var db = new PouchDB('http://localhost:5984/ember-todo');
 db.sync('http://localhost:5984/mydb', {live: true});
-export default EmberPouch.Adapter.extend({
-  db: db
-});
 ```
 
 For more info, see the official PouchDB documentation at [PouchDB.com](http://pouchdb.com).
-
 
 ## Build
 
