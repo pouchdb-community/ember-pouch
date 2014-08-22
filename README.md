@@ -1,6 +1,10 @@
 # Ember Pouch
 
-Ember Data adapter for PouchDB/CouchDB. Really just a thin layer over [Relational Pouch](https://github.com/nolanlawson/relational-pouch).
+Ember Pouch is a PouchDB/CouchDB adapter for Ember Data.
+
+Instead of using the standard RESTAdapter or FixtureAdapter, you can sync your Ember model objects to PouchDB, and then on to CouchDB or other CouchDB-compliant servers (Cloudant, Couchbase, IrisCouch, etc.). This adds real-time sync to your Ember app, as well as making it [offline-first](http://offlinefirst.org/).
+
+This module is really just a thin layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, check to see if it's more appropriate to toss over there.
 
 ## Installation
 
@@ -16,14 +20,16 @@ Or from npm:
 [PouchDB](https://github.com/pouchdb/pouchdb) and [relational-pouch](https://github.com/nolanlawson/relational-pouch).
 Bower installs the dependencies automatically; the others don't.
 
-Now that you have the `dist/` files locally, to use in your app, you just include
-these dependencies in your Brocfile:
+Now that you have the `dist/` files locally, you just put this in your `Brocfile.js`:
 
 ```js
 app.import('vendor/pouchdb/dist/pouchdb.js');
 app.import('vendor/relational-pouch/dist/pouchdb.relational-pouch.js');
 app.import('vendor/ember-pouch/dist/globals/main.js');
 ```
+
+Now you're ready to cook with Ember Pouch!
+
 
 ## Usage
 
