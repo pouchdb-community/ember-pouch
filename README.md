@@ -81,7 +81,7 @@ As a direct client to CouchDB:
 As a local database that syncs with CouchDB:
 
 ```js
-var db = new PouchDB('http://localhost:5984/ember-todo');
+var db = new PouchDB('mydb');
 db.sync('http://localhost:5984/mydb', {live: true});
 ```
 
