@@ -27,8 +27,7 @@ define(
 
         var schemaDef = {
           singular: singular,
-          plural: plural,
-          relations: {}
+          plural: plural
         };
 
         // else it's new, so update
@@ -42,6 +41,9 @@ define(
           }
           var relDef = {};
           relDef[rel.kind] = rel.type.typeKey;
+          if (!schemaDef.relations) {
+            schemaDef.relations = {};
+          }
           schemaDef.relations[rel.key] = relDef;
           self._init(rel.type);
         });
