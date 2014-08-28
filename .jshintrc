@@ -1,0 +1,20 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "newcap": true,
+  "noarg": true,
+  "sub": true,
+  "undef": true,
+  "unused": true,
+  "eqnull": true,
+  "browser": true,
+  "node": true,
+  "strict": false,
+  "globalstrict": false,
+  "globals": { "Ember": true, "DS": true},
+  "white": true,
+  "indent": 2,
+  "maxlen": 100,
+  "esnext": true
+}

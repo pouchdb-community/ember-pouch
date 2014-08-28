@@ -3,7 +3,9 @@
   "version": "0.1.5",
   "description": "PouchDB adapter for Ember Data",
   "main": "lib/index.js",
-  "dependencies": {},
+  "dependencies": {
+    "jshint": "^2.5.5"
+  },
   "devDependencies": {
     "broccoli-cli": "0.0.1",
     "broccoli-dist-es6-module": "^0.2.0",
@@ -11,8 +13,8 @@
     "rimraf": "^2.2.8"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf dist && broccoli build dist"
+    "test": "jshint -c .jshintrc lib/",
+    "build": "npm run test && rimraf dist && broccoli build dist"
   },
   "repository": {
     "type": "git",
