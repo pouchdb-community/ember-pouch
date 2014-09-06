@@ -23,9 +23,9 @@ Bower installs the dependencies automatically; the others don't.
 Now that you have the `dist/` files locally, you just put this in your `Brocfile.js`:
 
 ```js
-app.import('vendor/pouchdb/dist/pouchdb.js');
-app.import('vendor/relational-pouch/dist/pouchdb.relational-pouch.js');
-app.import('vendor/ember-pouch/dist/globals/main.js');
+app.import('bower_components/pouchdb/dist/pouchdb.js');
+app.import('bower_components/relational-pouch/dist/pouchdb.relational-pouch.js');
+app.import('bower_components/ember-pouch/dist/globals/main.js');
 ```
 
 Now you're ready to cook with Ember Pouch!
