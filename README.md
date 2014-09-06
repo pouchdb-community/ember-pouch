@@ -79,7 +79,7 @@ export default EmberPouch.Adapter.extend({
 As a direct client to CouchDB:
 
 ```js
- var db = new PouchDB('http://localhost:5984/mydb');
+var db = new PouchDB('http://localhost:5984/mydb');
  
 export default EmberPouch.Adapter.extend({
   db: db
