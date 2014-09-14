@@ -97,7 +97,40 @@ export default EmberPouch.Adapter.extend({
 });
 ```
 
-For more info, see the official PouchDB documentation at [PouchDB.com](http://pouchdb.com).
+When you sync with a live database, changes can come in both directions. To make sure that Ember is notified when the data set changes, you'll also need to modify your `route.js` to add an `afterModel` handler:
+
+```js
+export default Ember.Route.extend({
+
+  model: function() {
+    // your model will go here
+    // return this.store.find('something');
+  },
+  afterModel: function (recordArray) {
+    // This tells PouchDB to listen for live changes and
+    // notify Ember Data when a change comes in.
+    function listenForChanges() {
+      new PouchDB('mydb').changes({
+        since: 'now', 
+        live: true
+      }).on('change', function () {
+        recordArray.update();
+      }).on('error', function (err) {
+        // Important! When the user goes offline or some other network
+        // error occurs, we need to restart the changes feed.
+        // You can also use this opportunity to show an alert, e.g. 
+        // "You have gone offline."
+        // Here we just set a default retry timeout of 5 seconds, but if
+        // you want to be clever, you can do an exponential backoff or something.
+        setTimeout(listenForChanges, 5000);
+      });
+    }
+    listenForChanges();
+  }
+});
+```
+
+For more info on PouchDB, see the official PouchDB documentation at [PouchDB.com](http://pouchdb.com).
 
 ## Build
 
