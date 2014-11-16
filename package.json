@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "PouchDB adapter for Ember Data",
   "main": "lib/index.js",
   "dependencies": {
