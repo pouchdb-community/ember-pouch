@@ -109,11 +109,19 @@ export default Ember.Route.extend({
   afterModel: function (recordArray) {
     // This tells PouchDB to listen for live changes and
     // notify Ember Data when a change comes in.
-    new PouchDB('mydb').changes({
+    var db = new PouchDB('mydb');
+    db.changes({
       since: 'now', 
       live: true
-    }).on('change', function () {
+    }).on('change', function (change) {
+      // notify Ember of changed/added items
       recordArray.update();
+      // notify Ember of deleted items
+      if (change.deleted) {
+        var obj = db.rel.parseDocID(change.id);
+        var rec = recordArray.store.recordForId(obj.type, obj.id);
+        recordArray.removeRecord(rec);
+      }
     });
   }
 });
