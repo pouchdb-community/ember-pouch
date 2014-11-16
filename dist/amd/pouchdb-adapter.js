@@ -40,7 +40,10 @@ define(
             return; // skip
           }
           var relDef = {};
-          relDef[rel.kind] = rel.type.typeKey;
+          relDef[rel.kind] = {
+            type: rel.type.typeKey,
+            options: rel.options
+          };
           if (!schemaDef.relations) {
             schemaDef.relations = {};
           }
