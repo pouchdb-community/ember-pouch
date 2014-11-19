@@ -110,6 +110,7 @@ export default Ember.Route.extend({
     // This tells PouchDB to listen for live changes and
     // notify Ember Data when a change comes in.
     var db = new PouchDB('mydb');
+    db.setSchema([]);
     db.changes({
       since: 'now', 
       live: true
