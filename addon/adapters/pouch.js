@@ -8,46 +8,70 @@ import {
   updateSchemaForType
 } from 'ember-pouch/utils';
 
+var bind = Ember.run.bind;
+var next = Ember.run.next;
+
 export default DS.Adapter.extend({
   defaultSerializer: '-pouch',
   coalesceFindRequests: true,
   schema: null,
+  url: null,
 
   setup: function(url) {
-    if (!url) {
-      throw new Error('Please provide database url.');
-    }
+    url = url || this.url;
 
-    this.db = new PouchDB(url);
-  },
+    if (url) { this.db = new PouchDB(url); }
+  }.on('init'),
 
   sync: function(store, url) {
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    this.db.sync(url, { live: true });
+    this.sync = this.db.sync(url, { live: true });
+    this.changes = this.db.changes( { live: true, since: 'now' });
 
-    this.db
-      .changes({ since: 'now', live: true })
-      .on('change', Ember.run.bind(this, function(change) {
-        Ember.run.next(this, 'onChange', change, store);
-      }))
-      .on('error', Ember.run.bind(this, 'onError'));
+    this.changes.on('create', bind(this, function(change) {
+      next(this, 'onChange', change, store);
+    }));
+
+    this.changes.on('update', bind(this, function(change) {
+      next(this, 'onChange', change, store);
+    }));
+
+    this.changes.on('delete', bind(this, function(change) {
+      next(this, 'onDelete', change, store);
+    }));
+
+    this.changes.on('error', bind(this, function(error) {
+      next(this, 'onError', error, store);
+    }));
+  },
+
+  willDestroy: function() {
+    if (this.sync) {
+      this.sync.cancel();
+      this.changes.cancel();
+    }
   },
 
   onChange: function(change, store) {
     var typeId = this.db.rel.parseDocID(change.id);
     var record = store.getById(typeId.type, typeId.id);
 
-    if (change.deleted) {
-      if (record && !record.get('isDeleted')) {
-        store.unloadRecord(record);
-      }
-    } else if (record) {
+    if (record) {
       record.reload();
     } else {
       store.find(typeId.type, typeId.id);
+    }
+  },
+
+  onDelete: function(change, store) {
+    var typeId = this.db.rel.parseDocID(change.id);
+    var record = store.getById(typeId.type, typeId.id);
+
+    if (record && !record.get('isDeleted')) {
+      store.unloadRecord(record);
     }
   },
 

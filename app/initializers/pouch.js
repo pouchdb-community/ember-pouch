@@ -7,11 +7,11 @@ export function initialize(container, application) {
   application.register('serializer:-pouch', PouchSerializer);
 
   var adapter = container.lookup('adapter:application');
-  var store = container.lookup('store:main');
 
   if ((adapter instanceof PouchAdapter) && config.pouch) {
-    adapter.setup(config.pouch.local);
     if (config.pouch.remote) {
+      var store = container.lookup('store:main');
+
       adapter.sync(store, config.pouch.remote);
     }
   }
