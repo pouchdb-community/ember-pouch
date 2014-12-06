@@ -2,6 +2,12 @@ import Ember from 'ember';
 import DS from 'ember-data';
 import PouchDB from 'pouchdb';
 
+import {
+  extractFindOne,
+  extractDeleteRecord,
+  updateSchemaForType
+} from 'ember-pouch/utils';
+
 export default DS.Adapter.extend({
   defaultSerializer: '-pouch',
   coalesceFindRequests: true,
@@ -24,67 +30,43 @@ export default DS.Adapter.extend({
 
     this.db
       .changes({ since: 'now', live: true })
-      .on('change', (change) => {
-        var typeId = this.db.rel.parseDocID(change.id);
-        var record = store.getById(typeId.type, typeId.id);
-
-        if (change.deleted) {
-          if (record) {
-            store.unloadRecord(record);
-          }
-        } else if (record) {
-          record.reload();
-        } else {
-          store.find(typeId.type, typeId.id);
-        }
-      })
-      .on('error', (error) => {
-        console.error(error);
-      });
+      .on('change', Ember.run.bind(this, function(change) {
+        Ember.run.next(this, 'onChange', change, store);
+      }))
+      .on('error', Ember.run.bind(this, 'onError'));
   },
+
+  onChange: function(change, store) {
+    var typeId = this.db.rel.parseDocID(change.id);
+    var record = store.getById(typeId.type, typeId.id);
+
+    if (change.deleted) {
+      if (record && !record.get('isDeleted')) {
+        store.unloadRecord(record);
+      }
+    } else if (record) {
+      record.reload();
+    } else {
+      store.find(typeId.type, typeId.id);
+    }
+  },
+
+  onError: function() {},
 
   defineSchemaForType: function(type) {
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    this.schema = this.schema || Ember.A();
-
-    var singular = type.typeKey;
-    var plural = Ember.String.pluralize(type.typeKey);
-
-    // check that we haven't already registered this model
-    if (this.schema.findBy('singular', singular)) {
-      return;
-    }
-
-    var schemaDef = {
-      singular: singular,
-      plural: plural
-    };
-
-    // else it's new, so update
-    this.schema.push(schemaDef);
-
-    // check all the subtypes
-    type.eachRelationship((_, rel) => {
-      if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
-        // TODO: support inverse as well
-        return; // skip
-      }
-      var relDef = {};
-      relDef[rel.kind] = {
-        type: rel.type.typeKey,
-        options: rel.options
-      };
-      if (!schemaDef.relations) {
-        schemaDef.relations = {};
-      }
-      schemaDef.relations[rel.key] = relDef;
-      this.defineSchemaForType(rel.type);
-    });
+    this.schema = updateSchemaForType(type, this.schema)
 
     this.db.setSchema(this.schema);
+  },
+
+  groupRecordsForFindMany: function(store, records) {
+    return Object.values(records.groupBy(function(record) {
+      return record.constructor.typeKey;
+    }));
   },
 
   findAll: function(store, type /*, sinceToken */) {
@@ -100,12 +82,6 @@ export default DS.Adapter.extend({
     return this.db.rel.find(type.typeKey, ids);
   },
 
-  groupRecordsForFindMany: function(store, records) {
-    return Object.values(records.groupBy(function(record) {
-      return record.constructor.typeKey;
-    }));
-  },
-
   findQuery: function(/* store, type, query */) {
     throw new Error(
       "findQuery not yet supported by ember-pouch. " +
@@ -115,21 +91,8 @@ export default DS.Adapter.extend({
   find: function(store, type, id) {
     this.defineSchemaForType(type);
 
-    return this.db.rel.find(type.typeKey, id).then(function(payload) {
-      // Ember Data chokes on empty payload, this function throws
-      // an error when the requested data is not found
-      if (typeof payload === 'object' && payload !== null) {
-        var singular = type.typeKey;
-        var plural = Ember.String.pluralize(type.typeKey);
-        var results = payload[singular] || payload[plural];
-        if (results && results.length > 0) {
-          return payload;
-        }
-      }
-
-      throw new Error('Not found: type "' + type.typeKey +
-        '" with id "' + id + '"');
-    });
+    return this.db.rel.find(type.typeKey, id)
+      .then(extractFindOne(type));
   },
 
   createRecord: function(store, type, record) {
@@ -162,6 +125,7 @@ export default DS.Adapter.extend({
 
     serializer.serializeIntoDeleteHash(data, type, record);
 
-    return this.db.rel.del(type.typeKey, data).then(() => null);
+    return this.db.rel.del(type.typeKey, data)
+      .then(extractDeleteRecord);
   }
 });
