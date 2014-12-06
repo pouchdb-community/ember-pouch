@@ -28,7 +28,9 @@ export default DS.Adapter.extend({
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    this.sync = this.db.sync(url, { live: true });
+    this.cancelSync();
+
+    this._sync = this.db.sync(url, { live: true });
     this.changes = this.db.changes( { live: true, since: 'now' });
 
     this.changes.on('create', bind(this, function(change) {
@@ -49,9 +51,15 @@ export default DS.Adapter.extend({
   },
 
   willDestroy: function() {
-    if (this.sync) {
-      this.sync.cancel();
+    this.cancelSync();
+  },
+
+  cancelSync: function() {
+    if (this._sync) {
+      this._sync.cancel();
       this.changes.cancel();
+      delete this._sync;
+      delete this.changes;
     }
   },
 
@@ -88,9 +96,7 @@ export default DS.Adapter.extend({
   },
 
   groupRecordsForFindMany: function(store, records) {
-    return Object.values(records.groupBy(function(record) {
-      return record.constructor.typeKey;
-    }));
+    return records;
   },
 
   findAll: function(store, type /*, sinceToken */) {
