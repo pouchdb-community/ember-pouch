@@ -52,6 +52,21 @@ define(
         });
 
         this.db.setSchema(this._schema);
+
+        this.db.changes({
+          since: 'now',
+          live: true
+        }).on('change', function (change) {
+          var obj = this.db.rel.parseDocID(change.id);
+          var store = this.container.lookup('store:main');
+
+          store.findAll(obj.type);
+
+          if (change.deleted) {
+            var rec = store.recordForId(obj.type, obj.id);
+            store.unloadRecord(rec);
+          }
+        }.bind(this));
       },
 
       _recordToData: function (store, type, record) {
@@ -79,6 +94,12 @@ define(
       findMany: function(store, type, ids) {
         this._init(type);
         return this.db.rel.find(type.typeKey, ids);
+      },
+
+      findQuery: function(/* store, type, query */) {
+        throw new Error(
+          "findQuery not yet supported by ember-pouch. " +
+          "See https://github.com/nolanlawson/ember-pouch/issues/7.");
       },
 
       find: function (store, type, id) {
