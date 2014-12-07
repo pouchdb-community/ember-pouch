@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "homepage": "https://github.com/nolanlawson/ember-pouch",
   "authors": [
     "Nolan Lawson <nolan.lawson@gmail.com>"
@@ -22,8 +22,8 @@
     "tests"
   ],
   "dependencies": {
-    "ember-data": "~1.0.0-beta.8",
-    "pouchdb": "~3.1.0",
-    "relational-pouch": "~1.1.0"
+    "ember-data": "~1.0.0-beta.12",
+    "pouchdb": "^3.2.0",
+    "relational-pouch": "^1.2.0"
   }
 }
