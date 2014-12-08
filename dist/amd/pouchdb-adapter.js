@@ -6,6 +6,26 @@ define(
 
       //db: new PouchDB('http://localhost:5984/ember-todo'),
 
+      init: function () {
+        this._super();
+
+        // Update store on change events
+        this.db.changes({
+          since: 'now',
+          live: true
+        }).on('change', function (change) {
+          var obj = this.db.rel.parseDocID(change.id);
+          var store = this.container.lookup('store:main');
+
+          store.findAll(obj.type);
+
+          if (change.deleted) {
+            var rec = store.recordForId(obj.type, obj.id);
+            store.unloadRecord(rec);
+          }
+        }.bind(this));
+      },
+
       _init: function (type) {
         var self = this;
         if (!this.db || typeof this.db !== 'object') {
@@ -52,21 +72,6 @@ define(
         });
 
         this.db.setSchema(this._schema);
-
-        this.db.changes({
-          since: 'now',
-          live: true
-        }).on('change', function (change) {
-          var obj = this.db.rel.parseDocID(change.id);
-          var store = this.container.lookup('store:main');
-
-          store.findAll(obj.type);
-
-          if (change.deleted) {
-            var rec = store.recordForId(obj.type, obj.id);
-            store.unloadRecord(rec);
-          }
-        }.bind(this));
       },
 
       _recordToData: function (store, type, record) {
