@@ -90,41 +90,17 @@ As a local database that syncs with CouchDB:
 
 ```js
 var db = new PouchDB('mydb');
-db.sync('http://localhost:5984/mydb', {live: true});
+var remote = new PouchDB('http://localhost:5984/mydb');
+
+function doSync() {
+  db.sync(remote, {live: true}).on('error', function (err) {
+    setTimeout(doSync, 1000); // retry
+  });
+}
+doSync();
 
 export default EmberPouch.Adapter.extend({
   db: db
-});
-```
-
-When you sync with a live database, changes can come in both directions. To make sure that Ember is notified when the data set changes, you'll also need to modify your `route.js` to add an `afterModel` handler:
-
-```js
-export default Ember.Route.extend({
-
-  model: function() {
-    // your model will go here
-    // return this.store.find('something');
-  },
-  afterModel: function (recordArray) {
-    // This tells PouchDB to listen for live changes and
-    // notify Ember Data when a change comes in.
-    var db = new PouchDB('mydb');
-    db.setSchema([]);
-    db.changes({
-      since: 'now', 
-      live: true
-    }).on('change', function (change) {
-      // notify Ember of changed/added items
-      recordArray.update();
-      // notify Ember of deleted items
-      if (change.deleted) {
-        var obj = db.rel.parseDocID(change.id);
-        var rec = recordArray.store.recordForId(obj.type, obj.id);
-        recordArray.removeRecord(rec);
-      }
-    });
-  }
 });
 ```
 
