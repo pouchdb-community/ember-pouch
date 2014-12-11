@@ -58,7 +58,7 @@ exports["default"] = DS.RESTAdapter.extend({
 
     this.db.setSchema(this._schema);
 
-    this.db.changes({
+    this.changes = this.db.changes({
       since: 'now',
       live: true
     }).on('change', function (change) {
@@ -72,6 +72,10 @@ exports["default"] = DS.RESTAdapter.extend({
         store.unloadRecord(rec);
       }
     }.bind(this));
+  },
+
+  willDestroy: function() {
+    this.changes.cancel();
   },
 
   _recordToData: function (store, type, record) {

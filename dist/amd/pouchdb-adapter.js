@@ -53,7 +53,7 @@ define(
 
         this.db.setSchema(this._schema);
 
-        this.db.changes({
+        this.changes = this.db.changes({
           since: 'now',
           live: true
         }).on('change', function (change) {
@@ -67,6 +67,10 @@ define(
             store.unloadRecord(rec);
           }
         }.bind(this));
+      },
+
+      willDestroy: function() {
+        this.changes.cancel();
       },
 
       _recordToData: function (store, type, record) {
