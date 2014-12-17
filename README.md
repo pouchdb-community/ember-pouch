@@ -109,3 +109,9 @@ For more info on PouchDB, see the official PouchDB documentation at [PouchDB.com
 ## Build
 
     $ npm run build
+
+## Credits
+
+This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
+
+And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in relational-pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
