@@ -20,7 +20,7 @@ define("ember-pouch/pouchdb-adapter",
         this._super();
 
         // Update store on change events
-        this.db.changes({
+        this.changes = this.db.changes({
           since: 'now',
           live: true
         }).on('change', function (change) {
@@ -34,6 +34,12 @@ define("ember-pouch/pouchdb-adapter",
             store.unloadRecord(rec);
           }
         }.bind(this));
+      },
+
+      willDestroy: function() {
+        if (this.changes) {
+          this.changes.cancel();
+        }
       },
 
       _init: function (type) {

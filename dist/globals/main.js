@@ -15,7 +15,7 @@ exports["default"] = DS.RESTAdapter.extend({
     this._super();
 
     // Update store on change events
-    this.db.changes({
+    this.changes = this.db.changes({
       since: 'now',
       live: true
     }).on('change', function (change) {
@@ -29,6 +29,12 @@ exports["default"] = DS.RESTAdapter.extend({
         store.unloadRecord(rec);
       }
     }.bind(this));
+  },
+
+  willDestroy: function() {
+    if (this.changes) {
+      this.changes.cancel();
+    }
   },
 
   _init: function (type) {
