@@ -1,15 +1,16 @@
-/* jshint node: true */
-'use strict';
-
-var RSVP = require('RSVP');
-
 module.exports = {
-  normalizeEntityName: function() {},
+  normalizeEntityName: function() {
+    // allows us to run ember -g ember-cli-bootstrap and not blow up
+    // because ember cli normally expects the format
+    // ember generate <entitiyName> <blueprint>
+  },
 
   afterInstall: function() {
-    return RSVP.all([
-      this.addBowerPackageToProject('pouchdb', '~3.2.0'),
-      this.addBowerPackageToProject('relational-pouch', '~1.2.0')
-    ]);
+    var addonContext = this;
+
+    return this.addBowerPackageToProject('pouchdb', '~3.2.0')
+      .then(function() {
+        return addonContext.addBowerPackageToProject('relational-pouch', '~1.2.0');
+      });
   }
 };
