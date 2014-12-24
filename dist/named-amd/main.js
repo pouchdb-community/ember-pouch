@@ -48,6 +48,12 @@ define("ember-pouch/pouchdb-adapter",
           throw new Error('Please set the `db` property on the adapter.');
         }
 
+        if (!Ember.get(type, 'attributes').has('rev')) {
+          var modelName = Ember.String.classify(type.typeKey);
+          throw new Error('Please add a `rev` attribute of type `string`' +
+            ' on the ' + modelName + ' model.');
+        }
+
         this._schema = this._schema || [];
 
         var singular = type.typeKey;
