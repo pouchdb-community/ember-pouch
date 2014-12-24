@@ -74,6 +74,7 @@ export default EmberPouch.Adapter.extend({
 Example: https://github.com/broerse/ember-cli-blog
 
 For more on `EmberPouch`, there are only 150 meaningful lines of code for this project located here: https://github.com/nolanlawson/ember-pouch/blob/master/lib/pouchdb-adapter.js
+Everything else is handled in the `Relational-Pouch` PouchDB plugin, read those api docs here: https://github.com/nolanlawson/relational-pouch#api
 
 For more on PouchDB: [PouchDB.com](http://pouchdb.com).
 
