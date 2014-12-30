@@ -8,49 +8,12 @@ This module is really just a thin layer of Ember-y goodness over [Relational Pou
 
 ## Installation
 
-Download the `dist/` files you want, or install with Bower:
-
-    $ bower install ember-pouch --save
-
-Or from npm:
-
     $ npm install ember-pouch --save
-
-**Note:** if you *don't* install with Bower, then you will also have to manually download
-[PouchDB](https://github.com/pouchdb/pouchdb) and [relational-pouch](https://github.com/nolanlawson/relational-pouch).
-Bower installs the dependencies automatically; the others don't.
-
-Now that you have the `dist/` files locally, you just put this in your `Brocfile.js`:
-
-```js
-app.import('bower_components/pouchdb/dist/pouchdb.js');
-app.import('bower_components/relational-pouch/dist/pouchdb.relational-pouch.js');
-app.import('bower_components/ember-pouch/dist/globals/main.js');
-```
 
 Now you're ready to cook with Ember Pouch!
 
 
 ## Usage
-
-#### Set up your models
-
-Next, you need to add a `rev` field to all of your Models. This is used by PouchDB/CouchDB
-to manage revisions:
-
-```js
-var Todo = DS.Model.extend({
-  title       : DS.attr('string'),
-  isCompleted : DS.attr('boolean'),
-  rev         : DS.attr('string')    // <-- Add this to all your models
-});
-```
-
-If you forget to do this, you will see the error:
-
-    Failed to load resource: the server responded with a status of 409 (Conflict)
-
-in your console.
 
 #### Set up your adapter
 
