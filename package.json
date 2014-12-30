@@ -30,8 +30,7 @@
     "ember-data": "1.0.0-beta.11",
     "ember-export-application-global": "^1.0.0",
     "express": "^4.8.5",
-    "glob": "^4.0.5",
-    "rsvp": "^3.0.14"
+    "glob": "^4.0.5"
   },
   "description": "The default blueprint for ember-cli addons.",
   "keywords": [
