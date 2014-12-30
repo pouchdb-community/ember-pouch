@@ -60,5 +60,27 @@ export default DS.RESTSerializer.extend({
     }
 
     return hash;
+  },
+
+  serializeHasMany: function(record, json, relationship) {
+    var key = relationship.key;
+
+    if (this._canSerialize(key)) {
+      var payloadKey;
+
+      // if provided, use the mapping provided by `attrs` in
+      // the serializer
+      payloadKey = this._getMappedKey(key);
+      if (payloadKey === key && this.keyForRelationship) {
+        payloadKey = this.keyForRelationship(key, "hasMany");
+      }
+
+      var relationshipType = record.constructor.determineRelationshipType(relationship);
+
+      if (relationshipType === 'manyToNone' || relationshipType === 'manyToMany' || relationshipType === 'manyToOne') {
+        json[payloadKey] = get(record, key).mapBy('id');
+        // TODO support for polymorphic manyToNone and manyToMany relationships
+      }
+    }
   }
 });
