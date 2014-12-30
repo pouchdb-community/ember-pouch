@@ -20,17 +20,29 @@ export default DS.Adapter.extend({
   setup: function(url) {
     url = url || this.url;
 
-    if (url) { this.db = new PouchDB(url); }
+    if (url) {
+      this.db = new PouchDB(url);
+      this.registerChanges();
+    }
   }.on('init'),
 
-  sync: function(store, url) {
+  registerSync: function(store, url) {
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    this.cancelSync();
+    Ember.tryInvoke(this.sync, 'cancel');
 
-    this._sync = this.db.sync(url, { live: true });
+    this.sync = this.db.sync(url, { live: true });
+  },
+
+  registerChanges: function() {
+    if (!this.db || typeof this.db !== 'object') {
+      throw new Error('Please set the `db` property on the adapter.');
+    }
+
+    Ember.tryInvoke(this.changes, 'cancel');
+
     this.changes = this.db.changes( { live: true, since: 'now' });
 
     this.changes.on('create', bind(this, function(change) {
@@ -51,16 +63,8 @@ export default DS.Adapter.extend({
   },
 
   willDestroy: function() {
-    this.cancelSync();
-  },
-
-  cancelSync: function() {
-    if (this._sync) {
-      this._sync.cancel();
-      this.changes.cancel();
-      delete this._sync;
-      delete this.changes;
-    }
+    Ember.tryInvoke(this.changes, 'cancel');
+    Ember.tryInvoke(this.sync, 'cancel');
   },
 
   onChange: function(change, store) {

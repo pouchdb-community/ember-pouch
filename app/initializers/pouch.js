@@ -12,7 +12,7 @@ export function initialize(container, application) {
     if (config.pouch.remote) {
       var store = container.lookup('store:main');
 
-      adapter.sync(store, config.pouch.remote);
+      adapter.registerSync(store, config.pouch.remote);
     }
   }
 }
