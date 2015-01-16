@@ -3,6 +3,8 @@ exports["default"] = DS.RESTAdapter.extend({
 
   //db: new PouchDB('http://localhost:5984/ember-todo'),
 
+  coalesceFindRequests: true,
+
   init: function () {
     this._super();
 
