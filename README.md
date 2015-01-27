@@ -1,9 +1,8 @@
 # Ember Pouch
 
-With the **`EmberPouch`** Ember Data Adapter, all your app's data is automatically cached/saved client side using IndexedDB and WebSQL, and you just keep using the regular [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all). 
+With the **`EmberPouch`** Ember Data Adapter, all of your app's data is automatically cached/saved client side using IndexedDB and WebSQL, and you just keep using the regular [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all). 
 
 Go [_**offline-first**_](http://offlinefirst.org/) by adding an html5 **appcache.manifest** with [**broccoli-manifest**](https://github.com/racido/broccoli-manifest), and your app will also load way faster on subsequent loads over slower connections.
-Cordova/phonegap Ember plugins: [cordova addons](http://www.emberaddons.com/#/?q=cordova).
 
 ## Installation
 
@@ -29,7 +28,7 @@ var Todo = DS.Model.extend({
 });
 ```
 
-# `app/adapters/applications.js`
+## Configuring app/adapters/applications.js
 
 ### Basic adapter
 
@@ -129,7 +128,8 @@ And `/config/environment.js` would have something like this at the end:
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
 
-## Etc:
+
+## Notes:
 
 Currently PouchDB doesn't use localStorage unless you include an experimental plugin. Amazingly, this is only necessary to support IE ≤ 9.0 and Opera Mini. It's recommended you read more about this, what storage mechanisms modern browsers now support, and using SQLite in Cordova here: http://pouchdb.com/adapters.html
 
@@ -149,4 +149,5 @@ For more on PouchDB: http://pouchdb.com
 This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
 
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in relational-pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
+
 
