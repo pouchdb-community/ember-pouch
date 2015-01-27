@@ -1,15 +1,9 @@
 # Ember Pouch
 
-With the **`EmberPouch`** Ember Data Adapter, your Ember app's data is automatically cached/saved client side using whatever storage mechanisms are available (IndexedDB, WebSQL), and you're setup to easily sync with any backend implementing the CouchDB protocol. Throw in an html5 **appcache.manifest** with [**broccoli-manifest**](https://github.com/racido/broccoli-manifest) and now you have a highly functional [_**offline-first**_](http://offlinefirst.org/) web **App**. Your web app will load faster than even the lightest javascript apps because it's reading from the local disk; only using the network for data requests and transparent background updates. Stop stressing over how many kilobytes your page is!
+With the **`EmberPouch`** Ember Data Adapter, all your app's data is automatically cached/saved client side using IndexedDB and WebSQL, and you just keep using the regular [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all). 
 
-And with Ember-cli, you're only a few steps away from delivering a native app using these [cordova addons](http://www.emberaddons.com/#/?q=cordova).
-
-Currently PouchDB doesn't use localStorage unless you include an experimental plugin. Amazingly, this is only necessary to support IE ≤ 9.0 and Opera Mini. It's recommended you read more about this, what storage mechanisms modern browsers now support, and using SQLite in Cordova here: http://pouchdb.com/adapters.html
-
-CouchDB notes:
-From day one, CouchDB and it's protocol have been designed to be always Available and handle Partitioning over the network well. PouchDB/CouchDB gives you a solid way to manage conflicts. It is 'eventually consistent', but CouchDB has an api for listening to changes to the database, which can be then pushed down to the client in real-time. With PouchDB, you also get access to a whole host of [PouchDB plugins](http://pouchdb.com/external.html)
-
-This module is really just a thin layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, please check to see if it's more appropriate to file over there.
+Go [_**offline-first**_](http://offlinefirst.org/) by adding an html5 **appcache.manifest** with [**broccoli-manifest**](https://github.com/racido/broccoli-manifest), and your app will also load way faster on subsequent loads over slower connections.
+Cordova/phonegap Ember plugins: [cordova addons](http://www.emberaddons.com/#/?q=cordova).
 
 ## Installation
 
@@ -25,16 +19,6 @@ app.import('bower_components/ember-pouch/dist/globals/main.js');
 
 This defines `window.PouchDB` and `window.EmberPouch` globally.
 
-In `app/adapters/application.js`:
-
-```js
-/* global EmberPouch, PouchDB */
-
-export default EmberPouch.Adapter.extend({
-  db: new PouchDB('mydb') // See: http://pouchdb.com/api.html#create_database for options
-});
-```
-
 Currently `Ember-Pouch` needs you to **add a** `rev: DS.attr('string')` **field to all your models**. This is for Pouch/Couch to handle revisions:
 
 ```js
@@ -45,55 +29,120 @@ var Todo = DS.Model.extend({
 });
 ```
 
-## Usage
+# `app/adapters/applications.js`
 
-You can now use PouchDB as a local database that syncs with CouchDB:
+### Basic adapter
 
+Local pouch that syncs with a remote couch:
 ```js
 /* global EmberPouch, PouchDB */
-// app/adapters/application.js
-PouchDB.debug.enable('*');
 
-var db     = new PouchDB('mydb'); // Local
-var remote = new PouchDB('http://localhost:5984/mydb', {ajax: {timeout: 20000}});
-
-var dbSync = function() {
-  db.sync(remote, {live: true})
-    .on('error', function (err) {
-      setTimeout(dbSync, 2 * 1000); // retry
-    });
-};
-dbSync();
-window.dbSync = dbSync;
+var db = new PouchDB('local_couch');
+var remote = new PouchDB('http://localhost:5984');
+db.sync(remote, {live: true});
 
 export default EmberPouch.Adapter.extend({
   db: db
 });
 ```
 
-Example: https://github.com/broerse/ember-cli-blog
+### Get started with this setup for easier debugging
 
-For more on `EmberPouch`, there are only 150 meaningful lines of code for this project located here: https://github.com/nolanlawson/ember-pouch/blob/master/lib/pouchdb-adapter.js
-Everything else is handled in the `Relational-Pouch` PouchDB plugin, read those api docs here: https://github.com/nolanlawson/relational-pouch#api
+```javascript
+/* globals EmberPouch, PouchDB */
 
-For more on PouchDB: [PouchDB.com](http://pouchdb.com).
+PouchDB.debug.enable('*'); // Debug output options: http://pouchdb.com/api.html#debug_mode
 
-## Common errors:
+var db = new PouchDB('local_couch');
+var remote = new PouchDB('http://foo.iriscouch.com:5984', {
+  ajax: {
+    timeout: 6 * 1000
+  }
+});
 
-If you forget to add a `rev` field to a model, you will see the error:
+// Log all db events 
+['change', 'complete', 'uptodate', 'error', 'denied'].forEach(function(event) {
+  db.on(event, function() {
+    console.log('Pouch ' + event + '\'d', arguments);
+  }
+});
 
-    Failed to load resource: the server responded with a status of 409 (Conflict)
+db.sync(remote, {live: true})
+  .on('error', function(err) {
+    // Fail:
+    db.cancel();
+    throw new Error('PouchDB error:' + err);
+  });
 
-in your console.
+export default EmberPouch.Adapter.extend({
+  db: db
+});
+```
 
+### Retry connecting every 3.5 seconds:
+
+```javascript
+db.sync(remote, {live: true})
+  .on('error', function(err) {
+    // Retry:
+    setTimeout(function() {
+      db.sync(remote, {live: true})
+    }, 3.5 * 1000);
+  });
+```
+
+
+### Configure dev and prod urls:
+At the top of your `adapters/application.js`:
+```javascript
+/* globals EmberPouch, PouchDB */
+import config from '../config/environment';
+
+PouchDB.debug.enable('*'); // Debugging output options: http://pouchdb.com/api.html#debug_mode
+
+if (!config.remote_couch) {
+  throw new Error('Set a config.remote_couch url in /config/environment.js');
+}
+
+var db = new PouchDB(config.local_couch || 'local_couch');
+var remote = new PouchDB(config.remote_couch, {
+  ajax: {
+    timeout: 20000
+  }
+}); // All options: http://pouchdb.com/api.html#create_database
+```
+
+And `/config/environment.js` would have something like this at the end:
+```javascript
+  ENV.remote_couch = 'http://localhost:5984/bloggr';
+  ENV.local_couch = 'bloggr';
+  if (environment === 'production') {
+    ENV.baseURL = '/bloggrcouch/';
+    ENV.remote_couch = 'http://foo.iriscouch.com:5984/bloggr';
+  }
+  ENV.contentSecurityPolicy = {
+    'connect-src': "'self' " + ENV.remote_couch.substring(0, ENV.remote_couch.indexOf('/', 9))
+  };
+```
+
+## Full examples:
+
+Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
+
+## Etc:
+
+Currently PouchDB doesn't use localStorage unless you include an experimental plugin. Amazingly, this is only necessary to support IE ≤ 9.0 and Opera Mini. It's recommended you read more about this, what storage mechanisms modern browsers now support, and using SQLite in Cordova here: http://pouchdb.com/adapters.html
+
+CouchDB notes:
+From day one, CouchDB and it's protocol have been designed to be always Available and handle Partitioning over the network well. PouchDB/CouchDB gives you a solid way to manage conflicts. It is 'eventually consistent', but CouchDB has an api for listening to changes to the database, which can be then pushed down to the client in real-time. With PouchDB, you also get access to a whole host of [PouchDB plugins](http://pouchdb.com/external.html)
+
+`EmberPouch` is really just a thin [150 line](https://github.com/nolanlawson/ember-pouch/blob/master/lib/pouchdb-adapter.js) layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, check to see if it's more appropriate to file over there.
+
+For more on PouchDB: http://pouchdb.com
 
 ## Build
 
     $ npm run build
-
-## Related projects:
-
-- [taras/ember-pouchdb](https://github.com/taras/ember-pouchdb)
 
 ## Credits
 
