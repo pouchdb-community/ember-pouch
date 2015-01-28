@@ -63,7 +63,7 @@ var remote = new PouchDB('http://foo.iriscouch.com:5984', {
 ['change', 'complete', 'uptodate', 'error', 'denied'].forEach(function(event) {
   db.on(event, function() {
     console.log('Pouch ' + event + '\'d', arguments);
-  }
+  });
 });
 
 db.sync(remote, {live: true})
@@ -106,7 +106,7 @@ if (!config.remote_couch) {
 var db = new PouchDB(config.local_couch || 'local_couch');
 var remote = new PouchDB(config.remote_couch, {
   ajax: {
-    timeout: 20000
+    timeout: 6 * 1000
   }
 }); // All options: http://pouchdb.com/api.html#create_database
 ```
