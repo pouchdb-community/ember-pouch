@@ -28,7 +28,7 @@ var Todo = DS.Model.extend({
 });
 ```
 
-## Configuring app/adapters/applications.js
+## Configuring app/adapters/application.js
 
 ### Basic adapter
 
