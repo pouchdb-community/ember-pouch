@@ -57,9 +57,9 @@ var remote = new PouchDB('http://foo.iriscouch.com:5984', {
   ajax: {
     timeout: 6 * 1000
   }
-});
+}); // All options: http://pouchdb.com/api.html#create_database
 
-// Log all db events 
+// Log all db events
 ['change', 'complete', 'uptodate', 'error', 'denied'].forEach(function(event) {
   db.on(event, function() {
     console.log('Pouch ' + event + '\'d', arguments);
