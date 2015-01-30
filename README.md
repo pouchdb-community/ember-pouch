@@ -1,10 +1,10 @@
 # Ember Pouch
 
-With the **`EmberPouch`** Ember Data Adapter, all of your app's data is automatically cached/saved client side using IndexedDB and WebSQL, and you just keep using the regular [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all). 
+With the **`EmberPouch`** Ember Data Adapter, all of your app's data is automatically saved client side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all). 
 
 Go [_**offline-first**_](http://offlinefirst.org/) by adding an html5 **appcache.manifest** with [**broccoli-manifest**](https://github.com/racido/broccoli-manifest), and your app will also load way faster on subsequent loads over slower connections.
 
-## Installation
+## Install and setup
 
     bower install ember-pouch --save
 
@@ -28,32 +28,35 @@ var Todo = DS.Model.extend({
 });
 ```
 
-## Configuring app/adapters/application.js
+Add a Content Security Policy whitelisting your couch's hostname in `/config/environment.js`:
+```javascript
+  ENV.contentSecurityPolicy = {
+    "connect-src": "'self' " + (ENV.couch_hostname = "http://localhost:5984")
+  };
+```
+(Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts, you still have actually to set the content security policy http header on your backend in production)
 
-### Basic adapter
+## Configuring /app/adapters/application.js
 
-Local pouch that syncs with a remote couch:
+A local pouch that syncs with a remote couch looks like this:
 ```js
-/* global EmberPouch, PouchDB */
-
-var db = new PouchDB('local_couch');
-var remote = new PouchDB('http://localhost:5984');
-db.sync(remote, {live: true});
-
+var remote = new PouchDB('http://localhost:5984/my_couch');
+var local  = new PouchDB('local_couch');
 export default EmberPouch.Adapter.extend({
-  db: db
+  db: local.sync(remote)
 });
 ```
 
-### Get started with this setup for easier debugging
+But you will certainly prefer this more complete adapter setup for easier debugging:
 
 ```javascript
 /* globals EmberPouch, PouchDB */
+import config from '../config/environment';
 
 PouchDB.debug.enable('*'); // Debug output options: http://pouchdb.com/api.html#debug_mode
 
-var db = new PouchDB('local_couch');
-var remote = new PouchDB('http://foo.iriscouch.com:5984', {
+var local  = new PouchDB('local_couch');
+var remote = new PouchDB(config.couch_hostname + '/my_couch', {
   ajax: {
     timeout: 6 * 1000
   }
@@ -61,68 +64,27 @@ var remote = new PouchDB('http://foo.iriscouch.com:5984', {
 
 // Log all db events
 ['change', 'complete', 'uptodate', 'error', 'denied'].forEach(function(event) {
-  db.on(event, function() {
+  local.on(event, function() {
     console.log('Pouch ' + event + '\'d', arguments);
   });
 });
 
-db.sync(remote, {live: true})
-  .on('error', function(err) {
-    // Fail:
-    db.cancel();
-    throw new Error('PouchDB error:' + err);
-  });
-
 export default EmberPouch.Adapter.extend({
-  db: db
+  db: local.sync(remote, {live: true})
+        .on('error', function(err) {
+          // Retry connecting every 3.8 seconds:
+          setTimeout(function() {
+            db.sync(remote, {live: true})
+          }, 3.8 * 1000);
+
+          // Fail:
+          //db.cancel();
+          //throw new Error('PouchDB error:' + err);
+        });
 });
 ```
 
-### Retry connecting every 3.5 seconds:
-
-```javascript
-db.sync(remote, {live: true})
-  .on('error', function(err) {
-    // Retry:
-    setTimeout(function() {
-      db.sync(remote, {live: true})
-    }, 3.5 * 1000);
-  });
-```
-
-
-### Configure dev and prod urls:
-At the top of your `adapters/application.js`:
-```javascript
-/* globals EmberPouch, PouchDB */
-import config from '../config/environment';
-
-PouchDB.debug.enable('*'); // Debugging output options: http://pouchdb.com/api.html#debug_mode
-
-if (!config.remote_couch) {
-  throw new Error('Set a config.remote_couch url in /config/environment.js');
-}
-
-var db = new PouchDB(config.local_couch || 'local_couch');
-var remote = new PouchDB(config.remote_couch, {
-  ajax: {
-    timeout: 6 * 1000
-  }
-}); // All options: http://pouchdb.com/api.html#create_database
-```
-
-And `/config/environment.js` would have something like this at the end:
-```javascript
-  ENV.remote_couch = 'http://localhost:5984/bloggr';
-  ENV.local_couch = 'bloggr';
-  if (environment === 'production') {
-    ENV.baseURL = '/bloggrcouch/';
-    ENV.remote_couch = 'http://foo.iriscouch.com:5984/bloggr';
-  }
-  ENV.contentSecurityPolicy = {
-    'connect-src': "'self' " + ENV.remote_couch.substring(0, ENV.remote_couch.indexOf('/', 9))
-  };
-```
+Congrats! Now you can go crazy with the [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all) and you should be able to use the app offline if you have included an appcache.manifest.
 
 ## Full examples:
 
@@ -149,5 +111,3 @@ For more on PouchDB: http://pouchdb.com
 This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
 
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in relational-pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
-
-
