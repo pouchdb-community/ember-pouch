@@ -1,8 +1,18 @@
 # Ember Pouch
 
-With the **`EmberPouch`** Ember Data Adapter, all of your app's data is automatically saved client side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all). 
+Ember Pouch is a PouchDB/CouchDB adapter for Ember Data.
 
-Go [_**offline-first**_](http://offlinefirst.org/) by adding an html5 **appcache.manifest** with [**broccoli-manifest**](https://github.com/racido/broccoli-manifest), and your app will also load way faster on subsequent loads over slower connections.
+With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
+
+What's the point?
+
+1. You don't need to write any server-side logic. Just use CouchDB.
+
+2. Data syncs automatically.
+
+3. Your app works offline, and requests are super fast, because they don't need the network.
+
+For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
 
 ## Install and setup
 
@@ -18,7 +28,7 @@ app.import('bower_components/ember-pouch/dist/globals/main.js');
 
 This defines `window.PouchDB` and `window.EmberPouch` globally.
 
-Currently `Ember-Pouch` needs you to **add a** `rev: DS.attr('string')` **field to all your models**. This is for Pouch/Couch to handle revisions:
+`Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
 ```js
 var Todo = DS.Model.extend({
@@ -28,79 +38,77 @@ var Todo = DS.Model.extend({
 });
 ```
 
-Add a Content Security Policy whitelisting your couch's hostname in `/config/environment.js`:
-```javascript
-  ENV.contentSecurityPolicy = {
-    "connect-src": "'self' " + (ENV.couch_hostname = "http://localhost:5984")
-  };
-```
-(Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts, you still have actually to set the content security policy http header on your backend in production)
-
 ## Configuring /app/adapters/application.js
 
-A local pouch that syncs with a remote couch looks like this:
+A local PouchDB that syncs with a remote CouchDB looks like this:
+
 ```js
 var remote = new PouchDB('http://localhost:5984/my_couch');
-var local  = new PouchDB('local_couch');
+var db  = new PouchDB('local_couch');
+db.sync(remote);
+
 export default EmberPouch.Adapter.extend({
-  db: local.sync(remote)
+  db: db
 });
 ```
 
-But you will certainly prefer this more complete adapter setup for easier debugging:
+You can also turn on debugging:
 
-```javascript
-/* globals EmberPouch, PouchDB */
-import config from '../config/environment';
+```js
+PouchDB.debug.enable('*');
+```
 
-PouchDB.debug.enable('*'); // Debug output options: http://pouchdb.com/api.html#debug_mode
+And you will probably want to turn on retries in case the user goes offline:
 
-var local  = new PouchDB('local_couch');
-var remote = new PouchDB(config.couch_hostname + '/my_couch', {
-  ajax: {
-    timeout: 6 * 1000
-  }
-}); // All options: http://pouchdb.com/api.html#create_database
+```js
+var remote = new PouchDB('http://localhost:5984/my_couch');
+var db  = new PouchDB('local_couch');
 
-// Log all db events
-['change', 'complete', 'uptodate', 'error', 'denied'].forEach(function(event) {
-  local.on(event, function() {
-    console.log('Pouch ' + event + '\'d', arguments);
-  });
-});
+function doSync() {
+  local.sync(remote, {live: true})
+    .on('error', function(err) {
+      // Retry connection every 5 seconds
+      setTimeout(doSync, 5000);
+    });
+}
+
+doSync();
 
 export default EmberPouch.Adapter.extend({
-  db: local.sync(remote, {live: true})
-        .on('error', function(err) {
-          // Retry connecting every 3.8 seconds:
-          setTimeout(function() {
-            db.sync(remote, {live: true})
-          }, 3.8 * 1000);
-
-          // Fail:
-          //db.cancel();
-          //throw new Error('PouchDB error:' + err);
-        });
+  db: db
 });
 ```
 
-Congrats! Now you can go crazy with the [Ember Data `store` api](http://emberjs.com/api/data/classes/DS.Store.html#method_all) and you should be able to use the app offline if you have included an appcache.manifest.
+See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
 
-## Full examples:
+## Sample app
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
 
 
-## Notes:
+## Notes
 
-Currently PouchDB doesn't use localStorage unless you include an experimental plugin. Amazingly, this is only necessary to support IE ≤ 9.0 and Opera Mini. It's recommended you read more about this, what storage mechanisms modern browsers now support, and using SQLite in Cordova here: http://pouchdb.com/adapters.html
+### LocalStorage
 
-CouchDB notes:
-From day one, CouchDB and it's protocol have been designed to be always Available and handle Partitioning over the network well. PouchDB/CouchDB gives you a solid way to manage conflicts. It is 'eventually consistent', but CouchDB has an api for listening to changes to the database, which can be then pushed down to the client in real-time. With PouchDB, you also get access to a whole host of [PouchDB plugins](http://pouchdb.com/external.html)
+Currently PouchDB doesn't use LocalStorage unless you include an experimental plugin. Amazingly, this is only necessary to support IE ≤ 9.0 and Opera Mini. It's recommended you read more about this, what storage mechanisms modern browsers now support, and using SQLite in Cordova on [the PouchDB adapters page](http://pouchdb.com/adapters.html).
 
-`EmberPouch` is really just a thin [150 line](https://github.com/nolanlawson/ember-pouch/blob/master/lib/pouchdb-adapter.js) layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, check to see if it's more appropriate to file over there.
+### CouchDB
 
-For more on PouchDB: http://pouchdb.com
+From day one, CouchDB and its protocol have been designed to be always **A**vailable and handle **P**artitioning over the network well (AP in the CAP theorem). PouchDB/CouchDB gives you a solid way to manage conflicts. It is "eventually consistent," but CouchDB has an API for listening to changes to the database, which can be then pushed down to the client in real-time.
+
+To learn more about how CouchDB sync works, check out [the PouchDB guide to replication](http://pouchdb.com/guides/replication.html).
+
+### Plugins
+
+With PouchDB, you also get access to a whole host of [PouchDB plugins](http://pouchdb.com/external.html).
+
+### Relational Pouch
+
+Ember Pouch is really just a thin layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, check to see if it's more appropriate to file over there.
+
+### Offline first
+
+If you want to go completely [offline-first](http://offlinefirst.org/), you'll also need an HTML5 appcache.manifest with [broccoli-manifest](https://github.com/racido/broccoli-manifest). This will allow your HTML/CSS/JS assets to load even if the user is offline. Plus your users can "add to homescreen" on a mobile device (iOS/Android).
 
 ## Build
 
@@ -110,4 +118,4 @@ For more on PouchDB: http://pouchdb.com
 
 This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
 
-And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in relational-pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
+And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
