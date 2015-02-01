@@ -110,6 +110,20 @@ Ember Pouch is really just a thin layer of Ember-y goodness over [Relational Pou
 
 If you want to go completely [offline-first](http://offlinefirst.org/), you'll also need an HTML5 appcache.manifest with [broccoli-manifest](https://github.com/racido/broccoli-manifest). This will allow your HTML/CSS/JS assets to load even if the user is offline. Plus your users can "add to homescreen" on a mobile device (iOS/Android).
 
+### Security
+
+An easy way to secure your Ember Pouch-using app is to ensure that data can only be fetched from CouchDB &ndash; not from some other sever (e.g. in an [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting)).
+
+To do so, add a Content Security Policy whitelist entry to `/config/environment.js`:
+
+```js
+ ENV.contentSecurityPolicy = {
+ "connect-src": "'self' " + (ENV.couch_hostname = "http://localhost:5984")
+ };
+```
+
+Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
+
 ## Build
 
     $ npm run build
