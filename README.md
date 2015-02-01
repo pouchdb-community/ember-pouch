@@ -117,9 +117,9 @@ An easy way to secure your Ember Pouch-using app is to ensure that data can only
 To do so, add a Content Security Policy whitelist entry to `/config/environment.js`:
 
 ```js
- ENV.contentSecurityPolicy = {
- "connect-src": "'self' " + (ENV.couch_hostname = "http://localhost:5984")
- };
+ENV.contentSecurityPolicy = {
+  "connect-src": "'self' http://your_couch_host.com:5984"
+};
 ```
 
 Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
