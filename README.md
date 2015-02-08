@@ -65,7 +65,7 @@ var remote = new PouchDB('http://localhost:5984/my_couch');
 var db  = new PouchDB('local_couch');
 
 function doSync() {
-  local.sync(remote, {live: true})
+  db.sync(remote, {live: true})
     .on('error', function(err) {
       // Retry connection every 5 seconds
       setTimeout(doSync, 5000);
