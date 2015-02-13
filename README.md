@@ -158,7 +158,7 @@ PostSummary.reopenClass({
 export default PostSummary;
 ```
 
-The value for `documentType` is the primary model's `typeKey` — i.e., the camelCase version of the model name that you use with `DS.hasMany`, etc.
+The value for `documentType` is the primary model's `typeKey` — i.e., the camelCase version of the model name.
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
