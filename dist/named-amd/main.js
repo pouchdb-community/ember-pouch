@@ -74,6 +74,10 @@ define("ember-pouch/pouchdb-adapter",
           plural: plural
         };
 
+        if (type.documentType) {
+          schemaDef['documentType'] = type.documentType;
+        }
+
         // else it's new, so update
         this._schema.push(schemaDef);
 
