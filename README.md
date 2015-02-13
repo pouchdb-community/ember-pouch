@@ -124,6 +124,44 @@ ENV.contentSecurityPolicy = {
 
 Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
 
+### Multiple models for the same data
+
+Ember-data can be slow to load large numbers of records which have lots of relationships. If you run into this problem, you can define multiple models and have them all point to the same set of records by defining `documentType` on the model class. Example (in an ember-cli app):
+
+```javascript
+// app/models/post.js
+import DS from 'ember-data';
+
+export default DS.Model.extend({
+    rev: DS.attr('string'),
+
+    title: DS.attr('string'),
+    text: DS.attr('string'),
+
+    author: DS.belongsTo('author'),
+    comments: DS.hasMany('comments')
+});
+
+// app/models/post-summary.js
+import DS from 'ember-data';
+
+var PostSummary =  default DS.Model.extend({
+    rev: DS.attr('string'),
+
+    title: DS.attr('string'),
+});
+
+PostSummary.reopenClass({
+  documentType: 'post'
+})
+
+export default PostSummary;
+```
+
+The value for `documentType` is the primary model's `typeKey` — i.e., the camelCase version of the model name that you use with `DS.hasMany`, etc.
+
+For best results, only create/update records using the full model definition. Treat the others as read-only.
+
 ## Build
 
     $ npm run build
