@@ -7,21 +7,44 @@ exports["default"] = DS.RESTAdapter.extend({
 
   init: function () {
     this._super();
+    this._startChangesToStoreListener();
+  },
 
-    // Update store on change events
+  _startChangesToStoreListener: function () {
     this.changes = this.db.changes({
       since: 'now',
-      live: true
+      live: true,
+      returnDocs: false
     }).on('change', function (change) {
-      var obj = this.db.rel.parseDocID(change.id);
-      var store = this.container.lookup('store:main');
+      Ember.run(function () {
+        // If relational_pouch isn't initialized yet, there can't be any records
+        // in the store to update.
+        if (!this.db.rel) { return; }
 
-      store.findAll(obj.type);
+        var obj = this.db.rel.parseDocID(change.id);
+        // skip changes for non-relational_pouch docs. E.g., design docs.
+        if (!obj.type || !obj.id || obj.type === '') { return; }
 
-      if (change.deleted) {
-        var rec = store.recordForId(obj.type, obj.id);
-        store.unloadRecord(rec);
-      }
+        var store = this.container.lookup('store:main');
+
+        var recordInStore = store.getById(obj.type, obj.id);
+        if (!recordInStore) {
+          // The record hasn't been loaded into the store; no need to reload its data.
+          return;
+        }
+        if (!recordInStore.get('isLoaded') || recordInStore.get('isDirty')) {
+          // The record either hasn't loaded yet or has unpersisted local changes.
+          // In either case, we don't want to refresh it in the store
+          // (and for some substates, attempting to do so will result in an error).
+          return;
+        }
+
+        if (change.deleted) {
+          store.unloadRecord(recordInStore);
+        } else {
+          recordInStore.reload();
+        }
+      }.bind(this));
     }.bind(this));
   },
 
