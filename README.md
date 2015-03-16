@@ -44,8 +44,12 @@ A local PouchDB that syncs with a remote CouchDB looks like this:
 
 ```js
 var remote = new PouchDB('http://localhost:5984/my_couch');
-var db  = new PouchDB('local_couch');
-db.sync(remote);
+var db = new PouchDB('local_pouch');
+
+db.sync(remote, {
+   live: true,   // do a live, ongoing sync
+   retry: true   // retry if the conection is lost
+});
 
 export default EmberPouch.Adapter.extend({
   db: db
@@ -56,20 +60,6 @@ You can also turn on debugging:
 
 ```js
 PouchDB.debug.enable('*');
-```
-
-And you will probably want to turn on retries in case the user goes offline:
-
-```js
-var remote = new PouchDB('http://localhost:5984/my_couch');
-var db  = new PouchDB('local_couch');
-
-// Do a live, ongoing sync, retrying if the conection is lost.
-db.sync(remote, {live: true, retry: true});
-
-export default EmberPouch.Adapter.extend({
-  db: db
-});
 ```
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
