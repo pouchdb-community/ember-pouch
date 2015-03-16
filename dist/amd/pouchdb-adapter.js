@@ -118,8 +118,9 @@ define(
       _recordToData: function (store, type, record) {
         var data = {};
         var serializer = store.serializerFor(type.typeKey);
+        var snapshot = record._createSnapshot();
 
-        serializer.serializeIntoHash(data, type, record, { includeId: true });
+        serializer.serializeIntoHash(data, type, snapshot, { includeId: true });
 
         data = data[type.typeKey];
 
