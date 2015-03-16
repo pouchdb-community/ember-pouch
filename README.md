@@ -64,15 +64,8 @@ And you will probably want to turn on retries in case the user goes offline:
 var remote = new PouchDB('http://localhost:5984/my_couch');
 var db  = new PouchDB('local_couch');
 
-function doSync() {
-  db.sync(remote, {live: true})
-    .on('error', function(err) {
-      // Retry connection every 5 seconds
-      setTimeout(doSync, 5000);
-    });
-}
-
-doSync();
+// Do a live, ongoing sync, retrying if the conection is lost.
+db.sync(remote, {live: true, retry: true});
 
 export default EmberPouch.Adapter.extend({
   db: db
