@@ -118,7 +118,6 @@ define(
       _recordToData: function (store, type, record) {
         var data = {};
         var serializer = store.serializerFor(type.typeKey);
-        var snapshot = record._createSnapshot();
 
         var recordToStore = record;
         // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
