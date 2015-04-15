@@ -125,7 +125,13 @@ exports["default"] = DS.RESTAdapter.extend({
     var serializer = store.serializerFor(type.typeKey);
     var snapshot = record._createSnapshot();
 
-    serializer.serializeIntoHash(data, type, snapshot, { includeId: true });
+    var recordToStore = record;
+    // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
+    if (typeof record.record === 'undefined' && typeof record._createSnapshot === 'function') {
+      recordToStore = record._createSnapshot();
+    }
+
+    serializer.serializeIntoHash(data, type, recordToStore, { includeId: true });
 
     data = data[type.typeKey];
 
