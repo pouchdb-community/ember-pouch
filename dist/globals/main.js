@@ -126,7 +126,7 @@ exports["default"] = DS.RESTAdapter.extend({
 
     var recordToStore = record;
     // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
-    if (typeof record._createSnapshot === 'function') {
+    if (typeof record.record === 'undefined' && typeof record._createSnapshot === 'function') {
       recordToStore = record._createSnapshot();
     }
 
