@@ -111,7 +111,10 @@ ENV.contentSecurityPolicy = {
 
 Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
 
-To automatically set up your remote couchdb you can use the plugin [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb):
+### CORS setup (important!)
+
+To automatically set up your remote CouchDB to use CORS, you can use the plugin [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb):
+
 ```
 npm install -g add-cors-to-couchdb
 add-cors-to-couchdb http://your_couch_host.com:5984 -u your_username -p your_password
