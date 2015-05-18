@@ -158,9 +158,27 @@ The value for `documentType` is the primary model's `typeKey` — i.e., the came
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
-## Build
+## Installation
 
-    $ npm run build
+* `git clone` this repository
+* `npm install`
+* `bower install`
+
+## Running
+
+* `ember server`
+* Visit your app at http://localhost:4200.
+
+## Running Tests
+
+* `ember test`
+* `ember test --server`
+
+## Building
+
+* `ember build`
+
+For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
 
 ## Credits
 
