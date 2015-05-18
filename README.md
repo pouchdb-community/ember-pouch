@@ -16,17 +16,11 @@ For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
 
 ## Install and setup
 
-    bower install ember-pouch --save
+    ember install:addon ember-pouch
 
-In `Brocfile.js`:
-
-```js
-app.import('bower_components/pouchdb/dist/pouchdb.js');
-app.import('bower_components/relational-pouch/dist/pouchdb.relational-pouch.js');
-app.import('bower_components/ember-pouch/dist/globals/main.js');
-```
-
-This defines `window.PouchDB` and `window.EmberPouch` globally.
+This provides
+- `import PouchDB from 'pouchdb'`
+- `import {Model, Adapter, Serializer} from 'ember-pouch'`
 
 `Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
@@ -38,11 +32,25 @@ var Todo = DS.Model.extend({
 });
 ```
 
+If you like you can use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
+
+```js
+import {Model} from 'ember-pouch';
+
+var Todo = Model.extend({
+  title       : DS.attr('string'),
+  isCompleted : DS.attr('boolean')
+});
+```
+
 ## Configuring /app/adapters/application.js
 
 A local PouchDB that syncs with a remote CouchDB looks like this:
 
 ```js
+import PouchDB from 'pouchdb';
+import {Adapter} from 'ember-pouch';
+
 var remote = new PouchDB('http://localhost:5984/my_couch');
 var db = new PouchDB('local_pouch');
 
@@ -51,7 +59,7 @@ db.sync(remote, {
    retry: true   // retry if the conection is lost
 });
 
-export default EmberPouch.Adapter.extend({
+export default Adapter.extend({
   db: db
 });
 ```
@@ -59,11 +67,9 @@ export default EmberPouch.Adapter.extend({
 You can also turn on debugging:
 
 ```js
+import PouchDB from 'pouchdb';
+
 PouchDB.debug.enable('*');
-```
-If you use Ember-CLI, JShint will display that PouchDB and EmberPouch are not defined. Add the following comment on top of your application.js file to resolve this problem:
-``` javascript
-/*globals EmberPouch, PouchDB */
 ```
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
@@ -127,10 +133,9 @@ Ember-data can be slow to load large numbers of records which have lots of relat
 ```javascript
 // app/models/post.js
 import DS from 'ember-data';
+import {Model} from 'ember-pouch';
 
-export default DS.Model.extend({
-    rev: DS.attr('string'),
-
+export default Model.extend({
     title: DS.attr('string'),
     text: DS.attr('string'),
 
@@ -140,10 +145,9 @@ export default DS.Model.extend({
 
 // app/models/post-summary.js
 import DS from 'ember-data';
+import {Model} from 'ember-pouch';
 
-var PostSummary =  default DS.Model.extend({
-    rev: DS.attr('string'),
-
+var PostSummary = Model.extend({
     title: DS.attr('string'),
 });
 
