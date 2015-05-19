@@ -25,7 +25,11 @@ This provides
 `Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
 ```js
-var Todo = DS.Model.extend({
+// app/models/todo.js
+
+import DS from 'ember-data';
+
+export default DS.Model.extend({
   title       : DS.attr('string'),
   isCompleted : DS.attr('boolean'),
   rev         : DS.attr('string')    // <-- Add this to all your models
@@ -35,9 +39,11 @@ var Todo = DS.Model.extend({
 If you like you can use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
 
 ```js
-import {Model} from 'ember-pouch';
+// app/models/todo.js
 
-var Todo = Model.extend({
+import { Model } from 'ember-pouch';
+
+export default Model.extend({
   title       : DS.attr('string'),
   isCompleted : DS.attr('boolean')
 });
@@ -49,7 +55,7 @@ A local PouchDB that syncs with a remote CouchDB looks like this:
 
 ```js
 import PouchDB from 'pouchdb';
-import {Adapter} from 'ember-pouch';
+import { Adapter } from 'ember-pouch';
 
 var remote = new PouchDB('http://localhost:5984/my_couch');
 var db = new PouchDB('local_pouch');
@@ -132,8 +138,9 @@ Ember-data can be slow to load large numbers of records which have lots of relat
 
 ```javascript
 // app/models/post.js
+
 import DS from 'ember-data';
-import {Model} from 'ember-pouch';
+import { Model } from 'ember-pouch';
 
 export default Model.extend({
     title: DS.attr('string'),
@@ -143,9 +150,11 @@ export default Model.extend({
     comments: DS.hasMany('comments')
 });
 
+
 // app/models/post-summary.js
+
 import DS from 'ember-data';
-import {Model} from 'ember-pouch';
+import { Model } from 'ember-pouch';
 
 var PostSummary = Model.extend({
     title: DS.attr('string'),

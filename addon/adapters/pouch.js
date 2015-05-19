@@ -11,28 +11,21 @@ const {
   },
   on,
   String: {
-    pluralize
+    pluralize,
+    classify
   }
 } = Ember;
 
-
 export default DS.RESTAdapter.extend({
-
-  //db: new PouchDB('http://localhost:5984/ember-todo'),
-
   coalesceFindRequests: true,
 
-  setup: on('init', function () {
-    this._startChangesToStoreListener();
-  }),
-
-  _startChangesToStoreListener: function () {
+  _startChangesToStoreListener: on('init', function () {
     this.changes = this.db.changes({
       since: 'now',
       live: true,
       returnDocs: false
     }).on('change', bind(this, 'onChange'));
-  },
+  }),
 
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
@@ -77,7 +70,7 @@ export default DS.RESTAdapter.extend({
     }
 
     if (!Ember.get(type, 'attributes').has('rev')) {
-      var modelName = Ember.String.classify(type.typeKey);
+      var modelName = classify(type.typeKey);
       throw new Error('Please add a `rev` attribute of type `string`' +
         ' on the ' + modelName + ' model.');
     }
@@ -134,7 +127,10 @@ export default DS.RESTAdapter.extend({
 
     var recordToStore = record;
     // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
-    if (typeof record.record === 'undefined' && typeof record._createSnapshot === 'function') {
+    if (
+      typeof record.record === 'undefined' &&
+      typeof record._createSnapshot === 'function'
+    ) {
       recordToStore = record._createSnapshot();
     }
 
