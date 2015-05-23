@@ -16,36 +16,25 @@ For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
 
 ## Install and setup
 
-    ember install:addon ember-pouch
+    bower install ember-pouch --save
 
-This provides
-- `import PouchDB from 'pouchdb'`
-- `import {Model, Adapter, Serializer} from 'ember-pouch'`
+In `Brocfile.js`:
+
+```js
+app.import('bower_components/pouchdb/dist/pouchdb.js');
+app.import('bower_components/relational-pouch/dist/pouchdb.relational-pouch.js');
+app.import('bower_components/ember-pouch/dist/globals/main.js');
+```
+
+This defines `window.PouchDB` and `window.EmberPouch` globally.
 
 `Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
 ```js
-// app/models/todo.js
-
-import DS from 'ember-data';
-
-export default DS.Model.extend({
+var Todo = DS.Model.extend({
   title       : DS.attr('string'),
   isCompleted : DS.attr('boolean'),
   rev         : DS.attr('string')    // <-- Add this to all your models
-});
-```
-
-If you like you can use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
-
-```js
-// app/models/todo.js
-
-import { Model } from 'ember-pouch';
-
-export default Model.extend({
-  title       : DS.attr('string'),
-  isCompleted : DS.attr('boolean')
 });
 ```
 
@@ -54,9 +43,6 @@ export default Model.extend({
 A local PouchDB that syncs with a remote CouchDB looks like this:
 
 ```js
-import PouchDB from 'pouchdb';
-import { Adapter } from 'ember-pouch';
-
 var remote = new PouchDB('http://localhost:5984/my_couch');
 var db = new PouchDB('local_pouch');
 
@@ -65,7 +51,7 @@ db.sync(remote, {
    retry: true   // retry if the conection is lost
 });
 
-export default Adapter.extend({
+export default EmberPouch.Adapter.extend({
   db: db
 });
 ```
@@ -73,8 +59,6 @@ export default Adapter.extend({
 You can also turn on debugging:
 
 ```js
-import PouchDB from 'pouchdb';
-
 PouchDB.debug.enable('*');
 ```
 
@@ -123,26 +107,17 @@ ENV.contentSecurityPolicy = {
 
 Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
 
-### CORS setup (important!)
-
-To automatically set up your remote CouchDB to use CORS, you can use the plugin [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb):
-
-```
-npm install -g add-cors-to-couchdb
-add-cors-to-couchdb http://your_couch_host.com:5984 -u your_username -p your_password
-```
-
 ### Multiple models for the same data
 
 Ember-data can be slow to load large numbers of records which have lots of relationships. If you run into this problem, you can define multiple models and have them all point to the same set of records by defining `documentType` on the model class. Example (in an ember-cli app):
 
 ```javascript
 // app/models/post.js
-
 import DS from 'ember-data';
-import { Model } from 'ember-pouch';
 
-export default Model.extend({
+export default DS.Model.extend({
+    rev: DS.attr('string'),
+
     title: DS.attr('string'),
     text: DS.attr('string'),
 
@@ -150,13 +125,12 @@ export default Model.extend({
     comments: DS.hasMany('comments')
 });
 
-
 // app/models/post-summary.js
-
 import DS from 'ember-data';
-import { Model } from 'ember-pouch';
 
-var PostSummary = Model.extend({
+var PostSummary =  default DS.Model.extend({
+    rev: DS.attr('string'),
+
     title: DS.attr('string'),
 });
 
@@ -171,27 +145,9 @@ The value for `documentType` is the primary model's `typeKey` — i.e., the came
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
-## Installation
+## Build
 
-* `git clone` this repository
-* `npm install`
-* `bower install`
-
-## Running
-
-* `ember server`
-* Visit your app at http://localhost:4200.
-
-## Running Tests
-
-* `ember test`
-* `ember test --server`
-
-## Building
-
-* `ember build`
-
-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+    $ npm run build
 
 ## Credits
 
