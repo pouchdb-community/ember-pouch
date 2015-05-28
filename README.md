@@ -208,5 +208,6 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 
-* **2.0.0** - Ember CLI support! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
+* **2.0.0** - Ember CLI support, due to some amazing support by @fsmanuel! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
+* **1.2.5** - Last release with regular Bower/npm support via bundle javascript in the `dist/` directory.
 * **1.0.0** - First release
