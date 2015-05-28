@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
 
+[**Changelog**](#changelog)
+
 Ember Pouch is a PouchDB/CouchDB adapter for Ember Data.
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
@@ -18,7 +20,7 @@ For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
 
 ## Install and setup
 
-    ember install:addon ember-pouch
+    ember install ember-pouch
 
 This provides
 - `import PouchDB from 'pouchdb'`
@@ -200,3 +202,8 @@ For more information on using ember-cli, visit [http://www.ember-cli.com/](http:
 This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
 
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
+
+## Changelog
+
+* **2.0.0** - Ember CLI support! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
+* **1.0.0** - First release
