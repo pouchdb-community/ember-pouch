@@ -40,11 +40,12 @@ export default DS.Model.extend({
 });
 ```
 
-If you like you can use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
+If you like, you can also use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
 
 ```js
 // app/models/todo.js
 
+import DS from 'ember-data';
 import { Model } from 'ember-pouch';
 
 export default Model.extend({
@@ -58,6 +59,8 @@ export default Model.extend({
 A local PouchDB that syncs with a remote CouchDB looks like this:
 
 ```js
+// app/adapters/application.js
+
 import PouchDB from 'pouchdb';
 import { Adapter } from 'ember-pouch';
 
