@@ -1,12 +1,17 @@
-# Mac OS
-.DS_Store
+# See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# JavaScript
-## Node.js
-node_modules
+# compiled output
+/dist
+/tmp
 
-## Bower.js
-bower_components
+# dependencies
+/node_modules
+/bower_components
 
-# Build artifacts
-tmp
+# misc
+/.sass-cache
+/connect.lock
+/coverage/*
+/libpeerconnection.log
+npm-debug.log
+testem.log

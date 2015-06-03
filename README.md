@@ -1,5 +1,9 @@
 # Ember Pouch
 
+[![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
+
+[**Changelog**](#changelog)
+
 Ember Pouch is a PouchDB/CouchDB adapter for Ember Data.
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
@@ -16,25 +20,37 @@ For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
 
 ## Install and setup
 
-    bower install ember-pouch --save
+    ember install ember-pouch
 
-In `Brocfile.js`:
-
-```js
-app.import('bower_components/pouchdb/dist/pouchdb.js');
-app.import('bower_components/relational-pouch/dist/pouchdb.relational-pouch.js');
-app.import('bower_components/ember-pouch/dist/globals/main.js');
-```
-
-This defines `window.PouchDB` and `window.EmberPouch` globally.
+This provides
+- `import PouchDB from 'pouchdb'`
+- `import {Model, Adapter, Serializer} from 'ember-pouch'`
 
 `Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
 ```js
-var Todo = DS.Model.extend({
+// app/models/todo.js
+
+import DS from 'ember-data';
+
+export default DS.Model.extend({
   title       : DS.attr('string'),
   isCompleted : DS.attr('boolean'),
   rev         : DS.attr('string')    // <-- Add this to all your models
+});
+```
+
+If you like, you can also use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
+
+```js
+// app/models/todo.js
+
+import DS from 'ember-data';
+import { Model } from 'ember-pouch';
+
+export default Model.extend({
+  title       : DS.attr('string'),
+  isCompleted : DS.attr('boolean')
 });
 ```
 
@@ -43,6 +59,11 @@ var Todo = DS.Model.extend({
 A local PouchDB that syncs with a remote CouchDB looks like this:
 
 ```js
+// app/adapters/application.js
+
+import PouchDB from 'pouchdb';
+import { Adapter } from 'ember-pouch';
+
 var remote = new PouchDB('http://localhost:5984/my_couch');
 var db = new PouchDB('local_pouch');
 
@@ -51,7 +72,7 @@ db.sync(remote, {
    retry: true   // retry if the conection is lost
 });
 
-export default EmberPouch.Adapter.extend({
+export default Adapter.extend({
   db: db
 });
 ```
@@ -59,6 +80,8 @@ export default EmberPouch.Adapter.extend({
 You can also turn on debugging:
 
 ```js
+import PouchDB from 'pouchdb';
+
 PouchDB.debug.enable('*');
 ```
 
@@ -107,17 +130,26 @@ ENV.contentSecurityPolicy = {
 
 Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
 
+### CORS setup (important!)
+
+To automatically set up your remote CouchDB to use CORS, you can use the plugin [add-cors-to-couchdb](https://github.com/pouchdb/add-cors-to-couchdb):
+
+```
+npm install -g add-cors-to-couchdb
+add-cors-to-couchdb http://your_couch_host.com:5984 -u your_username -p your_password
+```
+
 ### Multiple models for the same data
 
 Ember-data can be slow to load large numbers of records which have lots of relationships. If you run into this problem, you can define multiple models and have them all point to the same set of records by defining `documentType` on the model class. Example (in an ember-cli app):
 
 ```javascript
 // app/models/post.js
+
 import DS from 'ember-data';
+import { Model } from 'ember-pouch';
 
-export default DS.Model.extend({
-    rev: DS.attr('string'),
-
+export default Model.extend({
     title: DS.attr('string'),
     text: DS.attr('string'),
 
@@ -125,12 +157,13 @@ export default DS.Model.extend({
     comments: DS.hasMany('comments')
 });
 
+
 // app/models/post-summary.js
+
 import DS from 'ember-data';
+import { Model } from 'ember-pouch';
 
-var PostSummary =  default DS.Model.extend({
-    rev: DS.attr('string'),
-
+var PostSummary = Model.extend({
     title: DS.attr('string'),
 });
 
@@ -145,12 +178,36 @@ The value for `documentType` is the primary model's `typeKey` — i.e., the came
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
-## Build
+## Installation
 
-    $ npm run build
+* `git clone` this repository
+* `npm install`
+* `bower install`
+
+## Running
+
+* `ember server`
+* Visit your app at http://localhost:4200.
+
+## Running Tests
+
+* `ember test`
+* `ember test --server`
+
+## Building
+
+* `ember build`
+
+For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
 
 ## Credits
 
 This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
 
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)! 
+
+## Changelog
+
+* **2.0.0** - Ember CLI support, due to some amazing support by @fsmanuel! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
+* **1.2.5** - Last release with regular Bower/npm support via bundle javascript in the `dist/` directory.
+* **1.0.0** - First release
