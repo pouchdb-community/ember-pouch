@@ -78,15 +78,15 @@ export default DS.RESTAdapter.extend({
     }
 
     if (!Ember.get(type, 'attributes').has('rev')) {
-      var modelName = classify(type.typeKey);
+      var modelName = classify(type.modelName);
       throw new Error('Please add a `rev` attribute of type `string`' +
         ' on the ' + modelName + ' model.');
     }
 
     this._schema = this._schema || [];
 
-    var singular = type.typeKey;
-    var plural = pluralize(type.typeKey);
+    var singular = type.modelName;
+    var plural = pluralize(type.modelName);
 
     // check that we haven't already registered this model
     for (var i = 0, len = this._schema.length; i < len; i++) {
@@ -116,7 +116,7 @@ export default DS.RESTAdapter.extend({
       }
       var relDef = {};
       relDef[rel.kind] = {
-        type: rel.type.typeKey,
+        type: rel.type.modelName,
         options: rel.options
       };
       if (!schemaDef.relations) {
@@ -131,7 +131,7 @@ export default DS.RESTAdapter.extend({
 
   _recordToData: function (store, type, record) {
     var data = {};
-    var serializer = store.serializerFor(type.typeKey);
+    var serializer = store.serializerFor(type.modelName);
 
     var recordToStore = record;
     // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
@@ -149,7 +149,7 @@ export default DS.RESTAdapter.extend({
       {includeId: true}
     );
 
-    data = data[type.typeKey];
+    data = data[type.modelName];
 
     // ember sets it to null automatically. don't need it.
     if (data.rev === null) {
@@ -162,12 +162,12 @@ export default DS.RESTAdapter.extend({
   findAll: function(store, type /*, sinceToken */) {
     // TODO: use sinceToken
     this._init(type);
-    return this.db.rel.find(type.typeKey);
+    return this.db.rel.find(type.modelName);
   },
 
   findMany: function(store, type, ids) {
     this._init(type);
-    return this.db.rel.find(type.typeKey, ids);
+    return this.db.rel.find(type.modelName, ids);
   },
 
   findQuery: function(/* store, type, query */) {
@@ -178,18 +178,18 @@ export default DS.RESTAdapter.extend({
 
   find: function (store, type, id) {
     this._init(type);
-    return this.db.rel.find(type.typeKey, id).then(function (payload) {
+    return this.db.rel.find(type.modelName, id).then(function (payload) {
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
-        var singular = type.typeKey;
-        var plural = pluralize(type.typeKey);
+        var singular = type.modelName;
+        var plural = pluralize(type.modelName);
         var results = payload[singular] || payload[plural];
         if (results && results.length > 0) {
           return payload;
         }
       }
-      throw new Error('Not found: type "' + type.typeKey +
+      throw new Error('Not found: type "' + type.modelName +
         '" with id "' + id + '"');
     });
   },
@@ -197,19 +197,19 @@ export default DS.RESTAdapter.extend({
   createRecord: function(store, type, record) {
     this._init(type);
     var data = this._recordToData(store, type, record);
-    return this.db.rel.save(type.typeKey, data);
+    return this.db.rel.save(type.modelName, data);
   },
 
   updateRecord: function (store, type, record) {
     this._init(type);
     var data = this._recordToData(store, type, record);
-    return this.db.rel.save(type.typeKey, data);
+    return this.db.rel.save(type.modelName, data);
   },
 
   deleteRecord: function (store, type, record) {
     this._init(type);
     var data = this._recordToData(store, type, record);
-    return this.db.rel.del(type.typeKey, data)
+    return this.db.rel.del(type.modelName, data)
       .then(extractDeleteRecord);
   }
 });
