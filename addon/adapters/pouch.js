@@ -133,8 +133,12 @@ export default DS.RESTAdapter.extend({
 
   _recordToData: function (store, type, record) {
     var data = {};
-    var recordTypeName = this.getRecordTypeName(type);
-    var serializer = store.serializerFor(recordTypeName);
+    // Though it would work to use the default recordTypeName for modelName &
+    // serializerKey here, these uses are conceptually distinct and may vary
+    // independently.
+    var modelName = type.modelName || type.typeKey;
+    var serializerKey = camelize(modelName);
+    var serializer = store.serializerFor(modelName);
 
     var recordToStore = record;
     // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
@@ -152,7 +156,7 @@ export default DS.RESTAdapter.extend({
       {includeId: true}
     );
 
-    data = data[recordTypeName];
+    data = data[serializerKey];
 
     // ember sets it to null automatically. don't need it.
     if (data.rev === null) {
