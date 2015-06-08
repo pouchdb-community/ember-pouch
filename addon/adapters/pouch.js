@@ -12,6 +12,7 @@ const {
   on,
   String: {
     pluralize,
+    camelize,
     classify
   }
 } = Ember;
@@ -72,21 +73,22 @@ export default DS.RESTAdapter.extend({
   },
 
   _init: function (type) {
-    var self = this;
+    var self = this,
+        recordTypeName = this.getRecordTypeName(type);
     if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
     if (!Ember.get(type, 'attributes').has('rev')) {
-      var modelName = classify(type.typeKey);
+      var modelName = classify(recordTypeName);
       throw new Error('Please add a `rev` attribute of type `string`' +
         ' on the ' + modelName + ' model.');
     }
 
     this._schema = this._schema || [];
 
-    var singular = type.typeKey;
-    var plural = pluralize(type.typeKey);
+    var singular = recordTypeName;
+    var plural = pluralize(recordTypeName);
 
     // check that we haven't already registered this model
     for (var i = 0, len = this._schema.length; i < len; i++) {
@@ -131,7 +133,8 @@ export default DS.RESTAdapter.extend({
 
   _recordToData: function (store, type, record) {
     var data = {};
-    var serializer = store.serializerFor(type.typeKey);
+    var recordTypeName = this.getRecordTypeName(type);
+    var serializer = store.serializerFor(recordTypeName);
 
     var recordToStore = record;
     // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
@@ -149,7 +152,7 @@ export default DS.RESTAdapter.extend({
       {includeId: true}
     );
 
-    data = data[type.typeKey];
+    data = data[recordTypeName];
 
     // ember sets it to null automatically. don't need it.
     if (data.rev === null) {
@@ -159,15 +162,37 @@ export default DS.RESTAdapter.extend({
     return data;
   },
 
+  /**
+   * Returns the string to use for the model name part of the PouchDB document
+   * ID for records of the given ember-data type.
+   *
+   * This method uses the camelized version of the model name in order to
+   * preserve data compatibility with older versions of ember-pouch. See
+   * nolanlawson/ember-pouch#63 for a discussion.
+   *
+   * You can override this to change the behavior. If you do, be aware that you
+   * need to execute a data migration to ensure that any existing records are
+   * moved to the new IDs.
+   */
+  getRecordTypeName(type) {
+    if (type.modelName) {
+      return camelize(type.modelName);
+    } else {
+      // This branch can be removed when the library drops support for
+      // ember-data 1.0-beta17 and earlier.
+      return type.typeKey;
+    }
+  },
+
   findAll: function(store, type /*, sinceToken */) {
     // TODO: use sinceToken
     this._init(type);
-    return this.db.rel.find(type.typeKey);
+    return this.db.rel.find(this.getRecordTypeName(type));
   },
 
   findMany: function(store, type, ids) {
     this._init(type);
-    return this.db.rel.find(type.typeKey, ids);
+    return this.db.rel.find(this.getRecordTypeName(type), ids);
   },
 
   findQuery: function(/* store, type, query */) {
@@ -178,18 +203,19 @@ export default DS.RESTAdapter.extend({
 
   find: function (store, type, id) {
     this._init(type);
-    return this.db.rel.find(type.typeKey, id).then(function (payload) {
+    var recordTypeName = this.getRecordTypeName(type);
+    return this.db.rel.find(recordTypeName, id).then(function (payload) {
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
-        var singular = type.typeKey;
-        var plural = pluralize(type.typeKey);
+        var singular = recordTypeName;
+        var plural = pluralize(recordTypeName);
         var results = payload[singular] || payload[plural];
         if (results && results.length > 0) {
           return payload;
         }
       }
-      throw new Error('Not found: type "' + type.typeKey +
+      throw new Error('Not found: type "' + recordTypeName +
         '" with id "' + id + '"');
     });
   },
@@ -197,19 +223,19 @@ export default DS.RESTAdapter.extend({
   createRecord: function(store, type, record) {
     this._init(type);
     var data = this._recordToData(store, type, record);
-    return this.db.rel.save(type.typeKey, data);
+    return this.db.rel.save(this.getRecordTypeName(type), data);
   },
 
   updateRecord: function (store, type, record) {
     this._init(type);
     var data = this._recordToData(store, type, record);
-    return this.db.rel.save(type.typeKey, data);
+    return this.db.rel.save(this.getRecordTypeName(type), data);
   },
 
   deleteRecord: function (store, type, record) {
     this._init(type);
     var data = this._recordToData(store, type, record);
-    return this.db.rel.del(type.typeKey, data)
+    return this.db.rel.del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
   }
 });
