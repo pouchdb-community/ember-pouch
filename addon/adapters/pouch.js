@@ -118,7 +118,7 @@ export default DS.RESTAdapter.extend({
       }
       var relDef = {};
       relDef[rel.kind] = {
-        type: rel.type.typeKey,
+        type: recordTypeName,
         options: rel.options
       };
       if (!schemaDef.relations) {
