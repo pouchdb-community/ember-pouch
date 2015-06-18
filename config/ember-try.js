@@ -1,53 +1,53 @@
 module.exports = {
   scenarios: [
     {
-      name: 'default',
+      name: 'ember-data-beta.15',
       dependencies: {
-        'ember': 'components/ember#release',
-        'ember-data': '1.0.0-beta.17'
+        'ember': '1.10.0',
+        'ember-data': '1.0.0-beta.15'
       },
       resolutions: {
-        'ember': 'release'
+        'ember': '1.10.0'
       }
     },
     {
-      name: 'legacy ember-data 1.0.0.beta.12',
+      name: 'ember-data-beta.16',
       dependencies: {
-        'ember': 'components/ember#release',
-        'ember-data': 'components/ember-data#1.0.0-beta.12'
+        'ember': '1.10.0',
+        'ember-data': '1.0.0-beta.16.1'
       },
       resolutions: {
-        'ember': 'release'
+        'ember': '1.10.0'
       }
     },
     {
-      name: 'legacy ember-data 1.0.0.beta.14.1',
+      name: 'ember-data-beta.18',
       dependencies: {
-        'ember': 'components/ember#release',
-        'ember-data': 'components/ember-data#1.0.0-beta.14.1'
+        'ember': '1.12.1',
+        'ember-data': '1.0.0-beta.18'
       },
       resolutions: {
-        'ember': 'release'
+        'ember': '1.12.1'
       }
     },
     {
-      name: 'legacy ember-data 1.0.0.beta.15',
+      name: 'ember-data-beta.19',
       dependencies: {
-        'ember': 'components/ember#release',
-        'ember-data': 'components/ember-data#1.0.0-beta.15'
+        'ember': '1.13.2',
+        'ember-data': '1.0.0-beta.19.2'
       },
       resolutions: {
-        'ember': 'release'
+        'ember': '1.13.2'
       }
     },
     {
-      name: 'legacy ember-data 1.0.0.beta.16.1',
+      name: 'ember-data-1.13',
       dependencies: {
-        'ember': 'components/ember#release',
-        'ember-data': 'components/ember-data#1.0.0-beta.16.1'
+        'ember': '1.13.2',
+        'ember-data': '1.13.2'
       },
       resolutions: {
-        'ember': 'release'
+        'ember': '1.13.2'
       }
     },
     {
