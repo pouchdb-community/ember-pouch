@@ -208,6 +208,7 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 
-* **2.0.0** - Ember CLI support, due to some amazing support by @fsmanuel! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
+* **2.0.1** - Fixed [#62](https://github.com/nolanlawson/ember-pouch/issues/62) thanks to [@rsutphin](https://github.com/rsutphin) (deprecated `typekey` in Ember-Data 1.0.0-beta.18)
+* **2.0.0** - Ember CLI support, due to some amazing support by [@fsmanuel](https://github.com/fsmanuel)! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
 * **1.2.5** - Last release with regular Bower/npm support via bundle javascript in the `dist/` directory.
 * **1.0.0** - First release
