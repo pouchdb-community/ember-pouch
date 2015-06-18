@@ -20,6 +20,17 @@ module('adapter:pouch [integration]', {
     // issue.
     (new PouchDB('ember-pouch-test')).destroy().then(() => {
       App = startApp();
+      var bootPromise;
+      Ember.run(() => {
+        if (App.boot) {
+          App.advanceReadiness();
+          bootPromise = App.boot();
+        } else {
+          bootPromise = Ember.RSVP.Promise.resolve();
+        }
+      });
+      return bootPromise;
+    }).then(() => {
       done();
     });
   },
