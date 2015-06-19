@@ -120,15 +120,17 @@ export default DS.RESTAdapter.extend({
       }
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
-      relDef[rel.kind] = {
-        type: this.getRecordTypeName(relModel),
-        options: rel.options
-      };
-      if (!schemaDef.relations) {
-        schemaDef.relations = {};
+      if (relModel) {
+        relDef[rel.kind] = {
+          type: this.getRecordTypeName(relModel),
+          options: rel.options
+        };
+        if (!schemaDef.relations) {
+          schemaDef.relations = {};
+        }
+        schemaDef.relations[rel.key] = relDef;
+        self._init(store, relModel);
       }
-      schemaDef.relations[rel.key] = relDef;
-      self._init(store, relModel);
     });
 
     this.db.setSchema(this._schema);
