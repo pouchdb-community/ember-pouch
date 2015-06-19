@@ -72,7 +72,7 @@ export default DS.RESTAdapter.extend({
     }
   },
 
-  _init: function (type) {
+  _init: function (store, type) {
     var self = this,
         recordTypeName = this.getRecordTypeName(type);
     if (!this.db || typeof this.db !== 'object') {
@@ -111,21 +111,26 @@ export default DS.RESTAdapter.extend({
     this._schema.push(schemaDef);
 
     // check all the subtypes
+    // We check the type of `rel.type`because with ember-data beta 19
+    // `rel.type` switched from DS.Model to string
     type.eachRelationship(function (_, rel) {
       if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
         // TODO: support inverse as well
         return; // skip
       }
-      var relDef = {};
-      relDef[rel.kind] = {
-        type: rel.type.typeKey,
-        options: rel.options
-      };
-      if (!schemaDef.relations) {
-        schemaDef.relations = {};
+      var relDef = {},
+          relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
+      if (relModel) {
+        relDef[rel.kind] = {
+          type: this.getRecordTypeName(relModel),
+          options: rel.options
+        };
+        if (!schemaDef.relations) {
+          schemaDef.relations = {};
+        }
+        schemaDef.relations[rel.key] = relDef;
+        self._init(store, relModel);
       }
-      schemaDef.relations[rel.key] = relDef;
-      self._init(rel.type);
     });
 
     this.db.setSchema(this._schema);
@@ -190,12 +195,12 @@ export default DS.RESTAdapter.extend({
 
   findAll: function(store, type /*, sinceToken */) {
     // TODO: use sinceToken
-    this._init(type);
+    this._init(store, type);
     return this.db.rel.find(this.getRecordTypeName(type));
   },
 
   findMany: function(store, type, ids) {
-    this._init(type);
+    this._init(store, type);
     return this.db.rel.find(this.getRecordTypeName(type), ids);
   },
 
@@ -206,7 +211,7 @@ export default DS.RESTAdapter.extend({
   },
 
   find: function (store, type, id) {
-    this._init(type);
+    this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
     return this.db.rel.find(recordTypeName, id).then(function (payload) {
       // Ember Data chokes on empty payload, this function throws
@@ -214,6 +219,7 @@ export default DS.RESTAdapter.extend({
       if (typeof payload === 'object' && payload !== null) {
         var singular = recordTypeName;
         var plural = pluralize(recordTypeName);
+
         var results = payload[singular] || payload[plural];
         if (results && results.length > 0) {
           return payload;
@@ -225,19 +231,19 @@ export default DS.RESTAdapter.extend({
   },
 
   createRecord: function(store, type, record) {
-    this._init(type);
+    this._init(store, type);
     var data = this._recordToData(store, type, record);
     return this.db.rel.save(this.getRecordTypeName(type), data);
   },
 
   updateRecord: function (store, type, record) {
-    this._init(type);
+    this._init(store, type);
     var data = this._recordToData(store, type, record);
     return this.db.rel.save(this.getRecordTypeName(type), data);
   },
 
   deleteRecord: function (store, type, record) {
-    this._init(type);
+    this._init(store, type);
     var data = this._recordToData(store, type, record);
     return this.db.rel.del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
