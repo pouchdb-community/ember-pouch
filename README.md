@@ -174,7 +174,7 @@ PostSummary.reopenClass({
 export default PostSummary;
 ```
 
-The value for `documentType` is the primary model's `typeKey` — i.e., the camelCase version of the model name.
+The value for `documentType` is the camelCase version of the primary model name.
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
