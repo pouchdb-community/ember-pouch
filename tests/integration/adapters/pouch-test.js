@@ -134,6 +134,62 @@ test('can find associated records', function (assert) {
   });
 });
 
+test('can find black bean tacos (query equal)', function (assert) {
+  assert.expect(3);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return db().bulkDocs([
+      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor' } },
+      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean' } },
+      { _id: 'tacoSoup_2_C', data: { flavor: 'red bean' } },
+      { _id: 'tacoSoup_2_D', data: { flavor: 'green bean' } },
+      { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
+    ]);
+  }).then(() => {
+    return store().find('taco-soup', {flavor: 'black bean'});
+  }).then((found) => {
+    assert.equal(found.get('length'), 1, 'should have found the taco soup with the black bean flavor');
+    assert.deepEqual(found.mapBy('id'), ['B'],
+      'should have extracted the IDs correctly');
+    assert.deepEqual(found.mapBy('flavor'), ['black bean'],
+      'should have extracted the attributes also');
+    done();
+  }).catch((error) => {
+    console.error('error in test', error);
+    assert.ok(false, 'error in test:' + error);
+    done();
+  });
+});
+
+test('can find any bean tacos (query regexp)', function (assert) {
+  assert.expect(3);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return db().bulkDocs([
+      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor' } },
+      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean' } },
+      { _id: 'tacoSoup_2_C', data: { flavor: 'red bean' } },
+      { _id: 'tacoSoup_2_D', data: { flavor: 'green bean' } },
+      { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
+    ]);
+  }).then(() => {
+    return store().find('taco-soup', {flavor: 'black bean'});
+  }).then((found) => {
+    assert.equal(found.get('length'), 1, 'should have found the taco soup with the black bean flavor');
+    assert.deepEqual(found.mapBy('id'), ['B'],
+      'should have extracted the IDs correctly');
+    assert.deepEqual(found.mapBy('flavor'), ['black bean'],
+      'should have extracted the attributes also');
+    done();
+  }).catch((error) => {
+    console.error('error in test', error);
+    assert.ok(false, 'error in test:' + error);
+    done();
+  });
+});
+
 test('create a new record', function (assert) {
   assert.expect(1);
 
