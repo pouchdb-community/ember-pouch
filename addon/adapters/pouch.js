@@ -122,7 +122,7 @@ export default DS.RESTAdapter.extend({
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
         relDef[rel.kind] = {
-          type: this.getRecordTypeName(relModel),
+          type: self.getRecordTypeName(relModel),
           options: rel.options
         };
         if (!schemaDef.relations) {
