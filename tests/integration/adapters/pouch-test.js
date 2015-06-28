@@ -103,6 +103,37 @@ test('can find one', function (assert) {
   });
 });
 
+test('can find associated records', function (assert) {
+  assert.expect(3);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return db().bulkDocs([
+      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
+      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
+      { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
+      { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
+      { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
+    ]);
+  }).then(() => {
+    return store().find('taco-soup', 'C');
+  }).then((found) => {
+    assert.equal(found.get('id'), 'C',
+      'should have found the requested item');
+    return found.get('ingredients');
+  }).then((foundIngredients) => {
+    assert.deepEqual(foundIngredients.mapBy('id'), ['X', 'Y'],
+      'should have found both associated items');
+    assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple', 'pork loin'],
+      'should have fully loaded the associated items');
+    done();
+  }).catch((error) => {
+    console.error('error in test', error);
+    assert.ok(false, 'error in test:' + error);
+    done();
+  });
+});
+
 test('create a new record', function (assert) {
   assert.expect(1);
 

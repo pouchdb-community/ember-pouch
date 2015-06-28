@@ -1,8 +1,9 @@
 import DS from 'ember-data';
 
+// N.b.: awkward model name is to test getRecordTypeName
+
 export default DS.Model.extend({
   rev: DS.attr('string'),
 
-  flavor: DS.attr('string'),
-  ingredients: DS.hasMany('food-item', { async: true })
+  name: DS.attr('string')
 });
