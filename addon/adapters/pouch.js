@@ -210,6 +210,13 @@ export default DS.RESTAdapter.extend({
       "See https://github.com/nolanlawson/ember-pouch/issues/7.");
   },
 
+  /**
+   * `find` has been deprecated in ED 1.13 and is replaced by 'new store
+   * methods', see: https://github.com/emberjs/data/pull/3306
+   * We keep the method for backward compatibility and forward calls to
+   * `findRecord`. This can be removed when the library drops support
+   * for deprecated methods.
+  */
   find: function (store, type, id) {
     this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
