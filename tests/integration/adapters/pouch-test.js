@@ -140,19 +140,53 @@ test('can find black bean tacos (query equal)', function (assert) {
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return db().bulkDocs([
-      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor' } },
-      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean' } },
-      { _id: 'tacoSoup_2_C', data: { flavor: 'red bean' } },
-      { _id: 'tacoSoup_2_D', data: { flavor: 'green bean' } },
+      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor', breadFlour: 'wheat'} },
+      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean', breadFlour: 'wheat' } },
+      { _id: 'tacoSoup_2_C', data: { flavor: 'red bean', breadFlour: 'wheat' } },
+      { _id: 'tacoSoup_2_D', data: { flavor: 'green bean', breadFlour: 'wheat' } },
+      { _id: 'tacoSoup_2_E', data: { flavor: 'black bean', breadFlour: 'barley' } },
       { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
     ]);
   }).then(() => {
     return store().find('taco-soup', {flavor: 'black bean'});
   }).then((found) => {
     assert.equal(found.get('length'), 1, 'should have found the taco soup with the black bean flavor');
-    assert.deepEqual(found.mapBy('id'), ['B'],
+    assert.deepEqual(found.mapBy('id'), ['B', 'E'],
+      'should have extracted the IDs correctly');
+    assert.deepEqual(found.mapBy('flavor'), ['black bean', 'black bean'],
+      'should have extracted the attributes also');
+    assert.deepEqual(found.mapBy('breadFlour'), ['wheat', 'barley'],
+      'should have extracted the attributes also');
+    done();
+  }).catch((error) => {
+    console.error('error in test', error);
+    assert.ok(false, 'error in test:' + error);
+    done();
+  });
+});
+
+test('can find black bean tacos with barley breadFlour (multiple equal query)', function (assert) {
+  assert.expect(3);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return db().bulkDocs([
+      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor', breadFlour: 'wheat'} },
+      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean', breadFlour: 'wheat' } },
+      { _id: 'tacoSoup_2_C', data: { flavor: 'red bean', breadFlour: 'wheat' } },
+      { _id: 'tacoSoup_2_D', data: { flavor: 'green bean', breadFlour: 'wheat' } },
+      { _id: 'tacoSoup_2_E', data: { flavor: 'black bean', breadFlour: 'barley' } },
+      { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
+    ]);
+  }).then(() => {
+    return store().find('taco-soup', {flavor: 'black bean', breadFlour: 'barley'});
+  }).then((found) => {
+    assert.equal(found.get('length'), 1, 'should have found the taco soup with the black bean flavor');
+    assert.deepEqual(found.mapBy('id'), ['E'],
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('flavor'), ['black bean'],
+      'should have extracted the attributes also');
+    assert.deepEqual(found.mapBy('breadFlour'), ['barley'],
       'should have extracted the attributes also');
     done();
   }).catch((error) => {
