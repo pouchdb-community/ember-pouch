@@ -204,11 +204,15 @@ export default DS.RESTAdapter.extend({
     return this.db.rel.find(this.getRecordTypeName(type), ids);
   },
 
-  testQuery: function (record, query) {
-    for(let item in query) {
-      if (query.hasOwnProperty(item)) {
-        const value = query[item];
-        if (record.get(item) !== value) {
+  matchQuery: function (record, query) {
+    for(let property in query) {
+      if (query.hasOwnProperty(property)) {
+        const value = query[property];
+        if (Object.prototype.toString.call(value) === '[object RegExp]') {
+          if (!value.test(record[property])) {
+            return false;
+          }
+        } else if (record[property] !== value) {
           return false;
         }
       }
@@ -219,13 +223,15 @@ export default DS.RESTAdapter.extend({
 
   findQuery: function(store, type, query) {
     var self = this;
-    this._init(type);
+    this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
     return this.db.rel.find(recordTypeName).then((res) => {
-      Ember.Logger.debug('findQuery -> found ', res.get('length'), ' records (', type, ')');
-      return res.filter((record) => {
-        self.testQuery(record, query);
+      const records = res[pluralize(recordTypeName)];
+      const results = {};
+      results[pluralize(recordTypeName)] = records.filter((record) => {
+        return self.matchQuery(record, query);
       });
+      return results;
     });
   },
 

@@ -54,13 +54,13 @@ function store() {
 }
 
 test('can find all', function (assert) {
-  assert.expect(3);
+  assert.expect(4);
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return db().bulkDocs([
-      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor' } },
-      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean' } },
+      { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor', breadFlour: 'wheat'} },
+      { _id: 'tacoSoup_2_B', data: { flavor: 'black bean', breadFlour: 'wheat'} },
       { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
     ]);
   }).then(() => {
@@ -70,6 +70,8 @@ test('can find all', function (assert) {
     assert.deepEqual(found.mapBy('id'), ['A', 'B'],
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('flavor'), ['al pastor', 'black bean'],
+      'should have extracted the attributes also');
+    assert.deepEqual(found.mapBy('breadFlour'), ['wheat', 'wheat'],
       'should have extracted the attributes also');
     done();
   }).catch((error) => {
@@ -135,7 +137,7 @@ test('can find associated records', function (assert) {
 });
 
 test('can find black bean tacos (query equal)', function (assert) {
-  assert.expect(3);
+  assert.expect(4);
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
@@ -150,7 +152,7 @@ test('can find black bean tacos (query equal)', function (assert) {
   }).then(() => {
     return store().find('taco-soup', {flavor: 'black bean'});
   }).then((found) => {
-    assert.equal(found.get('length'), 1, 'should have found the taco soup with the black bean flavor');
+    assert.equal(found.get('length'), 2, 'should have found the 2 taco soups with the black bean flavor');
     assert.deepEqual(found.mapBy('id'), ['B', 'E'],
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('flavor'), ['black bean', 'black bean'],
@@ -166,7 +168,7 @@ test('can find black bean tacos (query equal)', function (assert) {
 });
 
 test('can find black bean tacos with barley breadFlour (multiple equal query)', function (assert) {
-  assert.expect(3);
+  assert.expect(4);
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
@@ -209,12 +211,12 @@ test('can find any bean tacos (query regexp)', function (assert) {
       { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
     ]);
   }).then(() => {
-    return store().find('taco-soup', {flavor: 'black bean'});
+    return store().find('taco-soup', {flavor: /.*bean/ });
   }).then((found) => {
-    assert.equal(found.get('length'), 1, 'should have found the taco soup with the black bean flavor');
-    assert.deepEqual(found.mapBy('id'), ['B'],
+    assert.equal(found.get('length'), 3, 'should have found the taco soup with the black bean flavor');
+    assert.deepEqual(found.mapBy('id'), ['B', 'C', 'D'],
       'should have extracted the IDs correctly');
-    assert.deepEqual(found.mapBy('flavor'), ['black bean'],
+    assert.deepEqual(found.mapBy('flavor'), ['black bean', 'red bean', 'green bean'],
       'should have extracted the attributes also');
     done();
   }).catch((error) => {
