@@ -218,6 +218,10 @@ export default DS.RESTAdapter.extend({
    * for deprecated methods.
   */
   find: function (store, type, id) {
+    return this.findRecord(store, type, id);
+  },
+
+  findRecord: function (store, type, id) {
     this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
     return this.db.rel.find(recordTypeName, id).then(function (payload) {
