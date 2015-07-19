@@ -20,6 +20,12 @@ const {
 export default DS.RESTAdapter.extend({
   coalesceFindRequests: true,
 
+  // Ember Data 2.0 Reload behavior
+  shouldReloadRecord: function() { return true; },
+  shouldReloadAll: function() { return true; },
+  shouldBackgroundReloadRecord: function() { return true; },
+  shouldBackgroundReloadAll: function() { return true; },
+
   _startChangesToStoreListener: on('init', function () {
     this.changes = this.db.changes({
       since: 'now',
