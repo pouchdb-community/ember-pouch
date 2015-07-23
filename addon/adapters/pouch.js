@@ -20,6 +20,12 @@ const {
 export default DS.RESTAdapter.extend({
   coalesceFindRequests: true,
 
+  // The change listener ensures that individual records are kept up to date
+  // when the data in the database changes. This makes ember-data 2.0's record
+  // reloading redundant.
+  shouldReloadRecord: function () { return false; },
+  shouldBackgroundReloadRecord: function () { return false; },
+
   _startChangesToStoreListener: on('init', function () {
     this.changes = this.db.changes({
       since: 'now',
