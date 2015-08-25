@@ -108,6 +108,11 @@ To learn more about how CouchDB sync works, check out [the PouchDB guide to repl
 
 With PouchDB, you also get access to a whole host of [PouchDB plugins](http://pouchdb.com/external.html).
 
+For example, to use the `pouchdb-authentication` plugin, follow the install instructions and import it in your `Brocfile.js`:
+```js
+app.import('bower_components/pouchdb-authentication/dist/pouchdb.authentication.js');
+```
+
 ### Relational Pouch
 
 Ember Pouch is really just a thin layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, check to see if it's more appropriate to file over there.
