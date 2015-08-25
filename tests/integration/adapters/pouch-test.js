@@ -50,7 +50,7 @@ function adapter() {
 }
 
 function store() {
-  return App.__container__.lookup('store:main');
+  return App.__container__.lookup('service:store');
 }
 
 test('can find all', function (assert) {
@@ -64,7 +64,7 @@ test('can find all', function (assert) {
       { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
     ]);
   }).then(() => {
-    return store().find('taco-soup');
+    return store().findAll('taco-soup');
   }).then((found) => {
     assert.equal(found.get('length'), 2, 'should have found the two taco soup items only');
     assert.deepEqual(found.mapBy('id'), ['A', 'B'],
@@ -146,7 +146,7 @@ test('create a new record', function (assert) {
   }).then((newDoc) => {
     assert.equal(newDoc.data.flavor, 'balsamic', 'should have saved the attribute');
 
-    var recordInStore = store().getById('tacoSoup', 'E');
+    var recordInStore = store().peekRecord('tacoSoup', 'E');
     assert.equal(newDoc._rev, recordInStore.get('rev'),
       'should have associated the ember-data record with the rev for the new record');
 
@@ -177,7 +177,7 @@ test('update an existing record', function (assert) {
   }).then((updatedDoc) => {
     assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
 
-    var recordInStore = store().getById('tacoSoup', 'C');
+    var recordInStore = store().peekRecord('tacoSoup', 'C');
     assert.equal(updatedDoc._rev, recordInStore.get('rev'),
       'should have associated the ember-data record with the updated rev');
 
