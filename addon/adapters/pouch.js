@@ -210,10 +210,35 @@ export default DS.RESTAdapter.extend({
     return this.get('db').rel.find(this.getRecordTypeName(type), ids);
   },
 
-  findQuery: function(/* store, type, query */) {
-    throw new Error(
-      "findQuery not yet supported by ember-pouch. " +
-      "See https://github.com/nolanlawson/ember-pouch/issues/7.");
+  matchQuery: function (record, query) {
+    for(let property in query) {
+      if (query.hasOwnProperty(property)) {
+        const value = query[property];
+        if (Object.prototype.toString.call(value) === '[object RegExp]') {
+          if (!value.test(record[property])) {
+            return false;
+          }
+        } else if (record[property] !== value) {
+          return false;
+        }
+      }
+    }
+    //all query items were matched:
+    return true;
+  },
+
+  findQuery: function(store, type, query) {
+    var self = this;
+    this._init(store, type);
+    var recordTypeName = this.getRecordTypeName(type);
+    return this.db.rel.find(recordTypeName).then((res) => {
+      const records = res[pluralize(recordTypeName)];
+      const results = {};
+      results[pluralize(recordTypeName)] = records.filter((record) => {
+        return self.matchQuery(record, query);
+      });
+      return results;
+    });
   },
 
   /**
