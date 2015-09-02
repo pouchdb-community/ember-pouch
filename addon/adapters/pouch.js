@@ -32,7 +32,7 @@ export default DS.RESTAdapter.extend({
   _startChangesToStoreListener: function () {
     var db = this.get('db');
     if (db) {
-      this.changes = this.get('db').changes({
+      this.changes = db.changes({
         since: 'now',
         live: true,
         returnDocs: false
