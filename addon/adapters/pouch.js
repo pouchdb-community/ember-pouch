@@ -26,13 +26,19 @@ export default DS.RESTAdapter.extend({
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
 
-  _startChangesToStoreListener: on('init', function () {
-    this.changes = this.get('db').changes({
-      since: 'now',
-      live: true,
-      returnDocs: false
-    }).on('change', bind(this, 'onChange'));
+  _hookObservers : on('init', function()  {
+    this.addObserver('db', this, this._startChangesToStoreListener)
   }),
+  _startChangesToStoreListener: function () {
+    var db = this.get('db');
+    if (db) {
+      this.changes = this.get('db').changes({
+        since: 'now',
+        live: true,
+        returnDocs: false
+      }).on('change', bind(this, 'onChange'));
+    }
+  },
 
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
@@ -81,7 +87,8 @@ export default DS.RESTAdapter.extend({
   _init: function (store, type) {
     var self = this,
         recordTypeName = this.getRecordTypeName(type);
-    if (!this.get('db') || typeof this.get('db') !== 'object') {
+    var db = this.get('db');
+    if (!db || typeof db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
@@ -97,49 +104,55 @@ export default DS.RESTAdapter.extend({
     var plural = pluralize(recordTypeName);
 
     // check that we haven't already registered this model
+    var isSchemaNew = true;
     for (var i = 0, len = this._schema.length; i < len; i++) {
       var currentSchemaDef = this._schema[i];
       if (currentSchemaDef.singular === singular) {
-        return;
+        isSchemaNew = false;
+        break;
       }
-    }
-
-    var schemaDef = {
-      singular: singular,
-      plural: plural
-    };
-
-    if (type.documentType) {
-      schemaDef['documentType'] = type.documentType;
     }
 
     // else it's new, so update
-    this._schema.push(schemaDef);
+    if (isSchemaNew) {
+      var schemaDef = {
+        singular: singular,
+        plural: plural
+      };
 
-    // check all the subtypes
-    // We check the type of `rel.type`because with ember-data beta 19
-    // `rel.type` switched from DS.Model to string
-    type.eachRelationship(function (_, rel) {
-      if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
-        // TODO: support inverse as well
-        return; // skip
+      if (type.documentType) {
+        schemaDef['documentType'] = type.documentType;
       }
-      var relDef = {},
-          relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
-      if (relModel) {
-        relDef[rel.kind] = {
-          type: self.getRecordTypeName(relModel),
-          options: rel.options
-        };
-        if (!schemaDef.relations) {
-          schemaDef.relations = {};
+
+      this._schema.push(schemaDef);
+      // check all the subtypes
+      // We check the type of `rel.type`because with ember-data beta 19
+      // `rel.type` switched from DS.Model to string
+      type.eachRelationship(function (_, rel) {
+        if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
+          // TODO: support inverse as well
+          return; // skip
         }
-        schemaDef.relations[rel.key] = relDef;
-        self._init(store, relModel);
-      }
-    });
+        var relDef = {},
+            relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
+        if (relModel) {
+          relDef[rel.kind] = {
+            type: self.getRecordTypeName(relModel),
+            options: rel.options
+          };
+          if (!schemaDef.relations) {
+            schemaDef.relations = {};
+          }
+          schemaDef.relations[rel.key] = relDef;
+          self._init(store, relModel);
+        }
+      });
+    }
 
-    this.get('db').setSchema(this._schema);
+    if (!db.rel) {
+      db.setSchema(this._schema);
+    }
+
   },
 
   _recordToData: function (store, type, record) {
