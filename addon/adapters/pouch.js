@@ -27,7 +27,7 @@ export default DS.RESTAdapter.extend({
   shouldBackgroundReloadRecord: function () { return false; },
 
   _hookObservers : on('init', function()  {
-    this.addObserver('db', this, this._startChangesToStoreListener)
+    this.addObserver('db', this, this._startChangesToStoreListener);
   }),
   _startChangesToStoreListener: function () {
     var db = this.get('db');
