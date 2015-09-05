@@ -25,9 +25,8 @@ export default DS.RESTAdapter.extend({
   // reloading redundant.
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
-
-  _hookObservers : on('init', function()  {
-    this.addObserver('db', this, this._startChangesToStoreListener);
+  _onInit : on('init', function()  {
+    this._startChangesToStoreListener();
   }),
   _startChangesToStoreListener: function () {
     var db = this.get('db');
@@ -39,7 +38,22 @@ export default DS.RESTAdapter.extend({
       }).on('change', bind(this, 'onChange'));
     }
   },
+  changeDb: function(db) {
+    if (this.changes) {
+      this.changes.cancel();
+    }
 
+    var store = this.container.lookup('store:main');
+    var schema = this._schema || [];
+
+    for (var i = 0, len = schema.length; i < len; i++) {
+      store.unloadAll(schema[i].singular);
+    }
+
+    this._schema = null;
+    this.set('db', db);
+    this._startChangesToStoreListener();
+  },
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
     // in the store to update.
@@ -87,8 +101,7 @@ export default DS.RESTAdapter.extend({
   _init: function (store, type) {
     var self = this,
         recordTypeName = this.getRecordTypeName(type);
-    var db = this.get('db');
-    if (!db || typeof db !== 'object') {
+    if (!this.get('db') || typeof this.get('db') !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
@@ -104,55 +117,49 @@ export default DS.RESTAdapter.extend({
     var plural = pluralize(recordTypeName);
 
     // check that we haven't already registered this model
-    var isSchemaNew = true;
     for (var i = 0, len = this._schema.length; i < len; i++) {
       var currentSchemaDef = this._schema[i];
       if (currentSchemaDef.singular === singular) {
-        isSchemaNew = false;
-        break;
+        return;
       }
+    }
+
+    var schemaDef = {
+      singular: singular,
+      plural: plural
+    };
+
+    if (type.documentType) {
+      schemaDef['documentType'] = type.documentType;
     }
 
     // else it's new, so update
-    if (isSchemaNew) {
-      var schemaDef = {
-        singular: singular,
-        plural: plural
-      };
+    this._schema.push(schemaDef);
 
-      if (type.documentType) {
-        schemaDef['documentType'] = type.documentType;
+    // check all the subtypes
+    // We check the type of `rel.type`because with ember-data beta 19
+    // `rel.type` switched from DS.Model to string
+    type.eachRelationship(function (_, rel) {
+      if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
+        // TODO: support inverse as well
+        return; // skip
       }
-
-      this._schema.push(schemaDef);
-      // check all the subtypes
-      // We check the type of `rel.type`because with ember-data beta 19
-      // `rel.type` switched from DS.Model to string
-      type.eachRelationship(function (_, rel) {
-        if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
-          // TODO: support inverse as well
-          return; // skip
+      var relDef = {},
+          relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
+      if (relModel) {
+        relDef[rel.kind] = {
+          type: self.getRecordTypeName(relModel),
+          options: rel.options
+        };
+        if (!schemaDef.relations) {
+          schemaDef.relations = {};
         }
-        var relDef = {},
-            relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
-        if (relModel) {
-          relDef[rel.kind] = {
-            type: self.getRecordTypeName(relModel),
-            options: rel.options
-          };
-          if (!schemaDef.relations) {
-            schemaDef.relations = {};
-          }
-          schemaDef.relations[rel.key] = relDef;
-          self._init(store, relModel);
-        }
-      });
-    }
+        schemaDef.relations[rel.key] = relDef;
+        self._init(store, relModel);
+      }
+    });
 
-    if (!db.rel) {
-      db.setSchema(this._schema);
-    }
-
+    this.get('db').setSchema(this._schema);
   },
 
   _recordToData: function (store, type, record) {

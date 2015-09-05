@@ -183,6 +183,31 @@ The value for `documentType` is the camelCase version of the primary model name.
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
+## Multiple databases for the same model
+
+In some cases it might diserable (security related, where you want a given user to only have some informations stored on his computer) to have multiple databases for the same model of data.
+
+`Ember-Pouch` allows you to dynamically change the database a model is using by calling the function `changeDb` on the adapter.
+
+```javascript
+function changeProjectDatabase(dbName, dbUser, dbPassword) {
+  // CouchDB is serving at http://localhost:5455
+  let remote = new PouchDB('http://localhost:5455/' + dbName);
+  // here we are using pouchdb-authentication for credential supports
+  remote.login( dbUser, dbPassword).then(
+    function (user) {
+      let db = new PouchDB(dbName)
+      db.sync(remote, {live:true, retry:true})
+      // grab the adapter, it can be any ember-pouch adapter.
+      let adapter = this.store.adapterFor('project');
+      // this is where we told the adapter to change the current database.
+      adapter.changeDb(db);
+    }
+  )    
+}
+```
+
+
 ## Installation
 
 * `git clone` this repository
