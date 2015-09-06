@@ -4,6 +4,7 @@ module.exports = function(environment) {
   var ENV = {
     modulePrefix: 'dummy',
     environment: environment,
+    emberpouch: { localDb: 'ember-pouch-test' },
     baseURL: '/',
     locationType: 'auto',
     EmberENV: {
@@ -18,7 +19,6 @@ module.exports = function(environment) {
       // when it is created
     },
 
-    emberpouch: {}
   };
 
   if (environment === 'development') {
@@ -27,7 +27,6 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
-    ENV.emberpouch.localDb = 'ember-pouch-test';
   }
 
   if (environment === 'test') {
@@ -41,12 +40,9 @@ module.exports = function(environment) {
 
     ENV.APP.rootElement = '#ember-testing';
 
-    //pouchdb
-    ENV.emberpouch.localDb = 'ember-pouch-test';
   }
 
   if (environment === 'production') {
-    ENV.emberpouch.localDb = 'ember-pouch-test';
   }
 
   return ENV;
