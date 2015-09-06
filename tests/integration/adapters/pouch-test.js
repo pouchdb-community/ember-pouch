@@ -1,5 +1,6 @@
 import { module, test } from 'qunit';
 import startApp from '../../helpers/start-app';
+import config from 'dummy/config/environment';
 
 import Ember from 'ember';
 /* globals PouchDB */
@@ -14,11 +15,7 @@ module('adapter:pouch [integration]', {
   beforeEach: function (assert) {
     var done = assert.async();
 
-    // TODO: do this in a way that doesn't require duplicating the name of the
-    // test database here and in dummy/app/adapters/application.js. Importing
-    // the adapter directly doesn't work because of what seems like a resolver
-    // issue.
-    (new PouchDB('ember-pouch-test')).destroy().then(() => {
+    (new PouchDB(config.emberpouch.name)).destroy().then(() => {
       App = startApp();
       var bootPromise;
       Ember.run(() => {
