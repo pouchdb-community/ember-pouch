@@ -15,7 +15,7 @@ module('adapter:pouch [integration]', {
   beforeEach: function (assert) {
     var done = assert.async();
 
-    (new PouchDB(config.emberpouch.name)).destroy().then(() => {
+    (new PouchDB(config.emberpouch.localDb)).destroy().then(() => {
       App = startApp();
       var bootPromise;
       Ember.run(() => {

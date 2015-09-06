@@ -1,14 +1,21 @@
 import { Adapter } from 'ember-pouch/index';
 import PouchDB from 'pouchdb';
 import config from '<%= dasherizedPackageName %>/config/environment';
+import Ember from 'ember';
+
+const { assert, isEmpty } = Ember;
 
 function createDb() {
-  let db = new PouchDB(config.emberpouch.name);
+  let localDb = config.emberpouch.localDb;
+
+  assert('emberpouch.localDb must be set', !Ember.isEmpty(localDb));
+
+  let db = new PouchDB(localDb);
 
   if (config.emberpouch.remote) {
-      let remote = new PouchDB(config.emberpouch.remote);
+      let remoteDb = new PouchDB(config.emberpouch.remoteDb);
 
-      db.sync(remote, {
+      db.sync(remoteDb, {
         live: true,
         retry: true
       });
