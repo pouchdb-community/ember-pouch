@@ -12,7 +12,7 @@ function createDb() {
 
   let db = new PouchDB(localDb);
 
-  if (config.emberpouch.remote) {
+  if (config.emberpouch.remoteDb) {
       let remoteDb = new PouchDB(config.emberpouch.remoteDb);
 
       db.sync(remoteDb, {
