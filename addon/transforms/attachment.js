@@ -5,7 +5,9 @@ export default DS.Transform.extend({
   deserialize: function(serialized) {
     if (Ember.isNone(serialized)) { return null; }
 
-    return Ember.keys(serialized).map(function (attachmentName) {
+    const keys = Object.keys || Ember.keys;
+
+    return keys(serialized).map(function (attachmentName) {
       return {
         name: attachmentName,
         content_type: serialized[attachmentName]['content_type'],
