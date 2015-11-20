@@ -63,7 +63,7 @@ export default DS.RESTAdapter.extend({
     // skip changes for non-relational_pouch docs. E.g., design docs.
     if (!obj.type || !obj.id || obj.type === '') { return; }
 
-    var store = this.container.lookup('store:main');
+    var store = this.container.lookup('service:store');
 
     try {
       store.modelFor(obj.type);
@@ -78,7 +78,9 @@ export default DS.RESTAdapter.extend({
       // The record hasn't been loaded into the store; no need to reload its data.
       return;
     }
-    if (!recordInStore.get('isLoaded') || recordInStore.get('hasDirtyAttributes')) {
+    // removed || recordInStore.get('hasDirtyAttributes') because it does not track
+    // relationships correctly.
+    if (!recordInStore.get('isLoaded')) {
       // The record either hasn't loaded yet or has unpersisted local changes.
       // In either case, we don't want to refresh it in the store
       // (and for some substates, attempting to do so will result in an error).
