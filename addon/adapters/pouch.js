@@ -78,9 +78,7 @@ export default DS.RESTAdapter.extend({
       // The record hasn't been loaded into the store; no need to reload its data.
       return;
     }
-    // removed || recordInStore.get('hasDirtyAttributes') because it does not track
-    // relationships correctly.
-    if (!recordInStore.get('isLoaded')) {
+    if (!recordInStore.get('isLoaded') || recordInStore.get('hasDirtyAttributes')) {
       // The record either hasn't loaded yet or has unpersisted local changes.
       // In either case, we don't want to refresh it in the store
       // (and for some substates, attempting to do so will result in an error).
