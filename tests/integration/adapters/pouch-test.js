@@ -35,7 +35,7 @@ module('adapter:pouch [integration]', {
     });
   },
 
-  afterEach: function (assert) {
+  afterEach: function () {
     Ember.run(App, 'destroy');
   }
 });
@@ -141,7 +141,7 @@ test('create a new record', function (assert) {
   Ember.RSVP.Promise.resolve().then(() => {
     var newSoup = store().createRecord('taco-soup', { id: 'E', flavor: 'balsamic' });
     return newSoup.save();
-  }).then((saved) => {
+  }).then(() => {
     return db().get('tacoSoup_2_E');
   }).then((newDoc) => {
     assert.equal(newDoc.data.flavor, 'balsamic', 'should have saved the attribute');
@@ -172,7 +172,7 @@ test('update an existing record', function (assert) {
   }).then((found) => {
     found.set('flavor', 'pork');
     return found.save();
-  }).then((saved) => {
+  }).then(() => {
     return db().get('tacoSoup_2_C');
   }).then((updatedDoc) => {
     assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
