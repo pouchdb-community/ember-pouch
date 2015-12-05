@@ -158,36 +158,41 @@ test('create a new record', function (assert) {
   });
 });
 
-test('update an existing record', function (assert) {
-  assert.expect(2);
+// This test fails due to a bug in ember data
+// (https://github.com/emberjs/data/issues/3736)
+// starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
+if (!DS.VERSION.match(/^2\.0/)) {
+  test('update an existing record', function (assert) {
+    assert.expect(2);
 
-  var done = assert.async();
-  Ember.RSVP.Promise.resolve().then(() => {
-    return db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
-      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
-    ]);
-  }).then(() => {
-    return store().find('taco-soup', 'C');
-  }).then((found) => {
-    found.set('flavor', 'pork');
-    return found.save();
-  }).then(() => {
-    return db().get('tacoSoup_2_C');
-  }).then((updatedDoc) => {
-    assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
+    var done = assert.async();
+    Ember.RSVP.Promise.resolve().then(() => {
+      return db().bulkDocs([
+        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
+        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
+      ]);
+    }).then(() => {
+      return store().find('taco-soup', 'C');
+    }).then((found) => {
+      found.set('flavor', 'pork');
+      return found.save();
+    }).then(() => {
+      return db().get('tacoSoup_2_C');
+    }).then((updatedDoc) => {
+      assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
 
-    var recordInStore = store().peekRecord('tacoSoup', 'C');
-    assert.equal(updatedDoc._rev, recordInStore.get('rev'),
-      'should have associated the ember-data record with the updated rev');
+      var recordInStore = store().peekRecord('tacoSoup', 'C');
+      assert.equal(updatedDoc._rev, recordInStore.get('rev'),
+        'should have associated the ember-data record with the updated rev');
 
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
+      done();
+    }).catch((error) => {
+      console.error('error in test', error);
+      assert.ok(false, 'error in test:' + error);
+      done();
+    });
   });
-});
+}
 
 test('delete an existing record', function (assert) {
   assert.expect(1);
