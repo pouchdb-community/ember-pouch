@@ -22,10 +22,10 @@
     "tests"
   ],
   "dependencies": {
-    "ember": "^1.10.0",
+    "ember": "~1.13.0 || 2.x",
     "ember-cli-shims": "ember-cli/ember-cli-shims#0.0.3",
     "ember-cli-test-loader": "ember-cli-test-loader#0.1.3",
-    "ember-data": "~1.13.0",
+    "ember-data": "~1.13.0 || 2.x",
     "ember-load-initializers": "ember-cli/ember-load-initializers#0.1.4",
     "ember-qunit": "0.3.3",
     "ember-qunit-notifications": "0.0.7",
