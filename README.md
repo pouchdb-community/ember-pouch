@@ -87,6 +87,18 @@ PouchDB.debug.enable('*');
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
 
+## EmberPouch Blueprints
+
+### Model
+
+In order to create a model run the following command from the command line:
+
+```
+ember g model <model-name>
+```
+
+Replace `<model-name>` with the name of your model and the file will automatically be generated for you.
+
 ## Sample app
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
