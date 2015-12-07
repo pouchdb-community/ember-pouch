@@ -91,13 +91,13 @@ See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage inst
 
 ### Adapter
 
-You can now create an adapter using ember-cli's blueprint functionality.  Once you've installed `ember-puch` into your ember-cli app you can run the following command to automatically generate an application adapter.
+You can now create an adapter using ember-cli's blueprint functionality.  Once you've installed `ember-pouch` into your ember-cli app you can run the following command to automatically generate an application adapter.
 
 ```
 ember g adapter application
 ```
 
-Now you can store your localDb and remoteDb names in your ember-cli's config.  Just add the following keys to the `ENV` obj:
+Now you can store your localDb and remoteDb names in your ember-cli's config.  Just add the following keys to the `ENV` object:
 
 ```javascript
 ENV.emberPouch.localDb = 'test';
