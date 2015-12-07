@@ -87,6 +87,23 @@ PouchDB.debug.enable('*');
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
 
+## EmberPouch Blueprints
+
+### Adapter
+
+You can now create an adapter using ember-cli's blueprint functionality.  Once you've installed `ember-puch` into your ember-cli app you can run the following command to automatically generate an application adapter.
+
+```
+ember g adapter application
+```
+
+Now you can store your localDb and remoteDb names in your ember-cli's config.  Just add the following keys to the `ENV` obj:
+
+```javascript
+ENV.emberPouch.localDb = 'test';
+ENV.emberPouch.remoteDB = 'http://localhost:5984/my_couch';
+```
+
 ## Sample app
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
