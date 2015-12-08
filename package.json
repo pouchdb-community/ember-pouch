@@ -52,7 +52,8 @@
     "ember-try": "~0.0.8"
   },
   "dependencies": {
-    "ember-cli-babel": "^5.1.5"
+    "ember-cli-babel": "^5.1.5",
+    "ember-cli-version-checker": "1.1.4"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
