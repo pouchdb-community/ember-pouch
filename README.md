@@ -16,7 +16,7 @@ What's the point?
 
 3. Your app works offline, and requests are super fast, because they don't need the network.
 
-For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
+For more on PouchDB, check out [pouchdb.com](http://pouchdb.com).
 
 ## Install and setup
 
