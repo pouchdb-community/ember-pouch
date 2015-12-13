@@ -27,7 +27,7 @@
     "node": ">= 0.10.0"
   },
   "author": "Nolan Lawson",
-  "license": "Apache 2",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/nolanlawson/ember-pouch/issues"
   },
