@@ -87,6 +87,39 @@ PouchDB.debug.enable('*');
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
 
+## Attachments
+
+`Ember-Pouch` provides an `attachment` transform for your models, which makes working with attachments is as simple as working with any other field.
+
+Add a `DS.attr('attachment')` field to your model:
+
+```js
+// myapp/models/photo-album.js
+export default DS.Model.extend({
+  photos: DS.attr('attachment');
+});
+```
+
+Here, instances of `PhotoAlbum` have a `photos` field, which is an array of plain `Ember.Object`s, which have a `.name` and `.content_type`. Non-stubbed attachment also have a `.data` field; and stubbed attachments have a `.stub` instead.
+```handlebars
+<ul>
+  {{#each myalbum.photos as |photo|}}
+    <li>{{photo.name}}</li>
+  {{/each}}
+</ul>
+```
+
+Attach new files by adding an `Ember.Object` with a `.name`, `.content_type` and `.data` to array of attachments. 
+
+```js
+// somewhere in your controller/component:
+myAlbum.get('photos').addObject(Ember.Object.create({
+  'name': 'kitten.jpg',
+  'content_type': 'image/jpg',
+  'data': data // ... can be a DOM File, Blob, or plain old String
+}));
+```
+
 ## Sample app
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
