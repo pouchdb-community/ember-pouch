@@ -43,7 +43,7 @@ export default DS.RESTAdapter.extend({
       this.changes.cancel();
     }
 
-    var store = this.container.lookup('service:store');
+    var store = this.store;
     var schema = this._schema || [];
 
     for (var i = 0, len = schema.length; i < len; i++) {
