@@ -63,7 +63,7 @@ export default DS.RESTAdapter.extend({
     // skip changes for non-relational_pouch docs. E.g., design docs.
     if (!obj.type || !obj.id || obj.type === '') { return; }
 
-    var store = this.container.lookup('service:store');
+    var store = this.store;
 
     try {
       store.modelFor(obj.type);
@@ -171,19 +171,10 @@ export default DS.RESTAdapter.extend({
     var serializerKey = camelize(modelName);
     var serializer = store.serializerFor(modelName);
 
-    var recordToStore = record;
-    // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
-    if (
-      typeof record.record === 'undefined' &&
-      typeof record._createSnapshot === 'function'
-    ) {
-      recordToStore = record._createSnapshot();
-    }
-
     serializer.serializeIntoHash(
       data,
       type,
-      recordToStore,
+      record,
       {includeId: true}
     );
 
@@ -210,13 +201,7 @@ export default DS.RESTAdapter.extend({
    * moved to the new IDs.
    */
   getRecordTypeName(type) {
-    if (type.modelName) {
-      return camelize(type.modelName);
-    } else {
-      // This branch can be removed when the library drops support for
-      // ember-data 1.0-beta17 and earlier.
-      return type.typeKey;
-    }
+    return camelize(type.modelName);
   },
 
   findAll: function(store, type /*, sinceToken */) {
