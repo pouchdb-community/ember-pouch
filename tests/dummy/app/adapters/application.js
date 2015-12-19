@@ -8,7 +8,7 @@ const { assert, isEmpty } = Ember;
 function createDb() {
   let localDb = config.emberpouch.localDb;
 
-  assert('emberpouch.localDb must be set', !Ember.isEmpty(localDb));
+  assert('emberpouch.localDb must be set', !isEmpty(localDb));
 
   let db = new PouchDB(localDb);
 
