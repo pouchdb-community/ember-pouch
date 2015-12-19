@@ -248,6 +248,8 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 
+* **3.0.1**
+  - Add blueprints for model and adapter (see above for details). Thanks [@mattmarcum](https://github.com/mattmarcum).
 * **3.0.0**
   - Update for compatibility with Ember & Ember-Data 2.0+. The adapter now supports Ember & Ember-Data 1.13.x and 2.x only.
 * **2.0.3**
