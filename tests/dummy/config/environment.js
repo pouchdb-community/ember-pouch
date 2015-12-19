@@ -4,6 +4,7 @@ module.exports = function(environment) {
   var ENV = {
     modulePrefix: 'dummy',
     environment: environment,
+    emberpouch: { localDb: 'ember-pouch-test' },
     baseURL: '/',
     locationType: 'auto',
     EmberENV: {
@@ -16,7 +17,8 @@ module.exports = function(environment) {
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
-    }
+    },
+
   };
 
   if (environment === 'development') {
@@ -37,10 +39,10 @@ module.exports = function(environment) {
     ENV.APP.LOG_VIEW_LOOKUPS = false;
 
     ENV.APP.rootElement = '#ember-testing';
+
   }
 
   if (environment === 'production') {
-
   }
 
   return ENV;
