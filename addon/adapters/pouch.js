@@ -43,7 +43,7 @@ export default DS.RESTAdapter.extend({
     // skip changes for non-relational_pouch docs. E.g., design docs.
     if (!obj.type || !obj.id || obj.type === '') { return; }
 
-    var store = this.container.lookup('store:main');
+    var store = this.store;
 
     try {
       store.modelFor(obj.type);
@@ -53,12 +53,12 @@ export default DS.RESTAdapter.extend({
       return;
     }
 
-    var recordInStore = store.getById(obj.type, obj.id);
+    var recordInStore = store.peekRecord(obj.type, obj.id);
     if (!recordInStore) {
       // The record hasn't been loaded into the store; no need to reload its data.
       return;
     }
-    if (!recordInStore.get('isLoaded') || recordInStore.get('isDirty')) {
+    if (!recordInStore.get('isLoaded') || recordInStore.get('hasDirtyAttributes')) {
       // The record either hasn't loaded yet or has unpersisted local changes.
       // In either case, we don't want to refresh it in the store
       // (and for some substates, attempting to do so will result in an error).
@@ -151,19 +151,10 @@ export default DS.RESTAdapter.extend({
     var serializerKey = camelize(modelName);
     var serializer = store.serializerFor(modelName);
 
-    var recordToStore = record;
-    // In Ember-Data beta.15, we need to take a snapshot. See issue #45.
-    if (
-      typeof record.record === 'undefined' &&
-      typeof record._createSnapshot === 'function'
-    ) {
-      recordToStore = record._createSnapshot();
-    }
-
     serializer.serializeIntoHash(
       data,
       type,
-      recordToStore,
+      record,
       {includeId: true}
     );
 
@@ -190,13 +181,7 @@ export default DS.RESTAdapter.extend({
    * moved to the new IDs.
    */
   getRecordTypeName(type) {
-    if (type.modelName) {
-      return camelize(type.modelName);
-    } else {
-      // This branch can be removed when the library drops support for
-      // ember-data 1.0-beta17 and earlier.
-      return type.typeKey;
-    }
+    return camelize(type.modelName);
   },
 
   findAll: function(store, type /*, sinceToken */) {

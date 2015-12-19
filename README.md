@@ -4,7 +4,7 @@
 
 [**Changelog**](#changelog)
 
-Ember Pouch is a PouchDB/CouchDB adapter for Ember Data.
+Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 1.13+.
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
 
@@ -16,7 +16,7 @@ What's the point?
 
 3. Your app works offline, and requests are super fast, because they don't need the network.
 
-For more on PouchDB, check out [pouchdb.com](https://pouchdb.com).
+For more on PouchDB, check out [pouchdb.com](http://pouchdb.com).
 
 ## Install and setup
 
@@ -120,6 +120,14 @@ Currently PouchDB doesn't use LocalStorage unless you include an experimental pl
 From day one, CouchDB and its protocol have been designed to be always **A**vailable and handle **P**artitioning over the network well (AP in the CAP theorem). PouchDB/CouchDB gives you a solid way to manage conflicts. It is "eventually consistent," but CouchDB has an API for listening to changes to the database, which can be then pushed down to the client in real-time.
 
 To learn more about how CouchDB sync works, check out [the PouchDB guide to replication](http://pouchdb.com/guides/replication.html).
+
+### Sync and the ember-data store
+
+Out of the box, ember-pouch includes a PouchDB [change listener](http://pouchdb.com/guides/changes.html) that automatically updates any records your app has loaded when they change due to a sync. It also unloads records that are removed due to a sync.
+
+However, ember-pouch does not automatically load new records that arrive during a sync. The records are saved in the local database, but **ember-data is not told to load them into memory**. Automatically loading every new record works well with a small number of records and a limited number of models. As an app grows, automatically loading every record will negatively impact app responsiveness during syncs (especially the first sync). To avoid puzzling slowdowns, ember-pouch only automatically reloads records you have already used ember-data to load.
+
+If you have a model or two that you know will always have a small number of records, you can write your own change listener to tell ember-data to automatically load them into memory as they arrive.
 
 ### Plugins
 
@@ -230,6 +238,8 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 
+* **3.0.0**
+  - Update for compatibility with Ember & Ember-Data 2.0+. The adapter now supports Ember & Ember-Data 1.13.x and 2.x only.
 * **2.0.3**
   - Use Ember.get to reference the PouchDB instance property in the adapter (`db`), allowing it to be injected ([#84](https://github.com/nolanlawson/ember-pouch/issues/84)). Thanks to [@jkleinsc](https://github.com/jkleinsc)!
   - Indicate to ember-data 1.13+ that reloading individual ember-pouch records is never necessary (due to the change

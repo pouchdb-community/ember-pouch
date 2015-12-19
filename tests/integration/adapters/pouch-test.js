@@ -32,7 +32,7 @@ module('adapter:pouch [integration]', {
     });
   },
 
-  afterEach: function (assert) {
+  afterEach: function () {
     Ember.run(App, 'destroy');
   }
 });
@@ -47,7 +47,7 @@ function adapter() {
 }
 
 function store() {
-  return App.__container__.lookup('store:main');
+  return App.__container__.lookup('service:store');
 }
 
 test('can find all', function (assert) {
@@ -61,7 +61,7 @@ test('can find all', function (assert) {
       { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
     ]);
   }).then(() => {
-    return store().find('taco-soup');
+    return store().findAll('taco-soup');
   }).then((found) => {
     assert.equal(found.get('length'), 2, 'should have found the two taco soup items only');
     assert.deepEqual(found.mapBy('id'), ['A', 'B'],
@@ -138,12 +138,12 @@ test('create a new record', function (assert) {
   Ember.RSVP.Promise.resolve().then(() => {
     var newSoup = store().createRecord('taco-soup', { id: 'E', flavor: 'balsamic' });
     return newSoup.save();
-  }).then((saved) => {
+  }).then(() => {
     return db().get('tacoSoup_2_E');
   }).then((newDoc) => {
     assert.equal(newDoc.data.flavor, 'balsamic', 'should have saved the attribute');
 
-    var recordInStore = store().getById('tacoSoup', 'E');
+    var recordInStore = store().peekRecord('tacoSoup', 'E');
     assert.equal(newDoc._rev, recordInStore.get('rev'),
       'should have associated the ember-data record with the rev for the new record');
 
@@ -155,36 +155,41 @@ test('create a new record', function (assert) {
   });
 });
 
-test('update an existing record', function (assert) {
-  assert.expect(2);
+// This test fails due to a bug in ember data
+// (https://github.com/emberjs/data/issues/3736)
+// starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
+if (!DS.VERSION.match(/^2\.0/)) {
+  test('update an existing record', function (assert) {
+    assert.expect(2);
 
-  var done = assert.async();
-  Ember.RSVP.Promise.resolve().then(() => {
-    return db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
-      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
-    ]);
-  }).then(() => {
-    return store().find('taco-soup', 'C');
-  }).then((found) => {
-    found.set('flavor', 'pork');
-    return found.save();
-  }).then((saved) => {
-    return db().get('tacoSoup_2_C');
-  }).then((updatedDoc) => {
-    assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
+    var done = assert.async();
+    Ember.RSVP.Promise.resolve().then(() => {
+      return db().bulkDocs([
+        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
+        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
+      ]);
+    }).then(() => {
+      return store().find('taco-soup', 'C');
+    }).then((found) => {
+      found.set('flavor', 'pork');
+      return found.save();
+    }).then(() => {
+      return db().get('tacoSoup_2_C');
+    }).then((updatedDoc) => {
+      assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
 
-    var recordInStore = store().getById('tacoSoup', 'C');
-    assert.equal(updatedDoc._rev, recordInStore.get('rev'),
-      'should have associated the ember-data record with the updated rev');
+      var recordInStore = store().peekRecord('tacoSoup', 'C');
+      assert.equal(updatedDoc._rev, recordInStore.get('rev'),
+        'should have associated the ember-data record with the updated rev');
 
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
+      done();
+    }).catch((error) => {
+      console.error('error in test', error);
+      assert.ok(false, 'error in test:' + error);
+      done();
+    });
   });
-});
+}
 
 test('delete an existing record', function (assert) {
   assert.expect(1);
