@@ -94,7 +94,7 @@ See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage inst
 In order to create a model run the following command from the command line:
 
 ```
-ember g model <model-name>
+ember g pouch-model <model-name>
 ```
 
 Replace `<model-name>` with the name of your model and the file will automatically be generated for you.
