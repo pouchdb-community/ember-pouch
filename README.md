@@ -108,9 +108,9 @@ To learn more about how CouchDB sync works, check out [the PouchDB guide to repl
 
 Out of the box, ember-pouch includes a PouchDB [change listener](http://pouchdb.com/guides/changes.html) that automatically updates any records your app has loaded when they change due to a sync. It also unloads records that are removed due to a sync.
 
-However, ember-pouch *does not automatically load new records* that arrive during a sync. The records are saved in the local database, but ember-data is not automatically told to load them into memory. Automatically loading every new record works well with a small number of records and a limited number of models. As an app grows, automatically loading every record will negatively impact app responsiveness during syncs (especially the first sync). To avoid puzzling slowdowns, ember-pouch only works with records you have used ember-data to load.
+However, ember-pouch does not automatically load new records that arrive during a sync. The records are saved in the local database, but **ember-data is not told to load them into memory**. Automatically loading every new record works well with a small number of records and a limited number of models. As an app grows, automatically loading every record will negatively impact app responsiveness during syncs (especially the first sync). To avoid puzzling slowdowns, ember-pouch only automatically reloads records you have already used ember-data to load.
 
-If you have a model or two that you know will always have a small number of records, you can write your own change listener to automatically load them as they arrive.
+If you have a model or two that you know will always have a small number of records, you can write your own change listener to tell ember-data to automatically load them into memory as they arrive.
 
 ### Plugins
 
