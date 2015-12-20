@@ -7,7 +7,7 @@ import Ember from 'ember';
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
 
-moduleForIntegration('adapter:pouch [integration]');
+moduleForIntegration('Integration | Adapter | Basic CRUD Ops');
 
 test('can find all', function (assert) {
   assert.expect(3);
