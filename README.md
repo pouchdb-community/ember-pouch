@@ -211,7 +211,7 @@ Attach new files by adding an `Ember.Object` with a `.name`, `.content_type` and
 myAlbum.get('photos').addObject(Ember.Object.create({
   'name': 'kitten.jpg',
   'content_type': 'image/jpg',
-  'data': data // ... can be a DOM File, Blob, or plain old String
+  'data': btoa('hello world') // base64-encoded `String`, or a DOM `Blob`, or a `File`
 }));
 ```
 
