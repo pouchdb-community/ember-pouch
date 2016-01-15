@@ -4,7 +4,8 @@ module.exports = {
       name: 'ember-data-1.13',
       dependencies: {
         'ember': '1.13.11',
-        'ember-data': '1.13.15'
+        'ember-data': '1.13.15',
+        'ember-cli-shims': '0.0.6'
       },
       resolutions: {
         'ember': '1.13.11'
@@ -14,7 +15,8 @@ module.exports = {
       name: 'ember-data-2.0',
       dependencies: {
         'ember': '2.0.2',
-        'ember-data': '2.0.1'
+        'ember-data': '2.0.1',
+        'ember-cli-shims': '0.0.6'
       },
       resolutions: {
         'ember': '2.0.2'
@@ -24,7 +26,8 @@ module.exports = {
       name: 'ember-data-2.1',
       dependencies: {
         'ember': '2.1.1',
-        'ember-data': '2.1.0'
+        'ember-data': '2.1.0',
+        'ember-cli-shims': '0.0.6'
       },
       resolutions: {
         'ember': '2.1.1'
@@ -34,10 +37,21 @@ module.exports = {
       name: 'ember-data-2.2',
       dependencies: {
         'ember': '2.2.0',
-        'ember-data': '2.2.1'
+        'ember-data': '2.2.1',
+        'ember-cli-shims': '0.0.6'
       },
       resolutions: {
         'ember': '2.2.0'
+      }
+    },
+    {
+      name: 'ember-data-2.3',
+      dependencies: {
+        'ember': '2.2.1',
+        'ember-data': '2.3.0',
+      },
+      resolutions: {
+        'ember': '2.2.1'
       }
     },
     {
