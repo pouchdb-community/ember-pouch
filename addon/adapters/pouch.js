@@ -25,15 +25,35 @@ export default DS.RESTAdapter.extend({
   // reloading redundant.
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
-
-  _startChangesToStoreListener: on('init', function () {
-    this.changes = this.get('db').changes({
-      since: 'now',
-      live: true,
-      returnDocs: false
-    }).on('change', bind(this, 'onChange'));
+  _onInit : on('init', function()  {
+    this._startChangesToStoreListener();
   }),
+  _startChangesToStoreListener: function () {
+    var db = this.get('db');
+    if (db) {
+      this.changes = db.changes({
+        since: 'now',
+        live: true,
+        returnDocs: false
+      }).on('change', bind(this, 'onChange'));
+    }
+  },
+  changeDb: function(db) {
+    if (this.changes) {
+      this.changes.cancel();
+    }
 
+    var store = this.store;
+    var schema = this._schema || [];
+
+    for (var i = 0, len = schema.length; i < len; i++) {
+      store.unloadAll(schema[i].singular);
+    }
+
+    this._schema = null;
+    this.set('db', db);
+    this._startChangesToStoreListener();
+  },
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
     // in the store to update.
