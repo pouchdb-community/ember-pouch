@@ -5,13 +5,13 @@ var VersionChecker = require('ember-cli-version-checker');
 
 // We support Ember-Data 1.13.x and 2.x. Checking for this is complicated
 // because the effective version of ember-data is controlled by bower for
-// 1.13.0-2.3.x and npm for 2.4.x. This gets as close as we can get using
+// 1.13.0-2.2.x and npm for 2.3.x. This gets as close as we can get using
 // ember-cli-version-checker.
 function satisfactoryEmberDataVersion(addon) {
   var checker = new VersionChecker(addon),
       bowerEmberData = checker.for('ember-data', 'bower'),
       npmEmberData = checker.for('ember-data', 'npm');
-  return npmEmberData.isAbove('2.3.99') || bowerEmberData.isAbove('1.12.99');
+  return npmEmberData.isAbove('2.2.99') || bowerEmberData.isAbove('1.12.99');
 }
 
 module.exports = {
