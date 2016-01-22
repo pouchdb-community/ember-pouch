@@ -142,3 +142,55 @@ test('a change to a record of an unknown type does not cause an error', function
     });
   }).finally(done);
 });
+
+moduleForIntegration('Integration | Adapter | With unloadedDocumentChanged implementation to load new docs into store', {
+  beforeEach(assert) {
+    var done = assert.async();
+    this.adapter = function adapter() {
+      return this.store().adapterFor('taco-salad');
+    };
+    this.db = function db() {
+      return this.adapter().get('db');
+    };
+
+    Ember.RSVP.Promise.resolve().then(() => {
+      return this.db().bulkDocs([
+        { _id: 'tacoSalad_2_A', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
+        { _id: 'tacoSalad_2_B', data: { flavor: 'black bean', ingredients: ['Z'] } },
+        { _id: 'foodItem_2_X', data: { name: 'pineapple' } },
+        { _id: 'foodItem_2_Y', data: { name: 'pork loin' } },
+        { _id: 'foodItem_2_Z', data: { name: 'black beans' } }
+      ]);
+    }).finally(done);
+  }
+});
+
+test('a new record is automatically loaded', function (assert) {
+  assert.expect(4);
+  var done = assert.async();
+
+  Ember.RSVP.resolve().then(() => {
+    return this.store().find('taco-salad', 'B');
+  }).then((soupB) => {
+    assert.equal('black bean', soupB.get('flavor'),
+      'the loaded instance should reflect the initial test data');
+  }).then(() => {
+    assert.equal(null, this.store().peekRecord('taco-salad', 'C'),
+      'test setup: record should not be loaded already');
+
+    return this.db().put({
+      _id: 'tacoSalad_2_C', data: { flavor: 'sofritas' }
+    });
+  }).then(() => {
+    return promiseToRunLater(() => {
+      var alreadyLoadedSaladC = this.store().peekRecord('taco-salad', 'C');
+      assert.ok(alreadyLoadedSaladC,
+        'the corresponding instance should now be loaded');
+      if (alreadyLoadedSaladC) {
+        assert.equal(alreadyLoadedSaladC.get('flavor'), 'sofritas',
+          'the corresponding instance should now be loaded with the right data');
+      }
+    }, 15);
+  }).finally(done);
+});
+

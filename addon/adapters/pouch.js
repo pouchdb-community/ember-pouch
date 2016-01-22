@@ -76,6 +76,7 @@ export default DS.RESTAdapter.extend({
     var recordInStore = store.peekRecord(obj.type, obj.id);
     if (!recordInStore) {
       // The record hasn't been loaded into the store; no need to reload its data.
+      this.unloadedDocumentChanged(obj);
       return;
     }
     if (!recordInStore.get('isLoaded') || recordInStore.get('hasDirtyAttributes')) {
@@ -90,6 +91,19 @@ export default DS.RESTAdapter.extend({
     } else {
       recordInStore.reload();
     }
+  },
+
+  unloadedDocumentChanged: function(/* obj */) {
+    /*
+     * For performance purposes, we don't load records into the store that haven't previously been loaded.
+     * If you want to change this, subclass this method, and push the data into the store. e.g.
+     *
+     *  let store = this.get('store');
+     *  let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
+     *  this.get('db').rel.find(recordTypeName, obj.id).then(function(doc){
+     *    store.pushPayload(recordTypeName, doc);
+     *  });
+     */
   },
 
   willDestroy: function() {
