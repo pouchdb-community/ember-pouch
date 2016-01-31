@@ -114,6 +114,36 @@ test('create a new record', function (assert) {
   });
 });
 
+test('creating an associated record stores a reference to it in the parent', function (assert) {
+  assert.expect(1);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs([
+      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: [] } }
+    ]);
+  }).then(() => {
+    return this.store().findRecord('taco-soup', 'C');
+  }).then(tacoSoup => {
+    var newIngredient = this.store().createRecord('food-item', {
+      name: 'pineapple',
+      soup: tacoSoup
+    });
+
+    return newIngredient.save().then(() => tacoSoup.save());
+  }).then(() => {
+    this.store().unloadAll();
+
+    return this.store().findRecord('taco-soup', 'C');
+  }).then(tacoSoup => {
+    return tacoSoup.get('ingredients');
+  }).then(foundIngredients => {
+    assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple'],
+      'should have fully loaded the associated items');
+    done();
+  });
+});
+
 // This test fails due to a bug in ember data
 // (https://github.com/emberjs/data/issues/3736)
 // starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
