@@ -1,6 +1,4 @@
-# Ember Pouch
-
-[![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
+# Ember Pouch [![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
 
 [**Changelog**](#changelog)
 
