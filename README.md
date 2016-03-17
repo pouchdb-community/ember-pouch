@@ -112,6 +112,77 @@ ENV.emberPouch.localDb = 'test';
 ENV.emberPouch.remoteDB = 'http://localhost:5984/my_couch';
 ```
 
+## Relationships
+
+EmberPouch supports both `hasMany` and `belongsTo` relationships.
+
+### Saving
+
+When saving a `hasMany` - `belongsTo` relationship, both sides of the relationship (the child and the parent) must be saved. Note that the parent needs to have been saved at least once prior to adding children to it.
+
+```javascript
+// app/routes/post/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model(params){
+    //We are getting a post that already exists
+    return this.store.findRecord('post',  params.post_id);
+  },
+
+  actions:{
+    addComment(comment, author){
+      //Create the comment
+      const comment = this.store.createRecord('comment',{
+        comment: comment,
+        author: author
+      });
+      //Get our post
+      const post = this.controller.get('model');
+      //Add our comment to our existing post
+      post.get('comments').pushObject(comment);
+      //Save the child then the parent
+      comment.save().then(() => post.save());
+    }
+  }
+});
+
+```
+
+### Removing
+
+When removing a `hasMany` - `belongsTo` relationship, the children must be removed prior to the parent being removed.
+
+```javascript
+// app/routes/posts/admin/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model(){
+    //We are getting all posts for some sort of list
+    return this.store.findAll('post');
+  },
+
+  actions:{
+    deletePost(post){
+      //collect the promises for deletion
+      let deletedComments = [];
+      //get and destroy the posts comments
+      post.get('comments').then((comments) => {
+        comments.map((comment) => {
+          deletedComments.push(comment.destroyRecord());
+        });
+      });
+      //Wait for comments to be destroyed then destroy the post
+      Ember.RSVP.all(deletedComments).then(() => {
+        post.destroyRecord();
+      });
+    }
+  }
+});
+
+```
+
 ## Sample app
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
