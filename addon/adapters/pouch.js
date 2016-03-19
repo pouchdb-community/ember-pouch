@@ -25,15 +25,35 @@ export default DS.RESTAdapter.extend({
   // reloading redundant.
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
-
-  _startChangesToStoreListener: on('init', function () {
-    this.changes = this.get('db').changes({
-      since: 'now',
-      live: true,
-      returnDocs: false
-    }).on('change', bind(this, 'onChange'));
+  _onInit : on('init', function()  {
+    this._startChangesToStoreListener();
   }),
+  _startChangesToStoreListener: function () {
+    var db = this.get('db');
+    if (db) {
+      this.changes = db.changes({
+        since: 'now',
+        live: true,
+        returnDocs: false
+      }).on('change', bind(this, 'onChange'));
+    }
+  },
+  changeDb: function(db) {
+    if (this.changes) {
+      this.changes.cancel();
+    }
 
+    var store = this.store;
+    var schema = this._schema || [];
+
+    for (var i = 0, len = schema.length; i < len; i++) {
+      store.unloadAll(schema[i].singular);
+    }
+
+    this._schema = null;
+    this.set('db', db);
+    this._startChangesToStoreListener();
+  },
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
     // in the store to update.
@@ -56,6 +76,7 @@ export default DS.RESTAdapter.extend({
     var recordInStore = store.peekRecord(obj.type, obj.id);
     if (!recordInStore) {
       // The record hasn't been loaded into the store; no need to reload its data.
+      this.unloadedDocumentChanged(obj);
       return;
     }
     if (!recordInStore.get('isLoaded') || recordInStore.get('hasDirtyAttributes')) {
@@ -70,6 +91,19 @@ export default DS.RESTAdapter.extend({
     } else {
       recordInStore.reload();
     }
+  },
+
+  unloadedDocumentChanged: function(/* obj */) {
+    /*
+     * For performance purposes, we don't load records into the store that haven't previously been loaded.
+     * If you want to change this, subclass this method, and push the data into the store. e.g.
+     *
+     *  let store = this.get('store');
+     *  let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
+     *  this.get('db').rel.find(recordTypeName, obj.id).then(function(doc){
+     *    store.pushPayload(recordTypeName, doc);
+     *  });
+     */
   },
 
   willDestroy: function() {

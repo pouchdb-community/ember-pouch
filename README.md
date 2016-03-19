@@ -1,6 +1,4 @@
-# Ember Pouch
-
-[![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
+# Ember Pouch [![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
 
 [**Changelog**](#changelog)
 
@@ -71,7 +69,7 @@ var db = new PouchDB('local_pouch');
 
 db.sync(remote, {
    live: true,   // do a live, ongoing sync
-   retry: true   // retry if the conection is lost
+   retry: true   // retry if the connection is lost
 });
 
 export default Adapter.extend({
@@ -126,6 +124,77 @@ ember g pouch-serializer application
 
 An application serializer is required to get relations working correctly!
 
+## Relationships
+
+EmberPouch supports both `hasMany` and `belongsTo` relationships.
+
+### Saving
+
+When saving a `hasMany` - `belongsTo` relationship, both sides of the relationship (the child and the parent) must be saved. Note that the parent needs to have been saved at least once prior to adding children to it.
+
+```javascript
+// app/routes/post/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model(params){
+    //We are getting a post that already exists
+    return this.store.findRecord('post',  params.post_id);
+  },
+
+  actions:{
+    addComment(comment, author){
+      //Create the comment
+      const comment = this.store.createRecord('comment',{
+        comment: comment,
+        author: author
+      });
+      //Get our post
+      const post = this.controller.get('model');
+      //Add our comment to our existing post
+      post.get('comments').pushObject(comment);
+      //Save the child then the parent
+      comment.save().then(() => post.save());
+    }
+  }
+});
+
+```
+
+### Removing
+
+When removing a `hasMany` - `belongsTo` relationship, the children must be removed prior to the parent being removed.
+
+```javascript
+// app/routes/posts/admin/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model(){
+    //We are getting all posts for some sort of list
+    return this.store.findAll('post');
+  },
+
+  actions:{
+    deletePost(post){
+      //collect the promises for deletion
+      let deletedComments = [];
+      //get and destroy the posts comments
+      post.get('comments').then((comments) => {
+        comments.map((comment) => {
+          deletedComments.push(comment.destroyRecord());
+        });
+      });
+      //Wait for comments to be destroyed then destroy the post
+      Ember.RSVP.all(deletedComments).then(() => {
+        post.destroyRecord();
+      });
+    }
+  }
+});
+
+```
+
 ## Sample app
 
 Tom Dale's blog example using Ember CLI and EmberPouch: [broerse/ember-cli-blog](https://github.com/broerse/ember-cli-blog)
@@ -149,7 +218,17 @@ Out of the box, ember-pouch includes a PouchDB [change listener](http://pouchdb.
 
 However, ember-pouch does not automatically load new records that arrive during a sync. The records are saved in the local database, but **ember-data is not told to load them into memory**. Automatically loading every new record works well with a small number of records and a limited number of models. As an app grows, automatically loading every record will negatively impact app responsiveness during syncs (especially the first sync). To avoid puzzling slowdowns, ember-pouch only automatically reloads records you have already used ember-data to load.
 
-If you have a model or two that you know will always have a small number of records, you can write your own change listener to tell ember-data to automatically load them into memory as they arrive.
+If you have a model or two that you know will always have a small number of records, you can tell ember-data to automatically load them into memory as they arrive. Your PouchAdapter subclass has a method `unloadedDocumentChanged`, which is called when a document is received during sync that has not been loaded into the ember-data store. In your subclass, you can implement the following to load it automatically:
+
+```js
+  unloadedDocumentChanged: function(obj) {
+    let store = this.get('store');
+    let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
+    this.get('db').rel.find(recordTypeName, obj.id).then(function(doc) {
+      store.pushPayload(recordTypeName, doc);
+    });
+  },
+```
 
 ### Plugins
 
@@ -230,6 +309,31 @@ The value for `documentType` is the camelCase version of the primary model name.
 
 For best results, only create/update records using the full model definition. Treat the others as read-only.
 
+## Multiple databases for the same model
+
+In some cases it might diserable (security related, where you want a given user to only have some informations stored on his computer) to have multiple databases for the same model of data.
+
+`Ember-Pouch` allows you to dynamically change the database a model is using by calling the function `changeDb` on the adapter.
+
+```javascript
+function changeProjectDatabase(dbName, dbUser, dbPassword) {
+  // CouchDB is serving at http://localhost:5455
+  let remote = new PouchDB('http://localhost:5455/' + dbName);
+  // here we are using pouchdb-authentication for credential supports
+  remote.login( dbUser, dbPassword).then(
+    function (user) {
+      let db = new PouchDB(dbName)
+      db.sync(remote, {live:true, retry:true})
+      // grab the adapter, it can be any ember-pouch adapter.
+      let adapter = this.store.adapterFor('project');
+      // this is where we told the adapter to change the current database.
+      adapter.changeDb(db);
+    }
+  )
+}
+```
+
+
 ## Installation
 
 * `git clone` this repository
@@ -260,6 +364,11 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 
+* **3.1.1**
+  - Bugfix for hasMany relations by [@backspace](https://github.com/backspace) ([#111](https://github.com/nolanlawson/ember-pouch/pull/111)).
+* **3.1.0**
+  - Database can now be dynamically switched on the adapter ([#89](https://github.com/nolanlawson/ember-pouch/pull/89)). Thanks to [@olivierchatry](https://github.com/olivierchatry) for this!
+  - Various bugfixes by [@backspace](https://github.com/backspace), [@jkleinsc](https://github.com/jkleinsc), [@rsutphin](https://github.com/rsutphin), [@mattmarcum](https://github.com/mattmarcum), [@broerse](https://github.com/broerse), and [@olivierchatry](https://github.com/olivierchatry). See [the full commit log](https://github.com/nolanlawson/ember-pouch/compare/7c216311ffacd2f08b57df4fe34d49f4e7c373f1...v3.1.0) for details. Thank you!
 * **3.0.1**
   - Add blueprints for model and adapter (see above for details). Thanks [@mattmarcum](https://github.com/mattmarcum) ([#101](https://github.com/nolanlawson/ember-pouch/issues/101), [#102](https://github.com/nolanlawson/ember-pouch/issues/102)) and [@backspace](https://github.com/backspace) ([#103](https://github.com/nolanlawson/ember-pouch/issues/103)).
 * **3.0.0**
