@@ -206,7 +206,17 @@ Out of the box, ember-pouch includes a PouchDB [change listener](http://pouchdb.
 
 However, ember-pouch does not automatically load new records that arrive during a sync. The records are saved in the local database, but **ember-data is not told to load them into memory**. Automatically loading every new record works well with a small number of records and a limited number of models. As an app grows, automatically loading every record will negatively impact app responsiveness during syncs (especially the first sync). To avoid puzzling slowdowns, ember-pouch only automatically reloads records you have already used ember-data to load.
 
-If you have a model or two that you know will always have a small number of records, you can write your own change listener to tell ember-data to automatically load them into memory as they arrive.
+If you have a model or two that you know will always have a small number of records, you can tell ember-data to automatically load them into memory as they arrive. Your PouchAdapter subclass has a method `unloadedDocumentChanged`, which is called when a document is received during sync that has not been loaded into the ember-data store. In your subclass, you can implement the following to load it automatically:
+
+```js
+  unloadedDocumentChanged: function(obj) {
+    let store = this.get('store');
+    let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
+    this.get('db').rel.find(recordTypeName, obj.id).then(function(doc) {
+      store.pushPayload(recordTypeName, doc);
+    });
+  },
+```
 
 ### Plugins
 
@@ -307,7 +317,7 @@ function changeProjectDatabase(dbName, dbUser, dbPassword) {
       // this is where we told the adapter to change the current database.
       adapter.changeDb(db);
     }
-  )    
+  )
 }
 ```
 
