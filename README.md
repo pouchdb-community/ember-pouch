@@ -24,6 +24,8 @@ This provides
 - `import PouchDB from 'pouchdb'`
 - `import {Model, Adapter, Serializer} from 'ember-pouch'`
 
+You must install an adapter and serializer in order for `Ember-Pouch` to work correctly.  The [`blueprints`](#emberpouch-blueprints) are the easiest way to get started.
+
 `Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
 ```js
@@ -111,6 +113,16 @@ Now you can store your localDb and remoteDb names in your ember-cli's config.  J
 ENV.emberPouch.localDb = 'test';
 ENV.emberPouch.remoteDB = 'http://localhost:5984/my_couch';
 ```
+
+### Serializer
+
+In order to create an application serializer run the following command from the command line:
+
+```
+ember g pouch-serializer application
+```
+
+An application serializer is required to get relations working correctly!
 
 ## Relationships
 
