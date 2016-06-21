@@ -203,6 +203,58 @@ export default DS.RESTAdapter.extend({
   },
 
   /**
+   * Return key that conform to data adapter
+   * ex: 'name' become 'data.name'
+   */
+  _dataKey: function(key) {
+    var dataKey ='data.' + key;
+    return ""+ dataKey + "";
+  },
+
+  /**
+   * Returns the modified selector key to comform data key
+   * Ex: selector: {name: 'Mario'} wil become selector: {'data.name': 'Mario'}
+   */
+  _buildSelector: function(selector) {
+    var dataSelector = {};
+    var selectorKeys = [];
+
+    for (var key in selector) {
+      if(selector.hasOwnProperty(key)){
+        selectorKeys.push(key);
+      }
+    }
+
+    selectorKeys.forEach(function(key) {
+      var dataKey = this._dataKey(key);
+      dataSelector[dataKey] = selector[key];
+    }.bind(this));
+
+    return dataSelector;
+  },
+
+  /**
+   * Returns the modified sort key
+   * Ex: sort: ['series'] will become ['data.series']
+   * Ex: sort: [{series: 'desc'}] will became [{'data.series': 'desc'}]
+   */
+  _buildSort: function(sort) {
+    return sort.map(function (value) {
+      var sortKey = {};
+      if (typeof value === 'object' && value !== null) {
+        for (var key in value) {
+          if(value.hasOwnProperty(key)){
+            sortKey[this._dataKey(key)] = value[key];
+          }
+        }
+      } else {
+        return this._dataKey(value);
+      }
+      return sortKey;
+    }.bind(this));
+  },
+
+  /**
    * Returns the string to use for the model name part of the PouchDB document
    * ID for records of the given ember-data type.
    *
@@ -229,10 +281,43 @@ export default DS.RESTAdapter.extend({
     return this.get('db').rel.find(this.getRecordTypeName(type), ids);
   },
 
-  findQuery: function(/* store, type, query */) {
-    throw new Error(
-      "findQuery not yet supported by ember-pouch. " +
-      "See https://github.com/nolanlawson/ember-pouch/issues/7.");
+
+  query: function(store, type, query) {
+    this._init(store, type);
+
+    var recordTypeName = this.getRecordTypeName(type);
+    var db = this.get('db');
+
+    var queryParams = {
+      selector: this._buildSelector(query.selector)
+    };
+
+    if (!Ember.isEmpty(query.sort)) {
+      queryParams.sort = this._buildSort(query.sort);
+    }
+
+    return db.find(queryParams).then(function (payload) {
+      if (typeof payload === 'object' && payload !== null) {
+        var plural = pluralize(recordTypeName);
+        var results = {};
+
+        var rows = payload.docs.map((row) => {
+          var parsedId = db.rel.parseDocID(row._id);
+          if (!Ember.isEmpty(parsedId.id)) {
+            row.data.id = parsedId.id;
+            return row.data;
+          }
+        });
+
+        results[plural] = rows;
+
+        return results;
+      }
+    });
+  },
+
+  queryRecord: function(store, type, query) {
+    return this.query(store, type, query);
   },
 
   /**

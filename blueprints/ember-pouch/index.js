@@ -1,4 +1,5 @@
 'use strict';
+    "pouchdb-find": "^0.10.2"
 
 module.exports = {
   normalizeEntityName: function() {},
@@ -6,7 +7,8 @@ module.exports = {
   afterInstall: function() {
     return this.addBowerPackagesToProject([
       { name: 'pouchdb', target: '^5.4.5' },
-      { name: 'relational-pouch', target: '^1.4.4'}
+      { name: 'relational-pouch', target: '^1.4.4'},
+      { name: 'pouchdb-find', target: '^0.10.2'}
     ]);
   }
 };
