@@ -18,6 +18,8 @@ module.exports = {
   name: 'ember-pouch',
 
   init: function () {
+    this._super.init && this._super.init.apply(this, arguments);
+
     if (!satisfactoryEmberDataVersion(this)) {
       var error = new Error("ember-pouch requires ember-data 1.13.x or 2.x");
       error.suppressStacktrace = true;
