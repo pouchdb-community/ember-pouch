@@ -1,3 +1,9 @@
-var EmberCliModelBlueprint = require('ember-cli/blueprints/model');
+var ModelBlueprint;
 
-module.exports = EmberCliModelBlueprint;
+try {
+  ModelBlueprint = require('ember-data/blueprints/model');
+} catch (e) {
+  ModelBlueprint = require('ember-cli/blueprints/model');
+}
+
+module.exports = ModelBlueprint;
