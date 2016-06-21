@@ -32,6 +32,7 @@ module.exports = {
 
     app.import(bowerDir + '/pouchdb/dist/pouchdb.js');
     app.import(bowerDir + '/relational-pouch/dist/pouchdb.relational-pouch.js');
+    app.import(bowerDir + '/pouchdb-find/dist/pouchdb.find.js');
     app.import('vendor/ember-pouch/shim.js', {
       type: 'vendor',
       exports: {
