@@ -109,7 +109,7 @@ Now you can store your localDb and remoteDb names in your ember-cli's config.  J
 
 ```javascript
 ENV.emberPouch.localDb = 'test';
-ENV.emberPouch.remoteDB = 'http://localhost:5984/my_couch';
+ENV.emberPouch.remoteDb = 'http://localhost:5984/my_couch';
 ```
 
 ## Relationships
