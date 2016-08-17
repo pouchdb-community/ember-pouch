@@ -14,6 +14,8 @@ export default DS.Transform.extend({
         content_type: serialized[attachmentName]['content_type'],
         data: serialized[attachmentName]['data'],
         stub: serialized[attachmentName]['stub'],
+        length: serialized[attachmentName]['length'],
+        digest: serialized[attachmentName]['digest']
       });
     });
   },
@@ -27,6 +29,8 @@ export default DS.Transform.extend({
       };
       if (attachment.get('stub')) {
         serialized.stub = true;
+        serialized.length = attachment.get('length');
+        serialized.digest = attachment.get('digest');
       } else {
         serialized.data = attachment.get('data');
       }
