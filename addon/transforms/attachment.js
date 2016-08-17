@@ -6,7 +6,7 @@ const keys = Object.keys || Ember.keys;
 
 export default DS.Transform.extend({
   deserialize: function(serialized) {
-    if (isNone(serialized)) { return null; }
+    if (isNone(serialized)) { return []; }
 
     return keys(serialized).map(function (attachmentName) {
       return Ember.Object.create({

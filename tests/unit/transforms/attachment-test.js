@@ -39,6 +39,7 @@ test('it serializes an attachment', function(assert) {
   let transform = this.subject();
   assert.equal(transform.serialize(null), null);
   assert.equal(transform.serialize(undefined), null);
+  assert.deepEqual(transform.serialize([]), {});
 
   let serializedData = transform.serialize(testDeserializedData);
 
@@ -55,8 +56,8 @@ test('it serializes an attachment', function(assert) {
 
 test('it deserializes an attachment', function(assert) {
   let transform = this.subject();
-  assert.equal(transform.deserialize(null), null);
-  assert.equal(transform.deserialize(undefined), null);
+  assert.deepEqual(transform.deserialize(null), []);
+  assert.deepEqual(transform.deserialize(undefined), []);
 
   let deserializedData = transform.deserialize(testSerializedData);
 
