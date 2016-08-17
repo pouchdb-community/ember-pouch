@@ -33,7 +33,7 @@ let testDeserializedData = [
   })
 ];
 
-moduleFor('transform:attachment', 'Unit | Transform | attachment', {});
+moduleFor('transform:attachments', 'Unit | Transform | attachments', {});
 
 test('it serializes an attachment', function(assert) {
   let transform = this.subject();
