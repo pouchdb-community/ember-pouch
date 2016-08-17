@@ -1,70 +1,26 @@
-import { module, test } from 'qunit';
-import startApp from '../../helpers/start-app';
+import { test } from 'qunit';
+import moduleForIntegration from '../../helpers/module-for-acceptance';
 
 import Ember from 'ember';
-/* globals PouchDB */
-
-var App;
 
 /*
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
 
-module('adapter:pouch [integration]', {
-  beforeEach: function (assert) {
-    var done = assert.async();
-
-    // TODO: do this in a way that doesn't require duplicating the name of the
-    // test database here and in dummy/app/adapters/application.js. Importing
-    // the adapter directly doesn't work because of what seems like a resolver
-    // issue.
-    (new PouchDB('ember-pouch-test')).destroy().then(() => {
-      App = startApp();
-      var bootPromise;
-      Ember.run(() => {
-        if (App.boot) {
-          App.advanceReadiness();
-          bootPromise = App.boot();
-        } else {
-          bootPromise = Ember.RSVP.Promise.resolve();
-        }
-      });
-      return bootPromise;
-    }).then(() => {
-      done();
-    });
-  },
-
-  afterEach: function () {
-    Ember.run(App, 'destroy');
-  }
-});
-
-function db() {
-  return adapter().get('db');
-}
-
-function adapter() {
-  // the default adapter in the dummy app is an ember-pouch adapter
-  return App.__container__.lookup('adapter:application');
-}
-
-function store() {
-  return App.__container__.lookup('service:store');
-}
+moduleForIntegration('Integration | Adapter | Basic CRUD Ops');
 
 test('can find all', function (assert) {
   assert.expect(3);
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    return db().bulkDocs([
+    return this.db().bulkDocs([
       { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor' } },
       { _id: 'tacoSoup_2_B', data: { flavor: 'black bean' } },
       { _id: 'burritoShake_2_X', data: { consistency: 'smooth' } }
     ]);
   }).then(() => {
-    return store().findAll('taco-soup');
+    return this.store().findAll('taco-soup');
   }).then((found) => {
     assert.equal(found.get('length'), 2, 'should have found the two taco soup items only');
     assert.deepEqual(found.mapBy('id'), ['A', 'B'],
@@ -84,12 +40,12 @@ test('can find one', function (assert) {
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    return db().bulkDocs([
+    return this.db().bulkDocs([
       { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
       { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
     ]);
   }).then(() => {
-    return store().find('taco-soup', 'D');
+    return this.store().find('taco-soup', 'D');
   }).then((found) => {
     assert.equal(found.get('id'), 'D',
       'should have found the requested item');
@@ -108,7 +64,7 @@ test('can find associated records', function (assert) {
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    return db().bulkDocs([
+    return this.db().bulkDocs([
       { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
       { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
       { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
@@ -116,7 +72,7 @@ test('can find associated records', function (assert) {
       { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
     ]);
   }).then(() => {
-    return store().find('taco-soup', 'C');
+    return this.store().find('taco-soup', 'C');
   }).then((found) => {
     assert.equal(found.get('id'), 'C',
       'should have found the requested item');
@@ -139,14 +95,14 @@ test('create a new record', function (assert) {
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    var newSoup = store().createRecord('taco-soup', { id: 'E', flavor: 'balsamic' });
+    var newSoup = this.store().createRecord('taco-soup', { id: 'E', flavor: 'balsamic' });
     return newSoup.save();
   }).then(() => {
-    return db().get('tacoSoup_2_E');
+    return this.db().get('tacoSoup_2_E');
   }).then((newDoc) => {
     assert.equal(newDoc.data.flavor, 'balsamic', 'should have saved the attribute');
 
-    var recordInStore = store().peekRecord('tacoSoup', 'E');
+    var recordInStore = this.store().peekRecord('tacoSoup', 'E');
     assert.equal(newDoc._rev, recordInStore.get('rev'),
       'should have associated the ember-data record with the rev for the new record');
 
@@ -154,6 +110,36 @@ test('create a new record', function (assert) {
   }).catch((error) => {
     console.error('error in test', error);
     assert.ok(false, 'error in test:' + error);
+    done();
+  });
+});
+
+test('creating an associated record stores a reference to it in the parent', function (assert) {
+  assert.expect(1);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs([
+      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: [] } }
+    ]);
+  }).then(() => {
+    return this.store().findRecord('taco-soup', 'C');
+  }).then(tacoSoup => {
+    var newIngredient = this.store().createRecord('food-item', {
+      name: 'pineapple',
+      soup: tacoSoup
+    });
+
+    return newIngredient.save().then(() => tacoSoup.save());
+  }).then(() => {
+    this.store().unloadAll();
+
+    return this.store().findRecord('taco-soup', 'C');
+  }).then(tacoSoup => {
+    return tacoSoup.get('ingredients');
+  }).then(foundIngredients => {
+    assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple'],
+      'should have fully loaded the associated items');
     done();
   });
 });
@@ -167,21 +153,21 @@ if (!DS.VERSION.match(/^2\.0/)) {
 
     var done = assert.async();
     Ember.RSVP.Promise.resolve().then(() => {
-      return db().bulkDocs([
+      return this.db().bulkDocs([
         { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
         { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
       ]);
     }).then(() => {
-      return store().find('taco-soup', 'C');
+      return this.store().find('taco-soup', 'C');
     }).then((found) => {
       found.set('flavor', 'pork');
       return found.save();
     }).then(() => {
-      return db().get('tacoSoup_2_C');
+      return this.db().get('tacoSoup_2_C');
     }).then((updatedDoc) => {
       assert.equal(updatedDoc.data.flavor, 'pork', 'should have updated the attribute');
 
-      var recordInStore = store().peekRecord('tacoSoup', 'C');
+      var recordInStore = this.store().peekRecord('tacoSoup', 'C');
       assert.equal(updatedDoc._rev, recordInStore.get('rev'),
         'should have associated the ember-data record with the updated rev');
 
@@ -199,16 +185,16 @@ test('delete an existing record', function (assert) {
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    return db().bulkDocs([
+    return this.db().bulkDocs([
       { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
       { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
     ]);
   }).then(() => {
-    return store().find('taco-soup', 'C');
+    return this.store().find('taco-soup', 'C');
   }).then((found) => {
     return found.destroyRecord();
   }).then(() => {
-    return db().get('tacoSoup_2_C');
+    return this.db().get('tacoSoup_2_C');
   }).then((doc) => {
     assert.ok(!doc, 'document should no longer exist');
   }, (result) => {

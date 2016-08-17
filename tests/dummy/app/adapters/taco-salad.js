@@ -28,5 +28,12 @@ export default Adapter.extend({
   init() {
     this._super(...arguments);
     this.set('db', createDb());
+  },
+  unloadedDocumentChanged(obj) {
+    let store = this.get('store');
+    let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
+    this.get('db').rel.find(recordTypeName, obj.id).then(function(doc){
+      store.pushPayload(recordTypeName, doc);
+    });
   }
 });

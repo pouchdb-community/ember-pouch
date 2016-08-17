@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "3.0.0",
+  "version": "3.2.1",
   "description": "PouchDB adapter for Ember Data",
   "directories": {
     "doc": "doc",
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "ember-cli-babel": "^5.1.5",
-    "ember-cli-version-checker": "1.1.4"
+    "ember-cli-version-checker": "1.1.5"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
