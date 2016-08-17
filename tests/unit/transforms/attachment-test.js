@@ -3,26 +3,32 @@ import { moduleFor, test } from 'ember-qunit';
 import Ember from 'ember';
 
 let testSerializedData = {
-  'test.txt': {
+  'hello.txt': {
     content_type: 'text/plain',
-    data: 'hello world!'
+    data: 'aGVsbG8gd29ybGQ=',
+    digest: "md5-7mkg+nM0HN26sZkLN8KVSA=="
+    // CouchDB doesn't add 'length'
   },
-  'stub.json': {
+  'stub.txt': {
     stub: true,
-    content_type: 'application/json'
-  }
+    content_type: 'text/plain',
+    digest: "md5-7mkg+nM0HN26sZkLN8KVSA==",
+    length: 11
+  },
 };
 
 let testDeserializedData = [
   Ember.Object.create({
-    name: 'test.txt',
+    name: 'hello.txt',
     content_type: 'text/plain',
-    data: 'hello world!'
+    data: 'aGVsbG8gd29ybGQ=',
   }),
   Ember.Object.create({
-    name: 'stub.json',
-    content_type: 'application/json',
-    stub: true
+    name: 'stub.txt',
+    content_type: 'text/plain',
+    stub: true,
+    digest: 'md5-7mkg+nM0HN26sZkLN8KVSA==',
+    length: 11
   })
 ];
 
@@ -34,13 +40,14 @@ test('it serializes an attachment', function(assert) {
   assert.equal(transform.serialize(undefined), null);
 
   let serializedData = transform.serialize(testDeserializedData);
-  let name = testDeserializedData[0].get('name');
 
-  assert.equal(serializedData[name].content_type, testSerializedData[name].content_type);
-  assert.equal(serializedData[name].data, testSerializedData[name].data);
+  let hello = testDeserializedData[0].get('name');
+  assert.equal(hello, 'hello.txt');
+  assert.equal(serializedData[hello].content_type, testSerializedData[hello].content_type);
+  assert.equal(serializedData[hello].data, testSerializedData[hello].data);
 
   let stub = testDeserializedData[1].get('name');
-
+  assert.equal(stub, 'stub.txt');
   assert.equal(serializedData[stub].content_type, testSerializedData[stub].content_type);
   assert.equal(serializedData[stub].stub, true);
 });
@@ -55,8 +62,11 @@ test('it deserializes an attachment', function(assert) {
   assert.equal(deserializedData[0].get('name'), testDeserializedData[0].get('name'));
   assert.equal(deserializedData[0].get('content_type'), testDeserializedData[0].get('content_type'));
   assert.equal(deserializedData[0].get('data'), testDeserializedData[0].get('data'));
+  assert.equal(deserializedData[0].get('digest'), testDeserializedData[0].get('digest'));
 
   assert.equal(deserializedData[1].get('name'), testDeserializedData[1].get('name'));
   assert.equal(deserializedData[1].get('content_type'), testDeserializedData[1].get('content_type'));
   assert.equal(deserializedData[1].get('stub'), true);
+  assert.equal(deserializedData[1].get('digest'), testDeserializedData[1].get('digest'));
+  assert.equal(deserializedData[1].get('length'), testDeserializedData[1].get('length'));
 });
