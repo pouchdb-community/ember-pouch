@@ -1,7 +1,10 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 
-const { isNone } = Ember;
+const {
+  get,
+  isNone
+} = Ember;
 const keys = Object.keys || Ember.keys;
 
 export default DS.Transform.extend({
@@ -25,16 +28,16 @@ export default DS.Transform.extend({
 
     return deserialized.reduce(function (acc, attachment) {
       const serialized = {
-        content_type: attachment.get('content_type'),
+        content_type: get(attachment, 'content_type'),
       };
-      if (attachment.get('stub')) {
+      if (get(attachment, 'stub')) {
         serialized.stub = true;
-        serialized.length = attachment.get('length');
-        serialized.digest = attachment.get('digest');
+        serialized.length = get(attachment, 'length');
+        serialized.digest = get(attachment, 'digest');
       } else {
-        serialized.data = attachment.get('data');
+        serialized.data = get(attachment, 'data');
       }
-      acc[attachment.get('name')] = serialized;
+      acc[get(attachment, 'name')] = serialized;
       return acc;
     }, {});
   }
