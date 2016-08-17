@@ -22,6 +22,7 @@ let testDeserializedData = [
     name: 'hello.txt',
     content_type: 'text/plain',
     data: 'aGVsbG8gd29ybGQ=',
+    digest: 'md5-7mkg+nM0HN26sZkLN8KVSA=='
   }),
   Ember.Object.create({
     name: 'stub.txt',
