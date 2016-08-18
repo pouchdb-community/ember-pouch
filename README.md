@@ -186,12 +186,16 @@ export default Ember.Route.extend({
 
 `Ember-Pouch` provides an `attachment` transform for your models, which makes working with attachments as simple as working with any other field.
 
-Add a `DS.attr('attachment')` field to your model:
+Add a `DS.attr('attachment')` field to your model. Provide a default value for it to be an empty array.
 
 ```js
 // myapp/models/photo-album.js
 export default DS.Model.extend({
-  photos: DS.attr('attachment');
+  photos: DS.attr('attachment', {
+    defaultValue: function() {
+      return [];
+    }
+  });
 });
 ```
 
