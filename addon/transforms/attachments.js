@@ -12,13 +12,14 @@ export default DS.Transform.extend({
     if (isNone(serialized)) { return []; }
 
     return keys(serialized).map(function (attachmentName) {
+      let attachment = serialized[attachmentName];
       return Ember.Object.create({
         name: attachmentName,
-        content_type: serialized[attachmentName]['content_type'],
-        data: serialized[attachmentName]['data'],
-        stub: serialized[attachmentName]['stub'],
-        length: serialized[attachmentName]['length'],
-        digest: serialized[attachmentName]['digest']
+        content_type: attachment.content_type,
+        data: attachment.data,
+        stub: attachment.stub,
+        length: attachment.length,
+        digest: attachment.digest,
       });
     });
   },
@@ -34,8 +35,10 @@ export default DS.Transform.extend({
         serialized.stub = true;
         serialized.length = get(attachment, 'length');
         serialized.digest = get(attachment, 'digest');
-      } else {
+      }
+      else {
         serialized.data = get(attachment, 'data');
+        serialized.length = get(attachment, 'length');
       }
       acc[get(attachment, 'name')] = serialized;
       return acc;
