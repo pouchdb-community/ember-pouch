@@ -28,7 +28,7 @@ let photo2 = {
 };
 
 test('puts attachments into the `attachments` property when saving', function (assert) {
-  assert.expect(10);
+  assert.expect(11);
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
@@ -41,29 +41,20 @@ test('puts attachments into the `attachments` property when saving', function (a
   }).then(() => {
     return this.db().get('tacoRecipe_2_E');
   }).then((newDoc) => {
-    assert.deepEqual(newDoc._attachments, {
-      'cover.jpg': {
-        digest: 'md5-SxxZx3KOKxy2X2yyCq9c+Q==',
-        content_type: 'image/jpeg',
-        revpos: undefined,
-        stub: true,
-        length: 9
-      },
-      'photo-1.jpg': {
-        digest: 'md5-MafOMdm9kXWId0ruvo8sTA==',
-        content_type: 'image/jpeg',
-        revpos: undefined,
-        stub: true,
-        length: 11
-      },
-      'photo-2.jpg': {
-        digest: 'md5-VNkFh9jG/28rwoFW9L910g==',
-        content_type: 'image/jpeg',
-        revpos: undefined,
-        stub: true,
-        length: 11
-      }
+    function checkAttachment(attachments, fileName, value, message) {
+      delete attachments[fileName].revpos;
+      assert.deepEqual(attachments[fileName], value, message);
+    }
+    checkAttachment(newDoc._attachments, 'cover.jpg', {
+      digest: 'md5-SxxZx3KOKxy2X2yyCq9c+Q==',
+      content_type: 'image/jpeg',
+      stub: true,
+      length: 9
     }, 'attachments are placed into the _attachments property of the doc');
+    assert.deepEqual(Object.keys(newDoc._attachments).sort(),
+      [coverImage.name, photo1.name, photo2.name].sort(),
+      'all attachments are included in the _attachments property of the doc'
+    );
     assert.equal('cover_image' in newDoc.data, true,
       'respects the mapping provided by the serializer `attrs`'
     );
@@ -82,14 +73,14 @@ test('puts attachments into the `attachments` property when saving', function (a
     });
 
     var recordInStore = this.store().peekRecord('tacoRecipe', 'E');
-    let coverImage = recordInStore.get('coverImage');
-    assert.equal(coverImage.get('name'), coverImage.name);
-    assert.equal(coverImage.get('data'), coverImage.data);
+    let coverAttr = recordInStore.get('coverImage');
+    assert.equal(coverAttr.get('name'), coverImage.name);
+    assert.equal(coverAttr.get('data'), coverImage.data);
 
-    let photos = recordInStore.get('photos');
-    assert.equal(photos.length, 2, '2 photos');
-    assert.equal(photos[0].get('name'), photo1.name);
-    assert.equal(photos[0].get('data'), photo1.data);
+    let photosAttr = recordInStore.get('photos');
+    assert.equal(photosAttr.length, 2, '2 photos');
+    assert.equal(photosAttr[0].get('name'), photo1.name);
+    assert.equal(photosAttr[0].get('data'), photo1.data);
 
     done();
   }).catch((error) => {
