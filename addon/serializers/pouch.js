@@ -35,11 +35,19 @@ export default DS.RESTSerializer.extend({
       if (payloadKey === key && this.keyForAttribute) {
         payloadKey = this.keyForAttribute(key, 'serialize');
       }
-      // assign any attachments to the attachments property, so that relational-pouch
-      // will put these in the special CouchDB _attachments property
-      // this will conflict with any 'attachments' attr in the model
-      // suggest that #toRawDoc in relational-pouch should allow _attachments to be specified
+
+      // Merge any attachments in this attribute into the `attachments` property.
+      // relational-pouch will put these in the special CouchDB `_attachments` property
+      // of the document.
+      // This will conflict with any 'attachments' attr in the model. Suggest that
+      // #toRawDoc in relational-pouch should allow _attachments to be specified
       json['attachments'] = Object.assign({}, json['attachments'], json[payloadKey]);
+      json[payloadKey] = Object.keys(json[payloadKey]).reduce((attr, fileName) => {
+        attr[fileName] = Object.assign({}, json[payloadKey][fileName]);
+        delete attr[fileName].data;
+        delete attr[fileName].content_type;
+        return attr;
+      }, {});
     }
   },
 
