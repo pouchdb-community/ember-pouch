@@ -2,7 +2,8 @@ import Ember from 'ember';
 import DS from 'ember-data';
 
 const {
-  get
+  get,
+  assign
 } = Ember;
 const keys = Object.keys || Ember.keys;
 
@@ -41,9 +42,9 @@ export default DS.RESTSerializer.extend({
       // of the document.
       // This will conflict with any 'attachments' attr in the model. Suggest that
       // #toRawDoc in relational-pouch should allow _attachments to be specified
-      json['attachments'] = Object.assign({}, json['attachments'], json[payloadKey]);
-      json[payloadKey] = Object.keys(json[payloadKey]).reduce((attr, fileName) => {
-        attr[fileName] = Object.assign({}, json[payloadKey][fileName]);
+      json.attachments = assign(Object(), json.attachments || {}, json[payloadKey]); // jshint ignore:line
+      json[payloadKey] = keys(json[payloadKey]).reduce((attr, fileName) => {
+        attr[fileName] = assign(Object(), json[payloadKey][fileName]); // jshint ignore:line
         delete attr[fileName].data;
         delete attr[fileName].content_type;
         return attr;
