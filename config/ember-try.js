@@ -1,17 +1,6 @@
 module.exports = {
   scenarios: [
     {
-      name: 'ember-data-1.13',
-      dependencies: {
-        'ember': '1.13.11',
-        'ember-data': '1.13.15',
-        'ember-cli-shims': '0.0.6'
-      },
-      resolutions: {
-        'ember': '1.13.11'
-      }
-    },
-    {
       name: 'ember-data-2.0',
       dependencies: {
         'ember': '2.0.2',
