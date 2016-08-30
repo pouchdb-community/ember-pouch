@@ -11,7 +11,7 @@ function satisfactoryEmberDataVersion(addon) {
   var checker = new VersionChecker(addon),
       bowerEmberData = checker.for('ember-data', 'bower'),
       npmEmberData = checker.for('ember-data', 'npm');
-  return npmEmberData.isAbove('2.2.99') || bowerEmberData.isAbove('1.12.99');
+  return npmEmberData.isAbove('2.2.99') || bowerEmberData.isAbove('1.13.16');
 }
 
 module.exports = {
