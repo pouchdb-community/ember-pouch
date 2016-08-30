@@ -18,7 +18,21 @@ For more on PouchDB, check out [pouchdb.com](http://pouchdb.com).
 
 ## Install and setup
 
-    ember install ember-pouch
+```bash
+ember install ember-pouch
+```
+
+For ember-data < 2.0:
+
+```bash
+ember install ember-pouch@3.2.1
+```
+
+For ember-cli < 1.13.0:
+
+```bash
+npm install ember-pouch --save-dev
+```
 
 This provides
 - `import PouchDB from 'pouchdb'`
