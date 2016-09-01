@@ -52,10 +52,14 @@
     "ember-try": "~0.0.8"
   },
   "dependencies": {
+    "broccoli-funnel": "^1.0.1",
     "ember-cli-babel": "^5.1.5",
-    "ember-cli-version-checker": "1.1.5"
+    "ember-cli-version-checker": "1.1.5",
+    "pouchdb": "^5.2.1",
+    "relational-pouch": "^1.4.0"
   },
   "ember-addon": {
-    "configPath": "tests/dummy/config"
+    "configPath": "tests/dummy/config",
+    "fastBootDependencies": ["pouchdb", "relational-pouch"]
   }
 }
