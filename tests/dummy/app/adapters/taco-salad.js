@@ -33,7 +33,9 @@ export default Adapter.extend({
     let store = this.get('store');
     let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
     this.get('db').rel.find(recordTypeName, obj.id).then(function(doc){
-      store.pushPayload(recordTypeName, doc);
+      Ember.run(function() {
+        store.pushPayload(recordTypeName, doc);
+      });
     });
   }
 });

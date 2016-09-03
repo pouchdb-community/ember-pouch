@@ -18,7 +18,21 @@ For more on PouchDB, check out [pouchdb.com](http://pouchdb.com).
 
 ## Install and setup
 
-    ember install ember-pouch
+```bash
+ember install ember-pouch
+```
+
+For ember-data < 2.0:
+
+```bash
+ember install ember-pouch@3.2.1
+```
+
+For ember-cli < 1.13.0:
+
+```bash
+npm install ember-pouch --save-dev
+```
 
 This provides
 - `import PouchDB from 'pouchdb'`
@@ -180,7 +194,43 @@ export default Ember.Route.extend({
     }
   }
 });
+```
 
+## Attachments
+
+`Ember-Pouch` provides an `attachment` transform for your models, which makes working with attachments as simple as working with any other field.
+
+Add a `DS.attr('attachment')` field to your model. Provide a default value for it to be an empty array.
+
+```js
+// myapp/models/photo-album.js
+export default DS.Model.extend({
+  photos: DS.attr('attachment', {
+    defaultValue: function() {
+      return [];
+    }
+  });
+});
+```
+
+Here, instances of `PhotoAlbum` have a `photos` field, which is an array of plain `Ember.Object`s, which have a `.name` and `.content_type`. Non-stubbed attachment also have a `.data` field; and stubbed attachments have a `.stub` instead.
+```handlebars
+<ul>
+  {{#each myalbum.photos as |photo|}}
+    <li>{{photo.name}}</li>
+  {{/each}}
+</ul>
+```
+
+Attach new files by adding an `Ember.Object` with a `.name`, `.content_type` and `.data` to array of attachments.
+
+```js
+// somewhere in your controller/component:
+myAlbum.get('photos').addObject(Ember.Object.create({
+  'name': 'kitten.jpg',
+  'content_type': 'image/jpg',
+  'data': btoa('hello world') // base64-encoded `String`, or a DOM `Blob`, or a `File`
+}));
 ```
 
 ## Sample app
