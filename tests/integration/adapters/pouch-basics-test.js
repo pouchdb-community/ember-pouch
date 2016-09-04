@@ -75,7 +75,7 @@ test('can query with sort', function (assert) {
     });
   }).then(() => {
     return this.store().query('smasher', {
-      selector: {name: {$gt: ''}},
+      filter: {name: {$gt: ''}},
       sort: ['name']
     });
   }).then((found) => {
@@ -108,7 +108,7 @@ test('can query multi-field queries', function (assert) {
     });
   }).then(() => {
     return this.store().query('smasher', {
-      selector: {series: 'Mario' },
+      filter: {series: 'Mario' },
       sort: [
         {series: 'desc'},
         {debut: 'desc'}]
@@ -143,7 +143,7 @@ test('can query one record', function (assert) {
     });
   }).then(() => {
     return this.store().queryRecord('taco-soup', {
-      selector: {flavor: 'al pastor' }
+      filter: {flavor: 'al pastor' }
     });
   }).then((found) => {
     assert.equal(found.get('flavor'), 'al pastor',
@@ -172,7 +172,7 @@ test('can query one associated records', function (assert) {
     });
   }).then(() => {
     return this.store().queryRecord('taco-soup', {
-      selector: {flavor: 'al pastor' }});
+      filter: {flavor: 'al pastor' }});
   }).then((found) => {
     assert.equal(found.get('flavor'), 'al pastor',
       'should have found the requested item');

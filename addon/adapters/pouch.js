@@ -289,7 +289,7 @@ export default DS.RESTAdapter.extend({
     var db = this.get('db');
 
     var queryParams = {
-      selector: this._buildSelector(query.selector)
+      selector: this._buildSelector(query.filter)
     };
 
     if (!Ember.isEmpty(query.sort)) {
