@@ -2,7 +2,7 @@
 
 [**Changelog**](#changelog)
 
-Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 2.0+.
+Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 2.0+. For older Ember Data versions use Ember Pouch version 3.22. 
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
 
@@ -25,13 +25,13 @@ ember install ember-pouch
 For ember-data < 2.0:
 
 ```bash
-ember install ember-pouch@3.2.1
+ember install ember-pouch@3.2.2
 ```
 
 For ember-cli < 1.13.0:
 
 ```bash
-npm install ember-pouch --save-dev
+npm install ember-pouch@3.2.2 --save-dev
 ```
 
 This provides
@@ -435,7 +435,15 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 ## Changelog
 
 * **4.0.0**
-  - Add support for [#Attachments](attachments)
+  - Add support for Attachments [#135](https://github.com/nolanlawson/ember-pouch/pull/135)
+  - Implement glue code for query and queryRecord using pouchdb-find [#130](https://github.com/nolanlawson/ember-pouch/pull/130)
+* **3.2.2**
+  - Update Bower dependencies [#137](https://github.com/nolanlawson/ember-pouch/pull/137)
+  - Correct import of Ember Data model blueprint [#131](https://github.com/nolanlawson/ember-pouch/pull/131)
+* **3.2.1**
+  - Fix(Addon): Call super in init [#129](https://github.com/nolanlawson/ember-pouch/pull/129)
+* **3.2.0**
+  - Make adapter call a hook when encountering a change for a record that is not yet loaded [#108](https://github.com/nolanlawson/ember-pouch/pull/108)
 * **3.1.1**
   - Bugfix for hasMany relations by [@backspace](https://github.com/backspace) ([#111](https://github.com/nolanlawson/ember-pouch/pull/111)).
 * **3.1.0**
