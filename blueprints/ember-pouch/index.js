@@ -1,5 +1,4 @@
 'use strict';
-    "pouchdb-find": "^0.10.2"
 
 module.exports = {
   normalizeEntityName: function() {},
