@@ -2,7 +2,7 @@
 
 [**Changelog**](#changelog)
 
-Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 2.0+. For older Ember Data versions use Ember Pouch version 3.22. 
+Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 2.0+. For older Ember Data versions use Ember Pouch version 3.22.
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
 
@@ -98,6 +98,24 @@ PouchDB.debug.enable('*');
 ```
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
+
+### Disable live sync
+
+PouchDB's live sync uses a long-polling socket, so you may find that you hit the browser's
+limit of HTTP connections to a given host. In this case you may find that a periodic
+sync is better for your needs. The following will poll for changes rather than using
+live sync.
+
+```js
+export default Adapter.extend({
+  db: db,
+  liveSync: false,
+  syncInterval: 5000
+});
+```
+
+You can also sync manually by calling `adapter.sync()`, which returns a Promise that is
+fulfilled on the `complete` event from PouchDB.
 
 ## EmberPouch Blueprints
 
