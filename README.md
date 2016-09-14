@@ -103,8 +103,11 @@ See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage inst
 
 PouchDB's live sync uses a long-polling socket, so you may find that you hit the browser's
 limit of HTTP connections to a given host. In this case you may find that a periodic
-sync is better for your needs. The following will poll for changes rather than using
-live sync.
+sync is better for your needs.
+
+If you are connecting directly to a database over HTTP without syncing to a local database
+then ember-pouch's change detection will use a long-polling socket. The following will 
+poll for changes rather than using live sync.
 
 ```js
 export default Adapter.extend({
