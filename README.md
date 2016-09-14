@@ -99,7 +99,7 @@ PouchDB.debug.enable('*');
 
 See the [PouchDB sync API](http://pouchdb.com/api.html#sync) for full usage instructions.
 
-### Disable live sync
+### Live sync
 
 PouchDB's live sync uses a long-polling socket, so you may find that you hit the browser's
 limit of HTTP connections to a given host. In this case you may find that a periodic
