@@ -27,7 +27,8 @@ export default DS.RESTAdapter.extend({
   liveSync: true,
   syncInterval: null,
 
-  changes: null,
+  liveChanges: null,
+  syncChanges: null,
   syncTimer: null,
   lastSeq: null,
 
@@ -37,12 +38,12 @@ export default DS.RESTAdapter.extend({
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
   _liveSyncHandler: observer('liveSync', 'db', function () {
-    if (this.changes) {
-      this.changes.cancel();
+    if (this.liveChanges) {
+      this.liveChanges.cancel();
     }
     var db = this.get('db');
     if (this.get('liveSync') && db) {
-      this.changes = db.changes({
+      this.liveChanges = db.changes({
         since: 'now',
         live: true,
         returnDocs: false
@@ -79,12 +80,13 @@ export default DS.RESTAdapter.extend({
       this.syncChanges = db.changes({
         since: sinceSeq,
         returnDocs: false
-      }).on('change', bind(this, 'onChange'))
-        .on('complete', ev => {
-          this.lastSeq = ev.last_seq;
-          resolve(ev);
-        })
-        .on('error', reject);
+      }).on('complete', ev => {
+        this.lastSeq = ev.last_seq;
+        resolve(ev);
+      }).on('error', reject);
+      if (!this.get('liveSync')) {
+        this.syncChanges.on('change', bind(this, 'onChange'));
+      }
     }));
   },
   _startSyncing: on('init', function() {
@@ -92,8 +94,8 @@ export default DS.RESTAdapter.extend({
     this._syncIntervalHandler();
   }),
   _stopSyncing() {
-    if (this.changes) {
-      this.changes.cancel();
+    if (this.liveChanges) {
+      this.liveChanges.cancel();
     }
     if (this.syncTimer) {
       cancel(this.syncTimer);
