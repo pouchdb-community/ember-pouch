@@ -363,8 +363,10 @@ export default DS.RESTAdapter.extend({
 
         var rows = payload.docs.map((row) => {
           var parsedId = db.rel.parseDocID(row._id);
-          row.data.id = parsedId.id;
-          return row.data;
+          if (!Ember.isEmpty(parsedId.id)) {
+            row.data.id = parsedId.id;
+            return row.data;
+          }
         });
 
         results[plural] = rows;
