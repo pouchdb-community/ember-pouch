@@ -1,6 +1,6 @@
 import { test } from 'qunit';
 import moduleForIntegration from '../../helpers/module-for-acceptance';
-
+import { promiseToRunLater } from '../../helpers/async';
 import Ember from 'ember';
 
 /*
@@ -22,15 +22,6 @@ moduleForIntegration('Integration | Adapter | Default Change Watcher', {
     }).finally(done);
   }
 });
-
-function promiseToRunLater(callback, timeout) {
-  return new Ember.RSVP.Promise((resolve) => {
-    Ember.run.later(() => {
-      callback();
-      resolve();
-    }, timeout);
-  });
-}
 
 test('a loaded instance automatically reflects directly-made database changes', function (assert) {
   assert.expect(2);
@@ -193,4 +184,3 @@ test('a new record is automatically loaded', function (assert) {
     }, 15);
   }).finally(done);
 });
-

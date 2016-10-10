@@ -6,43 +6,106 @@ import {
 } from 'ember-pouch/utils';
 
 const {
+  assert,
   run: {
-    bind
+    bind,
+    later,
+    cancel
   },
   on,
+  observer,
   String: {
     pluralize,
     camelize,
     classify
-  }
+  },
+  RSVP
 } = Ember;
 
 export default DS.RESTAdapter.extend({
   coalesceFindRequests: true,
+  liveSync: true,
+  syncInterval: null,
+
+  liveChanges: null,
+  syncChanges: null,
+  syncTimer: null,
+  lastSeq: null,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
   // reloading redundant.
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
-  _onInit : on('init', function()  {
-    this._startChangesToStoreListener();
-  }),
-  _startChangesToStoreListener: function () {
+  _liveSyncHandler: observer('liveSync', 'db', function () {
+    if (this.liveChanges) {
+      this.liveChanges.cancel();
+    }
     var db = this.get('db');
-    if (db) {
-      this.changes = db.changes({
+    if (this.get('liveSync') && db) {
+      this.liveChanges = db.changes({
         since: 'now',
         live: true,
         returnDocs: false
       }).on('change', bind(this, 'onChange'));
     }
+  }),
+  _syncIntervalHandler: observer('syncInterval', 'db', function () {
+    cancel(this.syncTimer);
+    if (this.get('syncInterval')) {
+      assert("Only one of liveSync or syncInterval should be used for a given adapter",
+        !this.get('liveSync')
+      );
+      this._scheduleSync();
+    }
+  }),
+  _scheduleSync() {
+    cancel(this.syncTimer);
+    this.syncTimer = later(() => {
+      this.sync();
+      this._scheduleSync();
+    }, this.get('syncInterval'));
+  },
+  sync() {
+    var db = this.get('db');
+    if (!db) {
+      throw new Error("Can't sync without a db");
+    }
+    return (this.lastSeq ? RSVP.resolve(this.lastSeq) :
+      db.info().then(info => info.update_seq)
+    ).then(sinceSeq => new RSVP.Promise((resolve, reject) => {
+      if (this.syncChanges) {
+        this.syncChanges.cancel();
+      }
+      this.syncChanges = db.changes({
+        since: sinceSeq,
+        returnDocs: false
+      }).on('complete', ev => {
+        this.lastSeq = ev.last_seq;
+        resolve(ev);
+      }).on('error', reject);
+      if (!this.get('liveSync')) {
+        this.syncChanges.on('change', bind(this, 'onChange'));
+      }
+    }));
+  },
+  _startSyncing: on('init', function() {
+    this._liveSyncHandler();
+    this._syncIntervalHandler();
+  }),
+  _stopSyncing() {
+    if (this.liveChanges) {
+      this.liveChanges.cancel();
+    }
+    if (this.syncTimer) {
+      cancel(this.syncTimer);
+    }
+    if (this.syncChanges) {
+      this.syncChanges.cancel();
+    }
   },
   changeDb: function(db) {
-    if (this.changes) {
-      this.changes.cancel();
-    }
-
+    this._stopSyncing();
     var store = this.store;
     var schema = this._schema || [];
 
@@ -52,7 +115,6 @@ export default DS.RESTAdapter.extend({
 
     this._schema = null;
     this.set('db', db);
-    this._startChangesToStoreListener();
   },
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
@@ -107,9 +169,7 @@ export default DS.RESTAdapter.extend({
   },
 
   willDestroy: function() {
-    if (this.changes) {
-      this.changes.cancel();
-    }
+    this._stopSyncing();
   },
 
   _init: function (store, type) {
