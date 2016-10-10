@@ -1,4 +1,4 @@
-# Ember Pouch [![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch)
+# Ember Pouch [![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch) [![GitHub version](https://badge.fury.io/gh/nolanlawson%2Fember-pouch.svg)](https://badge.fury.io/gh/nolanlawson%2Fember-pouch) [![Ember Observer Score](https://emberobserver.com/badges/ember-pouch.svg)](https://emberobserver.com/addons/ember-pouch)
 
 [**Changelog**](#changelog)
 
