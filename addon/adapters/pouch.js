@@ -1,10 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 
-import {
-  extractDeleteRecord
-} from 'ember-pouch/utils';
-
 const {
   run: {
     bind
@@ -363,10 +359,33 @@ export default DS.RESTAdapter.extend({
     return this.get('db').rel.save(this.getRecordTypeName(type), data);
   },
 
-  deleteRecord: function (store, type, record) {
+  deleteRecord: function (store, type, snapshot) {
     this._init(store, type);
-    var data = this._recordToData(store, type, record);
-    return this.get('db').rel.del(this.getRecordTypeName(type), data)
-      .then(extractDeleteRecord);
+    let data = this._recordToData(store, type, snapshot);
+
+    //Delete the children
+    let deletedChildren = [];
+    snapshot.eachRelationship(function(name, descriptor) {
+      if(descriptor.kind === 'hasMany' && descriptor.options['cascadeDestroy']) {
+        snapshot.record.get(name).then(function(childRecords) {
+          childRecords.forEach(function(childRecord) {
+            deletedChildren.push(childRecord.destroyRecord());
+          });
+        });
+      }
+    });
+
+    let deletePromise = new Ember.RSVP.Promise((resolve, reject) => {
+      Ember.RSVP.all(deletedChildren).then(() => {
+        //Delete the parent
+        this.get('db').rel.del(this.getRecordTypeName(type), data).then(() => {
+          resolve();
+        }).catch(err => {
+          reject(err);
+        });
+      });
+    });
+
+    return deletePromise;
   }
 });
