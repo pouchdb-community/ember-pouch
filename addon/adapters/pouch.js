@@ -368,9 +368,7 @@ export default DS.RESTAdapter.extend({
     snapshot.eachRelationship(function(name, descriptor) {
       if(descriptor.kind === 'hasMany' && descriptor.options['cascadeDestroy']) {
         snapshot.record.get(name).then(function(childRecords) {
-          childRecords.forEach(function(childRecord) {
-            deletedChildren.push(childRecord.destroyRecord());
-          });
+          deletedChildren = childRecords.map(childRecord => childRecord.destroyRecord());
         });
       }
     });
