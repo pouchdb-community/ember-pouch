@@ -367,9 +367,10 @@ export default DS.RESTAdapter.extend({
     let deletedChildren = [];
     snapshot.eachRelationship(function(name, descriptor) {
       if(descriptor.kind === 'hasMany' && descriptor.options['cascadeDestroy']) {
-        snapshot.record.get(name).then(function(childRecords) {
-          deletedChildren = childRecords.map(childRecord => childRecord.destroyRecord());
+        let mappedPromise = snapshot.record.get(name).then(function(childRecords) {
+          return Ember.RSVP.all(childRecords.map(childRecord => childRecord.destroyRecord()));
         });
+        deletedChildren.push(mappedPromise);
       }
     });
 
