@@ -1,7 +1,6 @@
-'use strict';
-
+/*jshint node:true*/
 module.exports = {
-  normalizeEntityName: function() {},
+  description: 'Install ember-pouch deps via Bower',
 
   afterInstall: function() {
     return this.addBowerPackagesToProject([

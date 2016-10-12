@@ -1,41 +1,11 @@
 {
   "name": "ember-pouch",
-  "version": "2.0.0",
-  "description": "PouchDB adapter for Ember Data",
-  "homepage": "https://github.com/nolanlawson/ember-pouch",
-  "authors": [
-    "Nolan Lawson <nolan.lawson@gmail.com>"
-  ],
-  "main": "dist/globals/main.js",
-  "keywords": [
-    "PouchDB",
-    "Ember",
-    "Data",
-    "adapter"
-  ],
-  "license": "Apache 2",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
   "dependencies": {
-    "ember": "~1.13.0 || 2.x",
-    "ember-cli-shims": "0.1.0",
-    "ember-cli-test-loader": "0.2.1",
-    "ember-data": "~1.13.0 || 2.x",
-    "ember-load-initializers": "0.1.7",
-    "ember-qunit": "0.4.16",
-    "ember-qunit-notifications": "0.1.0",
-    "ember-resolver": "~0.1.20",
-    "jquery": "1.11.3",
-    "loader.js": "ember-cli/loader.js#3.4.0",
-    "qunit": "~1.20.0",
+    "ember": "~2.8.0",
+    "ember-cli-shims": "0.1.1",
     "pouchdb": "^5.4.5",
     "relational-pouch": "^1.4.4",
-    "phantomjs-polyfill-object-assign": "chuckplantain/phantomjs-polyfill-object-assign",
-    "pouchdb-find": "^0.10.2"
+    "pouchdb-find": "^0.10.3",
+    "phantomjs-polyfill-object-assign": "chuckplantain/phantomjs-polyfill-object-assign"
   }
 }
