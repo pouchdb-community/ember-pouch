@@ -1,5 +1,6 @@
 import { test } from 'qunit';
-import moduleForIntegration from '../../helpers/module-for-acceptance';
+import DS from 'ember-data';
+import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 import Ember from 'ember';
 

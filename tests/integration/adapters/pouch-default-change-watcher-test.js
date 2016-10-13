@@ -1,5 +1,5 @@
 import { test } from 'qunit';
-import moduleForIntegration from '../../helpers/module-for-acceptance';
+import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 import Ember from 'ember';
 
@@ -193,4 +193,3 @@ test('a new record is automatically loaded', function (assert) {
     }, 15);
   }).finally(done);
 });
-

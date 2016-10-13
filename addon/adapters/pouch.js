@@ -3,7 +3,7 @@ import DS from 'ember-data';
 
 import {
   extractDeleteRecord
-} from 'ember-pouch/utils';
+} from '../utils';
 
 const {
   run: {
