@@ -275,7 +275,7 @@ test('creating an associated record stores a reference to it in the parent', fun
   });
 });
 
-test('deleting a parent record deletes the children as well when cascadeDestroy is true', function (assert) {
+test('deleting a parent record deletes the children as well when dependent is set to destroy', function (assert) {
   assert.expect(3);
 
   var done = assert.async();
@@ -308,7 +308,7 @@ test('deleting a parent record deletes the children as well when cascadeDestroy 
   });
 });
 
-test('deleting a parent record should not delete the children when cascadeDestroy is not set', function (assert) {
+test('deleting a parent record should not delete the children when dependent is not set to destroy', function (assert) {
   assert.expect(3);
 
   var done = assert.async();

@@ -362,21 +362,17 @@ export default DS.RESTAdapter.extend({
   deleteRecord: function (store, type, snapshot) {
     this._init(store, type);
     let data = this._recordToData(store, type, snapshot);
-
-    //Delete the children
     let deletedChildren = [];
     snapshot.eachRelationship((name, descriptor) => {
-      if(descriptor.kind === 'hasMany' && descriptor.options['cascadeDestroy']) {
+      if(descriptor.kind === 'hasMany' && descriptor.options.dependent === 'destroy') {
         let mappedPromise = snapshot.record.get(name).then(childRecords => {
           return Ember.RSVP.all(childRecords.map(childRecord => childRecord.destroyRecord()));
         });
         deletedChildren.push(mappedPromise);
       }
     });
-
     let deletePromise = new Ember.RSVP.Promise((resolve, reject) => {
       Ember.RSVP.all(deletedChildren).then(() => {
-        //Delete the parent
         this.get('db').rel.del(this.getRecordTypeName(type), data).then(() => {
           resolve();
         }).catch(err => {
@@ -384,7 +380,6 @@ export default DS.RESTAdapter.extend({
         });
       });
     });
-
     return deletePromise;
   }
 });

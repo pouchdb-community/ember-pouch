@@ -166,13 +166,13 @@ export default Ember.Route.extend({
 ### Removing
 
 #### Cascading Destroy (New)
-When destroying a parent record, you can optionally have the children automatically destroyed as well. To do this, simply set `cascadeDestroy: true` in the `hasMany` options of the relationship on the parent model, as seen below.
+When destroying a parent record, you can optionally have the children automatically destroyed as well. To do this, simply set `dependent: 'destroy'` in the `hasMany` options of the relationship on the parent model, as seen below.
 
 ```javascript
 //Gyro Model (parent of gyro-ingredient)
 export default Model.extend({
   flavor: DS.attr('string'),
-  ingredients: DS.hasMany('gyro-ingredient', { async: true, cascadeDestroy: true })
+  ingredients: DS.hasMany('gyro-ingredient', { async: true, dependent: 'destroy' })
 });
 ```
 _:warning: Note: this calls `destroyRecord()` on the children. This means that you can not roll back the deletion of children as you would be able to do with `deleteRecord()`._

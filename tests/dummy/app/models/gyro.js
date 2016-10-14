@@ -4,5 +4,5 @@ export default DS.Model.extend({
   rev: DS.attr('string'),
 
   flavor: DS.attr('string'),
-  ingredients: DS.hasMany('gyro-ingredient', { async: true, cascadeDestroy: true })
+  ingredients: DS.hasMany('gyro-ingredient', { async: true, dependent: 'destroy' })
 });
