@@ -5,6 +5,7 @@ const {
   get,
 } = Ember;
 const keys = Object.keys || Ember.keys;
+const assign = Object.assign || Ember.assign;
 
 export default DS.RESTSerializer.extend({
   _shouldSerializeHasMany: function() {
@@ -41,9 +42,9 @@ export default DS.RESTSerializer.extend({
       // of the document.
       // This will conflict with any 'attachments' attr in the model. Suggest that
       // #toRawDoc in relational-pouch should allow _attachments to be specified
-      json.attachments = Object.assign({}, json.attachments || {}, json[payloadKey]); // jshint ignore:line
+      json.attachments = assign({}, json.attachments || {}, json[payloadKey]); // jshint ignore:line
       json[payloadKey] = keys(json[payloadKey]).reduce((attr, fileName) => {
-        attr[fileName] = Object.assign({}, json[payloadKey][fileName]); // jshint ignore:line
+        attr[fileName] = assign({}, json[payloadKey][fileName]); // jshint ignore:line
         delete attr[fileName].data;
         delete attr[fileName].content_type;
         return attr;
