@@ -319,10 +319,11 @@ export default DS.RESTAdapter.extend({
   queryRecord: function(store, type, query) {
     return this.query(store, type, query).then(results => {
       let result = {};
-      if(results[pluralize(this.getRecordTypeName(type))].length > 0){
-        result[this.getRecordTypeName(type)] = results[pluralize(this.getRecordTypeName(type))][0];
+      let recordType = this.getRecordTypeName(type);
+      if(results[pluralize(recordType)].length > 0){
+        result[recordType] = results[pluralize(recordType)][0];
       } else {
-        result[this.getRecordTypeName(type)] = null;
+        result[recordType] = null;
       }
       return result;
     });
