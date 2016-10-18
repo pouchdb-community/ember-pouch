@@ -1,16 +1,23 @@
 /* jshint node: true */
 'use strict';
+const browserifyTree = require('./lib/browserify-tree');
 
 module.exports = {
   name: 'ember-pouch',
-  included(app) {
-    const bowerDir = app.bowerDirectory;
-
-    app.import(bowerDir + '/pouchdb/dist/pouchdb.js');
-    app.import(bowerDir + '/relational-pouch/dist/pouchdb.relational-pouch.js');
-    app.import(bowerDir + '/pouchdb-find/dist/pouchdb.find.js');
-    app.import('vendor/shims/pouchdb.js', {
-      exports: { 'pouchdb': [ 'default' ]}
+  treeForVendor(tree) {
+    return browserifyTree(tree, {
+      modules: [
+        {
+          module: 'pouchdb-browser',
+          resolution: 'pouchdb'
+        },
+        'relational-pouch',
+        'pouchdb-find'
+      ],
+      outputFile: 'pouchdb-browserify.js'
     });
+  },
+  included(app) {
+    app.import('vendor/pouchdb-browserify.js');
   }
 };

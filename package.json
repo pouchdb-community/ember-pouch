@@ -55,7 +55,10 @@
     "loader.js": "^4.0.1"
   },
   "dependencies": {
-    "ember-cli-babel": "^5.1.6"
+    "ember-cli-babel": "^5.1.6",
+    "pouchdb-browser": "^6.0.7",
+    "pouchdb-find": "^0.10.3",
+    "relational-pouch": "^1.4.4"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

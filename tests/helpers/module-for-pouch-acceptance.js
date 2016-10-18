@@ -4,7 +4,7 @@ import destroyApp from '../helpers/destroy-app';
 import config from 'dummy/config/environment';
 
 import Ember from 'ember';
-/* globals PouchDB */
+import PouchDB from 'pouchdb';
 
 export default function(name, options = {}) {
   module(name, {
