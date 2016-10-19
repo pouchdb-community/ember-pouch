@@ -149,7 +149,6 @@ export default DS.RESTAdapter.extend({
 
     // else it's new, so update
     this._schema.push(schemaDef);
-
     // check all the subtypes
     // We check the type of `rel.type`because with ember-data beta 19
     // `rel.type` switched from DS.Model to string
@@ -298,15 +297,13 @@ export default DS.RESTAdapter.extend({
   	let inverse = record.type.inverseFor(rel.key, store);
   	if (inverse && inverse.kind === 'belongsTo') {
   		let selector = {'$and': [
-  			{ '_id': {'$gt': rel.type }},
-  			{ '_id': {'$lt': rel.type + '_3' }},//todo: get this from relational-pouch
+  			{ '_id': {'$gt': this.get('db').rel.makeDocID({type: camelize(rel.type)}) }},
+  			{ '_id': {'$lt': this.get('db').rel.makeDocID({type: camelize(rel.type), id: {}}) }},//todo: get this from relational-pouch
   			]};
   		let filter = {};
   		filter['data.' + inverse.name] = record.id;
   		
   		selector['$and'].push(filter);
-  		
-  		console.log('findHasMany', rel.type);
   		
   		return this.get('db').find({selector: selector}).then(a => {
   			let result = {};
