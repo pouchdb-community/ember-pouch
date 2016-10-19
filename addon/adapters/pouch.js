@@ -169,6 +169,19 @@ export default DS.RESTAdapter.extend({
           schemaDef.relations = {};
         }
         schemaDef.relations[rel.key] = relDef;
+        if (rel.kind === 'hasMany') {
+        	let inverse = type.inverseFor(rel.key, store);
+        	if (inverse) {
+	        	if (inverse.kind === 'belongsTo') {
+	        		//console.log(inverse, {fields: ['data.' + inverse.name, '_id']});
+	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
+	        	} else {
+	        		console.warn(type.modelName + " has a relationship with name " + rel.key + " that is many to many with type " + rel.type + ". This is not supported");
+	        	}
+	        } else {
+	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
+	        }
+        }
         self._init(store, relModel);
       }
     });
@@ -280,7 +293,39 @@ export default DS.RESTAdapter.extend({
     this._init(store, type);
     return this.get('db').rel.find(this.getRecordTypeName(type), ids);
   },
-
+  
+  findHasMany: function(store, record, link, rel) {
+  	let inverse = record.type.inverseFor(rel.key, store);
+  	if (inverse && inverse.kind === 'belongsTo') {
+  		let selector = {'$and': [
+  			{ '_id': {'$gt': rel.type }},
+  			{ '_id': {'$lt': rel.type + '_3' }},//todo: get this from relational-pouch
+  			]};
+  		let filter = {};
+  		filter['data.' + inverse.name] = record.id;
+  		
+  		selector['$and'].push(filter);
+  		
+  		console.log('findHasMany', rel.type);
+  		
+  		return this.get('db').find({selector: selector}).then(a => {
+  			let result = {};
+  			result[pluralize(rel.type)] = a.docs.map(d => {
+  				let result = d.data;
+  				result.id = this.get('db').rel.parseDocID(d._id).id;
+  				return result;
+  			});
+  			console.log(result);
+  			return result;
+  		});
+	}
+	else {
+		console.warn("Can't find " + rel.key);
+  		let result = {};
+  		result[pluralize(rel.type)] = [];
+  		return result;//data;
+  	}
+  },
 
   query: function(store, type, query) {
     this._init(store, type);

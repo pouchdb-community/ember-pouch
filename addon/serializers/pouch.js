@@ -9,7 +9,7 @@ const assign = Object.assign || Ember.assign;
 
 export default DS.RESTSerializer.extend({
   _shouldSerializeHasMany: function() {
-    return true;
+    return false;
   },
 
   // This fixes a failure in Ember Data 1.13 where an empty hasMany
