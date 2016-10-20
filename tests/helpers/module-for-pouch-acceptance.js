@@ -12,7 +12,10 @@ export default function(name, options = {}) {
       var done = assert.async();
 
       Ember.RSVP.Promise.resolve().then(() => {
-        return (new PouchDB(config.emberpouch.localDb)).destroy();
+      	let db = new PouchDB(config.emberpouch.localDb);
+      	return db.getIndexes().then(data => {
+      		return Ember.RSVP.all(data.indexes.map(index => index.ddoc ? db.deleteIndex(index) : Ember.RSVP.resolve()));
+      	}).then(() => db.destroy());
       }).then(() => {
         this.application = startApp();
 

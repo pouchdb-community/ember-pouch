@@ -206,7 +206,6 @@ test('can find associated records', function (assert) {
   }).then(() => {
     return this.store().find('taco-soup', 'C');
   }).then((found) => {
-  	debugger;
     assert.equal(found.get('id'), 'C',
       'should have found the requested item');
     return found.get('ingredients');

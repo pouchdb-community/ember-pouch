@@ -296,14 +296,13 @@ export default DS.RESTAdapter.extend({
   findHasMany: function(store, record, link, rel) {
   	let inverse = record.type.inverseFor(rel.key, store);
   	if (inverse && inverse.kind === 'belongsTo') {
-  		let selector = {'$and': [
-  			{ '_id': {'$gt': this.get('db').rel.makeDocID({type: camelize(rel.type)}) }},
-  			{ '_id': {'$lt': this.get('db').rel.makeDocID({type: camelize(rel.type), id: {}}) }},//todo: get this from relational-pouch
-  			]};
-  		let filter = {};
-  		filter['data.' + inverse.name] = record.id;
-  		
-  		selector['$and'].push(filter);
+  		let selector = {
+  			'_id': {
+	  			'$gt': this.get('db').rel.makeDocID({type: camelize(rel.type)}),
+	  			'$lt': this.get('db').rel.makeDocID({type: camelize(rel.type), id: {}}),
+  			},
+  		};
+  		selector['data.' + inverse.name] = record.id;
   		
   		return this.get('db').find({selector: selector}).then(a => {
   			let result = {};
@@ -312,7 +311,6 @@ export default DS.RESTAdapter.extend({
   				result.id = this.get('db').rel.parseDocID(d._id).id;
   				return result;
   			});
-  			console.log(result);
   			return result;
   		});
 	}
