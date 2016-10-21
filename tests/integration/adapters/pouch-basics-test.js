@@ -197,8 +197,8 @@ test('can find associated records', function (assert) {
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
-      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
+      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
+      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
       { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }},
       { _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }},
       { _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }}
@@ -252,7 +252,7 @@ test('creating an associated record stores a reference to it in the parent', fun
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } }
+      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: [] } }
     ]);
   }).then(() => {
     return this.store().findRecord('taco-soup', 'C');
@@ -262,10 +262,10 @@ test('creating an associated record stores a reference to it in the parent', fun
       soup: tacoSoup
     });
 
-    return newIngredient.save();
+    return newIngredient.save().then(() => tacoSoup.save());
   }).then(() => {
-    this.store().unloadAll();
-
+  	this.store().unloadAll();
+  	
     return this.store().findRecord('taco-soup', 'C');
   }).then(tacoSoup => {
     return tacoSoup.get('ingredients');

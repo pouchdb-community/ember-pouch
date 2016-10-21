@@ -160,6 +160,10 @@ export default DS.RESTAdapter.extend({
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
+      	rel.options = rel.options || {};
+      	if (typeof(rel.options.async) === "undefined") {
+      		rel.options.async = true;//default true from https://github.com/emberjs/data/pull/3366
+      	}
         relDef[rel.kind] = {
           type: self.getRecordTypeName(relModel),
           options: rel.options
@@ -168,7 +172,7 @@ export default DS.RESTAdapter.extend({
           schemaDef.relations = {};
         }
         schemaDef.relations[rel.key] = relDef;
-        if (rel.kind === 'hasMany') {
+        if (rel.kind === 'hasMany' && rel.options.dontsave) {
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
 	        	if (inverse.kind === 'belongsTo') {

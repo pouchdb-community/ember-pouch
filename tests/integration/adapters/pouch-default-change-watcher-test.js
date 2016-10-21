@@ -15,9 +15,9 @@ moduleForIntegration('Integration | Adapter | Default Change Watcher', {
       return this.db().bulkDocs([
         { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
         { _id: 'tacoSoup_2_B', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple' } },
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin' } },
-        { _id: 'foodItem_2_Z', data: { name: 'black beans' } }
+        { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'A' } },
+        { _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'A' } },
+        { _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'B' } }
       ]);
     }).finally(done);
   }
