@@ -196,6 +196,103 @@ export default Ember.Route.extend({
 });
 ```
 
+### Query and QueryRecord
+
+query and queryRecord is relying on [pouchdb-find](https://github.com/nolanlawson/pouchdb-find)
+
+### db.createIndex(index [, callback])
+
+Create an index if it doesn't exist.
+
+```javascript
+// app/adapters/application.js
+function createDb() {
+  ...
+
+  db.createIndex({
+    index: {
+      fields: ['data.name']
+    }
+  }).then((result) => {
+    // {'result': 'created'} index was created
+  });
+
+  return db;
+};
+```
+
+### store.query(model, options)
+
+Find all docs where doc.name === 'Mario'
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: { name: 'Mario' }
+    });
+  }
+});
+```
+
+Find all docs where doc.name === 'Mario' and doc.debut > 1990:
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario'
+        debut: { $gt: 1990 }
+      }
+    });
+  }
+});
+```
+
+Sorted by doc.debut descending.
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario'
+        sort: [
+          { debut: 'desc' }
+        ]
+      }
+    })
+  }
+});
+```
+
+### store.queryRecord(model, options)
+
+Find one document where doc.name === 'Mario'
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.queryRecord('smasher',  {
+      filter: { name: 'Mario' }
+    });
+  }
+});
+```
+
 ## Attachments
 
 `Ember-Pouch` provides an `attachment` transform for your models, which makes working with attachments as simple as working with any other field.
