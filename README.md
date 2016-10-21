@@ -198,7 +198,7 @@ export default Ember.Route.extend({
 
 ### Query and QueryRecord
 
-query and queryRecord is relying on [pouchdb-find](https://github.com/nolanlawson/pouchdb-find)
+query and queryRecord are relying on [pouchdb-find](https://github.com/nolanlawson/pouchdb-find)
 
 ### db.createIndex(index [, callback])
 
@@ -498,7 +498,9 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
 
 ## Changelog
-
+* **4.0.2**
+  - Updated ember-cli fixes and some minor changes [#147](https://github.com/nolanlawson/ember-pouch/pull/147)
+  - Added Version badge and Ember Observer badge [#142](https://github.com/nolanlawson/ember-pouch/pull/142)
 * **4.0.0**
   - Add support for Attachments [#135](https://github.com/nolanlawson/ember-pouch/pull/135)
   - Implement glue code for query and queryRecord using pouchdb-find [#130](https://github.com/nolanlawson/ember-pouch/pull/130)
