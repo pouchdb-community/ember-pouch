@@ -8,20 +8,23 @@ const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
 
 export default DS.RESTSerializer.extend({
-  _shouldSerializeHasMany: function() {
-    return false;
+  _shouldSerializeHasMany: function(snapshot, key, relationship) {
+  	let result = !relationship.options.dontsave;
+    return result;
   },
 
   // This fixes a failure in Ember Data 1.13 where an empty hasMany
   // was saving as undefined rather than [].
   serializeHasMany(snapshot, json, relationship) {
-    this._super.apply(this, arguments);
-
-    const key = relationship.key;
-
-    if (!json[key]) {
-      json[key] = [];
-    }
+  	if (this._shouldSerializeHasMany(snapshot, relationship.key, relationship)) {
+	    this._super.apply(this, arguments);
+	
+	    const key = relationship.key;
+	
+	    if (!json[key]) {
+	      json[key] = [];
+	    }
+	}
   },
 
   _isAttachment(attribute) {

@@ -12,5 +12,9 @@ module.exports = {
     app.import('vendor/shims/pouchdb.js', {
       exports: { 'pouchdb': [ 'default' ]}
     });
+  },
+  
+  isDevelopingAddon: function() {
+  	return true;
   }
 };
