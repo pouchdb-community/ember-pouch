@@ -1,15 +1,21 @@
-import { test } from 'qunit';
+import { module, test } from 'qunit';
+
 import DS from 'ember-data';
 import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 import Ember from 'ember';
 
+import config from 'dummy/config/environment';
+
 /*
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
 
-moduleForIntegration('Integration | Adapter | Basic CRUD Ops');
+		
+moduleForIntegration('Integration | Adapter | Basic CRUD Ops', {}, function() {
 
+let allTests = function() {
+	
 test('can find all', function (assert) {
   assert.expect(3);
 
@@ -166,9 +172,9 @@ test('can query one associated records', function (assert) {
       return this.db().bulkDocs([
         { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
         { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
-        { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
+        { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }},
+        { _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }},
+        { _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }}
       ]);
     });
   }).then(() => {
@@ -337,4 +343,19 @@ test('delete an existing record', function (assert) {
     assert.ok(false, 'error in test:' + error);
     done();
   });
+});
+
+};
+
+	module('dont save hasMany', {
+		beforeEach: function() {
+			config.emberpouch.dontsavehasmany = true;
+		}
+	}, allTests);
+	
+	module('save hasMany', {
+		beforeEach: function() {
+			config.emberpouch.dontsavehasmany = false;
+		}
+	}, allTests);
 });

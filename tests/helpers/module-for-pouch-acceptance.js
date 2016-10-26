@@ -6,7 +6,7 @@ import config from 'dummy/config/environment';
 import Ember from 'ember';
 /* globals PouchDB */
 
-export default function(name, options = {}) {
+export default function(name, options = {}, nested = undefined) {
   module(name, {
     beforeEach(assert) {
       var done = assert.async();
@@ -51,5 +51,5 @@ export default function(name, options = {}) {
         options.afterEach.apply(this, arguments);
       }
     }
-  });
+  }, nested);
 }

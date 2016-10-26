@@ -146,7 +146,9 @@ export default DS.RESTAdapter.extend({
     if (type.documentType) {
       schemaDef['documentType'] = type.documentType;
     }
-
+    
+    let config = Ember.getOwner(this).resolveRegistration('config:environment');
+    let dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
     // else it's new, so update
     this._schema.push(schemaDef);
     // check all the subtypes
@@ -172,7 +174,7 @@ export default DS.RESTAdapter.extend({
           schemaDef.relations = {};
         }
         schemaDef.relations[rel.key] = relDef;
-        if (rel.kind === 'hasMany' && rel.options.dontsave) {
+        if (rel.kind === 'hasMany' && (rel.options.dontsave || typeof(rel.options.dontsave) === 'undefined' && dontsavedefault)) {
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
 	        	if (inverse.kind === 'belongsTo') {
