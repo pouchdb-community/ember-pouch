@@ -162,21 +162,14 @@ export default DS.RESTAdapter.extend({
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
-      	rel.options = rel.options || {};
-      	if (typeof(rel.options.async) === "undefined") {
-      		rel.options.async = true;//default true from https://github.com/emberjs/data/pull/3366
+      	let options = Object.create(rel.options || {});
+      	if (typeof(options.async) === "undefined") {
+      		options.async = true;//default true from https://github.com/emberjs/data/pull/3366
       	}
-        relDef[rel.kind] = {
-          type: self.getRecordTypeName(relModel),
-          options: rel.options
-        };
-        if (!schemaDef.relations) {
-          schemaDef.relations = {};
-        }
-        schemaDef.relations[rel.key] = relDef;
-        if (rel.kind === 'hasMany' && (rel.options.dontsave || typeof(rel.options.dontsave) === 'undefined' && dontsavedefault)) {
+        if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
+        		options.inverse = camelize(rel.type);
 	        	if (inverse.kind === 'belongsTo') {
 	        		//console.log(inverse, {fields: ['data.' + inverse.name, '_id']});
 	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
@@ -187,6 +180,14 @@ export default DS.RESTAdapter.extend({
 	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
 	        }
         }
+        relDef[rel.kind] = {
+          type: self.getRecordTypeName(relModel),
+          options: options
+        };
+        if (!schemaDef.relations) {
+          schemaDef.relations = {};
+        }
+        schemaDef.relations[rel.key] = relDef;
         self._init(store, relModel);
       }
     });
@@ -302,15 +303,8 @@ export default DS.RESTAdapter.extend({
   findHasMany: function(store, record, link, rel) {
   	let inverse = record.type.inverseFor(rel.key, store);
   	if (inverse && inverse.kind === 'belongsTo') {
-  		let selector = {
-  			'_id': {
-	  			'$gt': this.get('db').rel.makeDocID({type: camelize(rel.type)}),
-	  			'$lt': this.get('db').rel.makeDocID({type: camelize(rel.type), id: {}}),
-  			},
-  		};
-  		selector['data.' + inverse.name] = record.id;
-  		
-  		return this.get('db').find({selector: selector}).then(a => {
+  		return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id).then(a => {
+  			//move this to relational-pouch?
   			let result = {};
   			result[pluralize(rel.type)] = a.docs.map(d => {
   				let result = d.data;
