@@ -69,5 +69,17 @@ export default DS.RESTSerializer.extend({
       }
     });
     return attributes;
+  },
+  
+  extractRelationships(modelClass) {
+  	let relationships = this._super(...arguments);
+
+  	modelClass.eachRelationship((key, relationshipMeta) => {
+  	  if (relationshipMeta.options.dontsave) {
+  	  	relationships[key] = { links: { related: key } };
+  	  }
+  	});
+  	
+  	return relationships;
   }
 });
