@@ -134,19 +134,35 @@ test('can query multi-field queries', function (assert) {
   });
 });
 
+function savingHasMany() {
+	return !config.emberpouch.dontsavehasmany;
+}
+
+function getDocsForRelations() {
+	let result = [];
+	
+	let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
+	if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
+	result.push(c);
+	
+	let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
+	if (savingHasMany()) { d.data.ingredients = ['Z']; }
+	result.push(d);
+	
+	result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
+	result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
+	result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
+    
+    return result;
+}
+
 test('can query one record', function (assert) {
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
       fields: ['data.flavor'] }
     }).then(() => {
-      return this.db().bulkDocs([
-        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
-        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
-        { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
-      ]);
+      return this.db().bulkDocs(getDocsForRelations());
     });
   }).then(() => {
     return this.store().queryRecord('taco-soup', {
@@ -169,13 +185,7 @@ test('can query one associated records', function (assert) {
     return this.db().createIndex({ index: {
       fields: ['data.flavor'] }
     }).then(() => {
-      return this.db().bulkDocs([
-        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
-        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }},
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }},
-        { _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }}
-      ]);
+      return this.db().bulkDocs(getDocsForRelations());
     });
   }).then(() => {
     return this.store().queryRecord('taco-soup', {
@@ -202,13 +212,7 @@ test('can find associated records', function (assert) {
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    return this.db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
-      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-      { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }},
-      { _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }},
-      { _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }}
-    ]);
+    return this.db().bulkDocs(getDocsForRelations());
   }).then(() => {
     return this.store().find('taco-soup', 'C');
   }).then((found) => {
