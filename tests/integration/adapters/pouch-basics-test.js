@@ -351,15 +351,28 @@ test('delete an existing record', function (assert) {
 
 };
 
+	let syncAsync = function() {
+		module('async', {
+			beforeEach: function() {
+				config.emberpouch.async = true;
+			}
+		}, allTests);
+		module('sync', {
+			beforeEach: function() {
+				config.emberpouch.async = false;
+			}
+		}, allTests);
+	};
+	
 	module('dont save hasMany', {
 		beforeEach: function() {
 			config.emberpouch.dontsavehasmany = true;
 		}
-	}, allTests);
+	}, syncAsync);
 	
 	module('save hasMany', {
 		beforeEach: function() {
 			config.emberpouch.dontsavehasmany = false;
 		}
-	}, allTests);
+	}, syncAsync);
 });

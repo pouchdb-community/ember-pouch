@@ -164,7 +164,7 @@ export default DS.RESTAdapter.extend({
       if (relModel) {
       	let options = Object.create(rel.options || {});
       	if (typeof(options.async) === "undefined") {
-      		options.async = true;//default true from https://github.com/emberjs/data/pull/3366
+      		options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
       	}
         if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
         	let inverse = type.inverseFor(rel.key, store);
