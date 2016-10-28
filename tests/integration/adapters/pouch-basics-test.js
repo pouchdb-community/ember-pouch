@@ -17,6 +17,7 @@ moduleForIntegration('Integration | Adapter | Basic CRUD Ops', {}, function() {
 let allTests = function() {
 	
 test('can find all', function (assert) {
+	console.log('AAAAAAA');
   assert.expect(3);
 
   var done = assert.async();
@@ -34,12 +35,7 @@ test('can find all', function (assert) {
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('flavor'), ['al pastor', 'black bean'],
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can find one', function (assert) {

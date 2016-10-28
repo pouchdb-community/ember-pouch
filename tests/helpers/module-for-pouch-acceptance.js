@@ -6,17 +6,29 @@ import config from 'dummy/config/environment';
 import Ember from 'ember';
 /* globals PouchDB */
 
+function promiseToRunLater(callback, timeout) {
+  return new Ember.RSVP.Promise((resolve) => {
+    Ember.run.later(() => {
+      callback();
+      resolve();
+    }, timeout);
+  });
+}
+
 export default function(name, options = {}, nested = undefined) {
   module(name, {
     beforeEach(assert) {
       var done = assert.async();
 
-      Ember.RSVP.Promise.resolve().then(() => {
+      setTimeout(() => {Ember.RSVP.Promise.resolve().then(() => {
+      	console.log('starting1');
       	let db = new PouchDB(config.emberpouch.localDb);
+      	
       	return db.getIndexes().then(data => {
       		return Ember.RSVP.all(data.indexes.map(index => index.ddoc ? db.deleteIndex(index) : Ember.RSVP.resolve()));
-      	}).then(() => db.destroy());
+      	}).then(() => db.destroy(), () => console.log('errors????', ...arguments));
       }).then(() => {
+      	console.log('starting2');
         this.application = startApp();
 
         this.lookup = function (item) {
@@ -42,10 +54,14 @@ export default function(name, options = {}, nested = undefined) {
           options.beforeEach.apply(this, arguments);
         }
       }).finally(done);
+  }, 20000)
     },
 
     afterEach() {
-      destroyApp(this.application);
+      if (this.application) {
+      	console.log('stopping');
+        destroyApp(this.application);
+	  }
 
       if (options.afterEach) {
         options.afterEach.apply(this, arguments);
