@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import getOwner from 'ember-getowner-polyfill';
 
 import {
   extractDeleteRecord
@@ -147,7 +148,7 @@ export default DS.RESTAdapter.extend({
       schemaDef['documentType'] = type.documentType;
     }
     
-    let config = Ember.getOwner(this).resolveRegistration('config:environment');
+    let config = getOwner(this).resolveRegistration('config:environment');
     let dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
     // else it's new, so update
     this._schema.push(schemaDef);
