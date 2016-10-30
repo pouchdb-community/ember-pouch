@@ -51,7 +51,7 @@ test('a loaded instance automatically reflects directly-made database changes', 
       var alreadyLoadedSoupB = this.store().peekRecord('taco-soup', 'B');
       assert.equal(alreadyLoadedSoupB.get('flavor'), 'carnitas',
         'the loaded instance should automatically reflect the change in the database');
-    }, 15);
+    }, 100);
   }).finally(done);
 });
 

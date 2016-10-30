@@ -54,15 +54,11 @@ test('can find one', function (assert) {
       'should have found the requested item');
     assert.deepEqual(found.get('flavor'), 'black bean',
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can query with sort', function (assert) {
+  assert.expect(3);
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
@@ -87,15 +83,11 @@ test('can query with sort', function (assert) {
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('name'), ['Donkey Kong', 'Jigglypuff', 'Link', 'Mario','Pikachu'],
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can query multi-field queries', function (assert) {
+  assert.expect(3);
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
@@ -122,12 +114,7 @@ test('can query multi-field queries', function (assert) {
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('name'), ['Mario', 'Donkey Kong'],
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 function savingHasMany() {
@@ -153,6 +140,8 @@ function getDocsForRelations() {
 }
 
 test('can query one record', function (assert) {
+  assert.expect(1);
+
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
@@ -167,15 +156,11 @@ test('can query one record', function (assert) {
   }).then((found) => {
     assert.equal(found.get('flavor'), 'al pastor',
       'should have found the requested item');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can query one associated records', function (assert) {
+  assert.expect(3);
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
@@ -195,12 +180,7 @@ test('can query one associated records', function (assert) {
       'should have found both associated items');
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple', 'pork loin'],
       'should have fully loaded the associated items');
-      done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can find associated records', function (assert) {
@@ -220,12 +200,7 @@ test('can find associated records', function (assert) {
       'should have found both associated items');
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple', 'pork loin'],
       'should have fully loaded the associated items');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('create a new record', function (assert) {
@@ -244,12 +219,7 @@ test('create a new record', function (assert) {
     assert.equal(newDoc._rev, recordInStore.get('rev'),
       'should have associated the ember-data record with the rev for the new record');
 
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('creating an associated record stores a reference to it in the parent', function (assert) {
@@ -278,8 +248,7 @@ test('creating an associated record stores a reference to it in the parent', fun
   }).then(foundIngredients => {
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple'],
       'should have fully loaded the associated items');
-    done();
-  });
+  }).finally(done);
 });
 
 // This test fails due to a bug in ember data
@@ -309,12 +278,7 @@ if (!DS.VERSION.match(/^2\.0/)) {
       assert.equal(updatedDoc._rev, recordInStore.get('rev'),
         'should have associated the ember-data record with the updated rev');
 
-      done();
-    }).catch((error) => {
-      console.error('error in test', error);
-      assert.ok(false, 'error in test:' + error);
-      done();
-    });
+    }).finally(done);
   });
 }
 
@@ -337,12 +301,7 @@ test('delete an existing record', function (assert) {
     assert.ok(!doc, 'document should no longer exist');
   }, (result) => {
     assert.equal(result.status, 404, 'document should no longer exist');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 };

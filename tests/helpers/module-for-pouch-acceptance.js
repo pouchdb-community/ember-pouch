@@ -4,7 +4,7 @@ import destroyApp from '../helpers/destroy-app';
 import config from 'dummy/config/environment';
 
 import Ember from 'ember';
-/* globals PouchDB */
+/* globals PouchDB Qunit */
 
 function promiseToRunLater(callback, timeout) {
   return new Ember.RSVP.Promise((resolve) => {
@@ -15,21 +15,43 @@ function promiseToRunLater(callback, timeout) {
   });
 }
 
+function serializePromises(promiseFactories) {
+  var chain = Ember.RSVP.resolve();
+  var overallRes = new Array(promiseFactories.length);
+  promiseFactories.forEach(function (promiseFactory, i) {
+    chain = chain.then(promiseFactories[i]).then(function (res) {
+      overallRes[i] = res;
+    });
+  });
+  return chain.then(function () {
+    return overallRes;
+  });
+};
+
 export default function(name, options = {}, nested = undefined) {
   module(name, {
     beforeEach(assert) {
+    	//console.log('expect + 1');
+      //assert.expect(1);
       var done = assert.async();
 
-      setTimeout(() => {Ember.RSVP.Promise.resolve().then(() => {
-      	console.log('starting1');
+      return /*promiseToRunLater(() => {*/ Ember.RSVP.Promise.resolve().then(() => {
+      	//throw "test";
+
+      	console.log('starting1', QUnit.config.current.testName);
       	let db = new PouchDB(config.emberpouch.localDb);
       	
       	return db.getIndexes().then(data => {
-      		return Ember.RSVP.all(data.indexes.map(index => index.ddoc ? db.deleteIndex(index) : Ember.RSVP.resolve()));
-      	}).then(() => db.destroy(), () => console.log('errors????', ...arguments));
+      		console.log('indexes', data.indexes.length);
+      		return serializePromises(data.indexes.map(
+      		index => {
+      			console.log(index.ddoc);
+      			return index.ddoc ? (() => db.deleteIndex(index)) : (() => Ember.RSVP.resolve())
+      		}));
+      	}).then(() => console.log('indexes gone'))
+      	.then(() => db.destroy()).then(() => console.log('destroyed', QUnit.config.current.testName));
       }).then(() => {
-      	console.log('starting2');
-        this.application = startApp();
+      	this.application = startApp();
 
         this.lookup = function (item) {
           return this.application.__container__.lookup(item);
@@ -53,8 +75,9 @@ export default function(name, options = {}, nested = undefined) {
         if (options.beforeEach) {
           options.beforeEach.apply(this, arguments);
         }
-      }).finally(done);
-  }, 20000)
+        done();
+      });//.finally(done);
+//  }, 10);
     },
 
     afterEach() {

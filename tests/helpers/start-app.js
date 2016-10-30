@@ -9,10 +9,11 @@ export default function startApp(attrs) {
   attributes = Ember.merge(attributes, attrs); // use defaults, but you can override;
 
   Ember.run(() => {
+  	console.log('run started');
     application = Application.create(attributes);
     application.setupForTesting();
     application.injectTestHelpers();
   });
-
+console.log('run scheduled');
   return application;
 }
