@@ -2,18 +2,19 @@ import { module } from 'qunit';
 import startApp from '../helpers/start-app';
 import destroyApp from '../helpers/destroy-app';
 import config from 'dummy/config/environment';
+import QUnit from 'qunit';
 
 import Ember from 'ember';
-/* globals PouchDB Qunit */
+/* globals PouchDB */
 
-function promiseToRunLater(callback, timeout) {
-  return new Ember.RSVP.Promise((resolve) => {
-    Ember.run.later(() => {
-      callback();
-      resolve();
-    }, timeout);
-  });
-}
+//function promiseToRunLater(callback, timeout) {
+//  return new Ember.RSVP.Promise((resolve) => {
+//    Ember.run.later(() => {
+//      callback();
+//      resolve();
+//    }, timeout);
+//  });
+//}
 
 function serializePromises(promiseFactories) {
   var chain = Ember.RSVP.resolve();
@@ -26,7 +27,7 @@ function serializePromises(promiseFactories) {
   return chain.then(function () {
     return overallRes;
   });
-};
+}
 
 export default function(name, options = {}, nested = undefined) {
   module(name, {
@@ -46,7 +47,7 @@ export default function(name, options = {}, nested = undefined) {
       		return serializePromises(data.indexes.map(
       		index => {
       			console.log(index.ddoc);
-      			return index.ddoc ? (() => db.deleteIndex(index)) : (() => Ember.RSVP.resolve())
+      			return index.ddoc ? (() => db.deleteIndex(index)) : (() => Ember.RSVP.resolve());
       		}));
       	}).then(() => console.log('indexes gone'))
       	.then(() => db.destroy()).then(() => console.log('destroyed', QUnit.config.current.testName));
