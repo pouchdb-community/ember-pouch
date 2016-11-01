@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import getOwner from 'ember-getowner-polyfill';
 
 const {
   get,
@@ -8,8 +9,21 @@ const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
 
 export default DS.RESTSerializer.extend({
+  
+  init: function() {
+  	this._super(...arguments);
+  	
+    let config = getOwner(this).resolveRegistration('config:environment');
+  	this.dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
+  },
+  
+  _getDontsave(relationship) {
+  	return !Ember.isEmpty(relationship.options.dontsave) ? relationship.options.dontsave : this.dontsavedefault;
+  },
+
   _shouldSerializeHasMany: function(snapshot, key, relationship) {
-  	let result = !relationship.options.dontsave;
+  	let dontsave = this._getDontsave(relationship);
+  	let result = !dontsave;
     return result;
   },
 
@@ -75,7 +89,7 @@ export default DS.RESTSerializer.extend({
   	let relationships = this._super(...arguments);
 
   	modelClass.eachRelationship((key, relationshipMeta) => {
-  	  if (relationshipMeta.options.dontsave) {
+  	  if (this._getDontsave(relationshipMeta)) {
   	  	relationships[key] = { links: { related: key } };
   	  }
   	});
