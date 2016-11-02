@@ -89,7 +89,7 @@ export default DS.RESTSerializer.extend({
   	let relationships = this._super(...arguments);
 
   	modelClass.eachRelationship((key, relationshipMeta) => {
-  	  if (this._getDontsave(relationshipMeta)) {
+  	  if (relationshipMeta.kind === 'hasMany' && this._getDontsave(relationshipMeta)) {
   	  	relationships[key] = { links: { related: key } };
   	  }
   	});
