@@ -498,6 +498,8 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.0.3**
+  - Fixes [#158](https://github.com/nolanlawson/ember-pouch/pull/158)
 * **4.0.2**
   - Updated ember-cli fixes and some minor changes [#147](https://github.com/nolanlawson/ember-pouch/pull/147)
   - Added Version badge and Ember Observer badge [#142](https://github.com/nolanlawson/ember-pouch/pull/142)
