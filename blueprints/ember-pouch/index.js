@@ -1,6 +1,7 @@
 /*jshint node:true*/
 module.exports = {
   description: 'Install ember-pouch deps via Bower',
+  normalizeEntityName: function() {},
 
   afterInstall: function() {
     return this.addBowerPackagesToProject([
