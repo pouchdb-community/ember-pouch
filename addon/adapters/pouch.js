@@ -170,10 +170,14 @@ export default DS.RESTAdapter.extend({
         if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
-        		options.inverse = camelize(rel.type);
 	        	if (inverse.kind === 'belongsTo') {
 	        		//console.log(inverse, {fields: ['data.' + inverse.name, '_id']});
 	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
+	        		if (options.async) {
+	        			return;
+	        		} else {
+	        			options.queryInverse = inverse.name;
+	        		}
 	        	} else {
 	        		console.warn(type.modelName + " has a relationship with name " + rel.key + " that is many to many with type " + rel.type + ". This is not supported");
 	        	}
