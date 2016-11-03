@@ -33,6 +33,8 @@
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.2",
+    "broccoli-plugin": "^1.2.2",
+    "broccoli-watchify": "^1.0.0",
     "ember-cli": "2.8.0",
     "ember-cli-app-version": "^1.0.0",
     "ember-cli-dependency-checker": "^1.2.0",
@@ -53,7 +55,10 @@
     "loader.js": "^4.0.1"
   },
   "dependencies": {
-    "ember-cli-babel": "^5.1.6"
+    "ember-cli-babel": "^5.1.6",
+    "pouchdb-browser": "^6.0.7",
+    "pouchdb-find": "^0.10.3",
+    "relational-pouch": "^1.4.4"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
