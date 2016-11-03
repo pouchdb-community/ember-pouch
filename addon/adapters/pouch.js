@@ -163,18 +163,20 @@ export default DS.RESTAdapter.extend({
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
-      	let options = Object.create(rel.options || {});
-      	if (typeof(options.async) === "undefined") {
-      		options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
+      	let includeRel = true;
+      	rel.options = rel.options || {}
+      	if (typeof(rel.options.async) === "undefined") {
+      		rel.options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
       	}
+      	let options = Object.create(rel.options);
         if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
 	        	if (inverse.kind === 'belongsTo') {
-	        		//console.log(inverse, {fields: ['data.' + inverse.name, '_id']});
+	        		console.log('created index for ' + type.modelName + "." + rel.key);
 	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
 	        		if (options.async) {
-	        			return;
+	        			includeRel = false;
 	        		} else {
 	        			options.queryInverse = inverse.name;
 	        		}
@@ -185,14 +187,17 @@ export default DS.RESTAdapter.extend({
 	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
 	        }
         }
-        relDef[rel.kind] = {
-          type: self.getRecordTypeName(relModel),
-          options: options
-        };
-        if (!schemaDef.relations) {
-          schemaDef.relations = {};
-        }
-        schemaDef.relations[rel.key] = relDef;
+        
+        if (includeRel) {
+	        relDef[rel.kind] = {
+	          type: self.getRecordTypeName(relModel),
+	          options: options
+	        };
+	        if (!schemaDef.relations) {
+	          schemaDef.relations = {};
+	        }
+	        schemaDef.relations[rel.key] = relDef;
+	    }
         self._init(store, relModel);
       }
     });
@@ -308,16 +313,7 @@ export default DS.RESTAdapter.extend({
   findHasMany: function(store, record, link, rel) {
   	let inverse = record.type.inverseFor(rel.key, store);
   	if (inverse && inverse.kind === 'belongsTo') {
-  		return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id).then(a => {
-  			//move this to relational-pouch?
-  			let result = {};
-  			result[pluralize(rel.type)] = a.docs.map(d => {
-  				let result = d.data;
-  				result.id = this.get('db').rel.parseDocID(d._id).id;
-  				return result;
-  			});
-  			return result;
-  		});
+  		return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
 	}
 	else {
 		console.warn("Can't find " + rel.key);
@@ -341,24 +337,7 @@ export default DS.RESTAdapter.extend({
       queryParams.sort = this._buildSort(query.sort);
     }
 
-    return db.find(queryParams).then(function (payload) {
-      if (typeof payload === 'object' && payload !== null) {
-        var plural = pluralize(recordTypeName);
-        var results = {};
-
-        var rows = payload.docs.map((row) => {
-          var parsedId = db.rel.parseDocID(row._id);
-          if (!Ember.isEmpty(parsedId.id)) {
-            row.data.id = parsedId.id;
-            return row.data;
-          }
-        });
-
-        results[plural] = rows;
-
-        return results;
-      }
-    });
+    return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
   },
 
   queryRecord: function(store, type, query) {
