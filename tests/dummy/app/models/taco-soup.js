@@ -4,5 +4,5 @@ export default DS.Model.extend({
   rev: DS.attr('string'),
 
   flavor: DS.attr('string'),
-  ingredients: DS.hasMany('food-item', { dontsave: true })
+  ingredients: DS.hasMany('food-item')
 });
