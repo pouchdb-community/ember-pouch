@@ -111,7 +111,7 @@ test('a deleted record is automatically unloaded', function (assert) {
     return promiseToRunLater(() => {
       assert.equal(null, this.store().peekRecord('taco-soup', 'B'),
         'the corresponding instance should no longer be loaded');
-    }, 15);
+    }, 100);
   }).finally(done);
 });
 

@@ -1,8 +1,7 @@
 import DS from 'ember-data';
+import Model from '../model';
 
-export default DS.Model.extend({
-  rev: DS.attr('string'),
-
+export default Model.extend({
   coverImage: DS.attr('attachment'),
   photos: DS.attr('attachments')
 });

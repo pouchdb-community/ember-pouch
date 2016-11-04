@@ -16,18 +16,18 @@ import Ember from 'ember';
 //  });
 //}
 
-function serializePromises(promiseFactories) {
-  var chain = Ember.RSVP.resolve();
-  var overallRes = new Array(promiseFactories.length);
-  promiseFactories.forEach(function (promiseFactory, i) {
-    chain = chain.then(promiseFactories[i]).then(function (res) {
-      overallRes[i] = res;
-    });
-  });
-  return chain.then(function () {
-    return overallRes;
-  });
-}
+//function serializePromises(promiseFactories) {
+//  var chain = Ember.RSVP.resolve();
+//  var overallRes = new Array(promiseFactories.length);
+//  promiseFactories.forEach(function (promiseFactory, i) {
+//    chain = chain.then(promiseFactories[i]).then(function (res) {
+//      overallRes[i] = res;
+//    });
+//  });
+//  return chain.then(function () {
+//    return overallRes;
+//  });
+//}
 
 export default function(name, options = {}, nested = undefined) {
   module(name, {
@@ -44,10 +44,10 @@ export default function(name, options = {}, nested = undefined) {
       	
       	return db.getIndexes().then(data => {
       		console.log('indexes', data.indexes.length);
-      		return serializePromises(data.indexes.map(
+      		return Ember.RSVP.all(data.indexes.map(
       		index => {
       			console.log(index.ddoc);
-      			return index.ddoc ? (() => db.deleteIndex(index)) : (() => Ember.RSVP.resolve());
+      			return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
       		}));
       	}).then(() => console.log('indexes gone'))
       	.then(() => db.destroy()).then(() => console.log('destroyed', QUnit.config.current.testName));
