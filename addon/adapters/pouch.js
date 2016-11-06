@@ -173,13 +173,10 @@ export default DS.RESTAdapter.extend({
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
 	        	if (inverse.kind === 'belongsTo') {
-	        		console.log('created index for ' + type.modelName + "." + rel.key);
 	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
 	        		if (options.async) {
-	        			console.log('async');
 	        			includeRel = false;
 	        		} else {
-	        			console.log('sync');
 	        			options.queryInverse = inverse.name;
 	        		}
 	        	} else {
@@ -188,8 +185,6 @@ export default DS.RESTAdapter.extend({
 	        } else {
 	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
 	        }
-        } else if (rel.kind === 'hasMany') {
-        	console.log('save', options.async);
         }
         
         if (includeRel) {

@@ -17,7 +17,6 @@ moduleForIntegration('Integration | Adapter | Basic CRUD Ops', {}, function() {
 let allTests = function() {
 	
 test('can find all', function (assert) {
-	console.log('AAAAAAA');
   assert.expect(3);
 
   var done = assert.async();

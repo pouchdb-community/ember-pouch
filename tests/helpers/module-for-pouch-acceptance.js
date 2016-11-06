@@ -2,55 +2,25 @@ import { module } from 'qunit';
 import startApp from '../helpers/start-app';
 import destroyApp from '../helpers/destroy-app';
 import config from 'dummy/config/environment';
-import QUnit from 'qunit';
 
 import Ember from 'ember';
 /* globals PouchDB */
 
-//function promiseToRunLater(callback, timeout) {
-//  return new Ember.RSVP.Promise((resolve) => {
-//    Ember.run.later(() => {
-//      callback();
-//      resolve();
-//    }, timeout);
-//  });
-//}
-
-//function serializePromises(promiseFactories) {
-//  var chain = Ember.RSVP.resolve();
-//  var overallRes = new Array(promiseFactories.length);
-//  promiseFactories.forEach(function (promiseFactory, i) {
-//    chain = chain.then(promiseFactories[i]).then(function (res) {
-//      overallRes[i] = res;
-//    });
-//  });
-//  return chain.then(function () {
-//    return overallRes;
-//  });
-//}
-
 export default function(name, options = {}, nested = undefined) {
   module(name, {
     beforeEach(assert) {
-    	//console.log('expect + 1');
-      //assert.expect(1);
       var done = assert.async();
 
-      return /*promiseToRunLater(() => {*/ Ember.RSVP.Promise.resolve().then(() => {
-      	//throw "test";
+      Ember.RSVP.Promise.resolve().then(() => {
 
-      	console.log('starting1', QUnit.config.current.testName);
       	let db = new PouchDB(config.emberpouch.localDb);
       	
       	return db.getIndexes().then(data => {
-      		console.log('indexes', data.indexes.length);
       		return Ember.RSVP.all(data.indexes.map(
       		index => {
-      			console.log(index.ddoc);
       			return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
       		}));
-      	}).then(() => console.log('indexes gone'))
-      	.then(() => db.destroy()).then(() => console.log('destroyed', QUnit.config.current.testName));
+      	}).then(() => db.destroy());
       }).then(() => {
       	this.application = startApp();
 
@@ -77,13 +47,11 @@ export default function(name, options = {}, nested = undefined) {
           options.beforeEach.apply(this, arguments);
         }
         done();
-      });//.finally(done);
-//  }, 10);
+      });
     },
 
     afterEach() {
       if (this.application) {
-      	console.log('stopping');
         destroyApp(this.application);
 	  }
 
