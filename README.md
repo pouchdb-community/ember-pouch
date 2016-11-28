@@ -130,7 +130,19 @@ ENV.emberPouch.remoteDb = 'http://localhost:5984/my_couch';
 
 EmberPouch supports both `hasMany` and `belongsTo` relationships.
 
-### Saving
+### Don't save hasMany child ids
+
+To be more in line with the normal ember data way of saving `hasMany` - `belongsTo` relationships, ember-pouch now has an option to not save the child ids on the `hasMany` side. This prevents the extra need to save the `hasMany` side as explained below. For a more detailed explanation please read the [relational-pouch documentation](https://github.com/nolanlawson/relational-pouch#dont-save-hasmany)
+
+This new mode can be selected for a `hasMany` relationship by specifying the option `dontsave: true` on the relationship. An application wide setting named `ENV.emberpouch.dontsavehasmany` can also be set to `true` to make all `hasMany` relationships behave this way.
+
+Using this mode does impose a slight runtime overhead, since this will use `db.find` and database indexes to search for the child ids. The indexes are created automatically for you. But large changes to the model might require you to clean up old, unused indexes.
+
+### Saving child ids
+
+When you do save child ids on the `hasMany` side, you have to follow the directions below to make sure the data is saved correctly
+
+#### Adding entries
 
 When saving a `hasMany` - `belongsTo` relationship, both sides of the relationship (the child and the parent) must be saved. Note that the parent needs to have been saved at least once prior to adding children to it.
 
@@ -163,7 +175,7 @@ export default Ember.Route.extend({
 
 ```
 
-### Removing
+#### Removing child ids
 
 When removing a `hasMany` - `belongsTo` relationship, the children must be removed prior to the parent being removed.
 
@@ -498,6 +510,9 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.1.0**
+  - async is now true when not specified for relationships
+  - hasMany relationship can have option dontsave
 * **4.0.3**
   - Fixes [#158](https://github.com/nolanlawson/ember-pouch/pull/158)
 * **4.0.2**
