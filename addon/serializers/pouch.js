@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import getOwner from 'ember-getowner-polyfill';
 
 const {
   get,
@@ -8,20 +9,36 @@ const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
 
 export default DS.RESTSerializer.extend({
-  _shouldSerializeHasMany: function() {
-    return true;
+  
+  init: function() {
+  	this._super(...arguments);
+  	
+    let config = getOwner(this).resolveRegistration('config:environment');
+  	this.dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
+  },
+  
+  _getDontsave(relationship) {
+  	return !Ember.isEmpty(relationship.options.dontsave) ? relationship.options.dontsave : this.dontsavedefault;
+  },
+
+  _shouldSerializeHasMany: function(snapshot, key, relationship) {
+  	let dontsave = this._getDontsave(relationship);
+  	let result = !dontsave;
+    return result;
   },
 
   // This fixes a failure in Ember Data 1.13 where an empty hasMany
   // was saving as undefined rather than [].
   serializeHasMany(snapshot, json, relationship) {
-    this._super.apply(this, arguments);
-
-    const key = relationship.key;
-
-    if (!json[key]) {
-      json[key] = [];
-    }
+  	if (this._shouldSerializeHasMany(snapshot, relationship.key, relationship)) {
+	    this._super.apply(this, arguments);
+	
+	    const key = relationship.key;
+	
+	    if (!json[key]) {
+	      json[key] = [];
+	    }
+	}
   },
 
   _isAttachment(attribute) {
@@ -66,5 +83,17 @@ export default DS.RESTSerializer.extend({
       }
     });
     return attributes;
+  },
+  
+  extractRelationships(modelClass) {
+  	let relationships = this._super(...arguments);
+
+  	modelClass.eachRelationship((key, relationshipMeta) => {
+  	  if (relationshipMeta.kind === 'hasMany' && this._getDontsave(relationshipMeta) && !!relationshipMeta.options.async) {
+  	  	relationships[key] = { links: { related: key } };
+  	  }
+  	});
+  	
+  	return relationships;
   }
 });

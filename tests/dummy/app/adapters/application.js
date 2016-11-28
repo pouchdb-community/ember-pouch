@@ -1,4 +1,4 @@
-import { Adapter } from 'ember-pouch';
+import Adapter from 'dummy/adapter';
 import PouchDB from 'pouchdb';
 import config from 'dummy/config/environment';
 import Ember from 'ember';

@@ -1,15 +1,21 @@
-import { test } from 'qunit';
+import { module, test } from 'qunit';
+
 import DS from 'ember-data';
 import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 import Ember from 'ember';
 
+import config from 'dummy/config/environment';
+
 /*
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
 
-moduleForIntegration('Integration | Adapter | Basic CRUD Ops');
+		
+moduleForIntegration('Integration | Adapter | Basic CRUD Ops', {}, function() {
 
+let allTests = function() {
+	
 test('can find all', function (assert) {
   assert.expect(3);
 
@@ -28,12 +34,7 @@ test('can find all', function (assert) {
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('flavor'), ['al pastor', 'black bean'],
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can find one', function (assert) {
@@ -52,15 +53,11 @@ test('can find one', function (assert) {
       'should have found the requested item');
     assert.deepEqual(found.get('flavor'), 'black bean',
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can query with sort', function (assert) {
+  assert.expect(3);
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
@@ -85,15 +82,11 @@ test('can query with sort', function (assert) {
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('name'), ['Donkey Kong', 'Jigglypuff', 'Link', 'Mario','Pikachu'],
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can query multi-field queries', function (assert) {
+  assert.expect(3);
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
@@ -120,27 +113,40 @@ test('can query multi-field queries', function (assert) {
       'should have extracted the IDs correctly');
     assert.deepEqual(found.mapBy('name'), ['Mario', 'Donkey Kong'],
       'should have extracted the attributes also');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
+function savingHasMany() {
+	return !config.emberpouch.dontsavehasmany;
+}
+
+function getDocsForRelations() {
+	let result = [];
+	
+	let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
+	if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
+	result.push(c);
+	
+	let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
+	if (savingHasMany()) { d.data.ingredients = ['Z']; }
+	result.push(d);
+	
+	result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
+	result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
+	result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
+    
+    return result;
+}
+
 test('can query one record', function (assert) {
+  assert.expect(1);
+
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
       fields: ['data.flavor'] }
     }).then(() => {
-      return this.db().bulkDocs([
-        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
-        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
-        { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
-      ]);
+      return this.db().bulkDocs(getDocsForRelations());
     });
   }).then(() => {
     return this.store().queryRecord('taco-soup', {
@@ -149,27 +155,17 @@ test('can query one record', function (assert) {
   }).then((found) => {
     assert.equal(found.get('flavor'), 'al pastor',
       'should have found the requested item');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can query one associated records', function (assert) {
+  assert.expect(3);
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
     return this.db().createIndex({ index: {
       fields: ['data.flavor'] }
     }).then(() => {
-      return this.db().bulkDocs([
-        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
-        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
-        { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
-      ]);
+      return this.db().bulkDocs(getDocsForRelations());
     });
   }).then(() => {
     return this.store().queryRecord('taco-soup', {
@@ -183,12 +179,7 @@ test('can query one associated records', function (assert) {
       'should have found both associated items');
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple', 'pork loin'],
       'should have fully loaded the associated items');
-      done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('can find associated records', function (assert) {
@@ -196,13 +187,7 @@ test('can find associated records', function (assert) {
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-    return this.db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
-      { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
-      { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
-      { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
-      { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
-    ]);
+    return this.db().bulkDocs(getDocsForRelations());
   }).then(() => {
     return this.store().find('taco-soup', 'C');
   }).then((found) => {
@@ -214,12 +199,7 @@ test('can find associated records', function (assert) {
       'should have found both associated items');
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple', 'pork loin'],
       'should have fully loaded the associated items');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('create a new record', function (assert) {
@@ -238,12 +218,7 @@ test('create a new record', function (assert) {
     assert.equal(newDoc._rev, recordInStore.get('rev'),
       'should have associated the ember-data record with the rev for the new record');
 
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
 });
 
 test('creating an associated record stores a reference to it in the parent', function (assert) {
@@ -264,16 +239,15 @@ test('creating an associated record stores a reference to it in the parent', fun
 
     return newIngredient.save().then(() => tacoSoup.save());
   }).then(() => {
-    this.store().unloadAll();
-
+  	this.store().unloadAll();
+  	
     return this.store().findRecord('taco-soup', 'C');
   }).then(tacoSoup => {
     return tacoSoup.get('ingredients');
   }).then(foundIngredients => {
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple'],
       'should have fully loaded the associated items');
-    done();
-  });
+  }).finally(done);
 });
 
 // This test fails due to a bug in ember data
@@ -303,12 +277,7 @@ if (!DS.VERSION.match(/^2\.0/)) {
       assert.equal(updatedDoc._rev, recordInStore.get('rev'),
         'should have associated the ember-data record with the updated rev');
 
-      done();
-    }).catch((error) => {
-      console.error('error in test', error);
-      assert.ok(false, 'error in test:' + error);
-      done();
-    });
+    }).finally(done);
   });
 }
 
@@ -331,10 +300,33 @@ test('delete an existing record', function (assert) {
     assert.ok(!doc, 'document should no longer exist');
   }, (result) => {
     assert.equal(result.status, 404, 'document should no longer exist');
-    done();
-  }).catch((error) => {
-    console.error('error in test', error);
-    assert.ok(false, 'error in test:' + error);
-    done();
-  });
+  }).finally(done);
+});
+
+};
+
+	let syncAsync = function() {
+		module('async', {
+			beforeEach: function() {
+				config.emberpouch.async = true;
+			}
+		}, allTests);
+		module('sync', {
+			beforeEach: function() {
+				config.emberpouch.async = false;
+			}
+		}, allTests);
+	};
+	
+	module('dont save hasMany', {
+		beforeEach: function() {
+			config.emberpouch.dontsavehasmany = true;
+		}
+	}, syncAsync);
+	
+	module('save hasMany', {
+		beforeEach: function() {
+			config.emberpouch.dontsavehasmany = false;
+		}
+	}, syncAsync);
 });
