@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "PouchDB adapter for Ember Data",
   "directories": {
     "doc": "doc",
