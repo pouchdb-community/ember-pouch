@@ -7,6 +7,16 @@ var stew = require('broccoli-stew');
 module.exports = {
   name: 'ember-pouch',
 
+  init: function(parent, project) {
+    this._super(parent, project);
+
+    var bowerDeps = this.project.bowerDependencies();
+
+    if (bowerDeps['pouchdb']) {this.ui.writeWarnLine('Please remove `pouchdb` from `bower.json`. As of ember-pouch 4.2.0, only the NPM package is needed.');}
+    if (bowerDeps['relational-pouch']) {this.ui.writeWarnLine('Please remove `relational-pouch` from `bower.json`. As of ember-pouch 4.2.0, only the NPM package is needed.');}
+    if (bowerDeps['pouchdb-find']) {this.ui.writeWarnLine('Please remove `pouchdb-find` from `bower.json`. As of ember-pouch 4.2.0, only the NPM package is needed.');}
+  },
+
   treeForVendor: function() {
     var pouchdb = stew.find(path.join(path.dirname(require.resolve('pouchdb')), '..', 'dist'), {
       destDir: 'pouchdb',
