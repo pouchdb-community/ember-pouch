@@ -510,6 +510,8 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.2.1**
+  - Fix `Init` `_super.Init` error
 * **4.2.0**
   - Switch to npm versions
 * **4.1.0**

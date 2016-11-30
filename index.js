@@ -8,7 +8,7 @@ module.exports = {
   name: 'ember-pouch',
 
   init: function(parent, project) {
-    this._super(parent, project);
+    this._super.init && this._super.init(parent, project);
 
     var bowerDeps = this.project.bowerDependencies();
 
