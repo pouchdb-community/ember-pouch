@@ -511,6 +511,7 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 * **4.2.1**
+  - Fix `Init` some more
   - Fix `Init` `_super.Init` error
 * **4.2.0**
   - Switch to npm versions

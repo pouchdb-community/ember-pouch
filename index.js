@@ -7,8 +7,8 @@ var stew = require('broccoli-stew');
 module.exports = {
   name: 'ember-pouch',
 
-  init: function(parent, project) {
-    this._super.init && this._super.init(parent, project);
+  init: function() {
+    this._super.init && this._super.init.apply(this, arguments);
 
     var bowerDeps = this.project.bowerDependencies();
 
