@@ -1,4 +1,4 @@
-/* jshint node: true */
+/* jshint node: true, -W030 */
 'use strict';
 
 var path = require('path');
