@@ -140,7 +140,7 @@ Using this mode does impose a slight runtime overhead, since this will use `db.f
 
 ### Saving child ids
 
-When you do save child ids on the `hasMany` side, you have to follow the directions below to make sure the data is saved correctly
+When you do save child ids on the `hasMany` side, you have to follow the directions below to make sure the data is saved correctly.
 
 #### Adding entries
 
@@ -396,7 +396,7 @@ If you want to go completely [offline-first](http://offlinefirst.org/), you'll a
 
 ### Security
 
-An easy way to secure your Ember Pouch-using app is to ensure that data can only be fetched from CouchDB &ndash; not from some other sever (e.g. in an [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting)).
+An easy way to secure your Ember Pouch-using app is to ensure that data can only be fetched from CouchDB &ndash; not from some other server (e.g. in an [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting)).
 
 To do so, add a Content Security Policy whitelist entry to `/config/environment.js`:
 
