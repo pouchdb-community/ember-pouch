@@ -1,4 +1,3 @@
-
 import Ember from 'ember';
 import PouchDB from 'pouchdb';
 import config from '<%= dasherizedPackageName %>/config/environment';
