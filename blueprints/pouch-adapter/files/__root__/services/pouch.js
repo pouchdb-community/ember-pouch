@@ -7,7 +7,7 @@ export default Ember.Service.extend({
   db:null,
   init(){
     this._super(...arguments);
-    this.setup()
+    this.setup();
   },
   setup(){
     let localDb = config.emberPouch.localDb;
@@ -18,7 +18,7 @@ export default Ember.Service.extend({
 
     if (config.emberPouch.remoteDb) {
       let remoteDb = new PouchDB(config.emberPouch.remoteDb);
-      
+
       db.sync(remoteDb, {
          live: true,
          retry: true
