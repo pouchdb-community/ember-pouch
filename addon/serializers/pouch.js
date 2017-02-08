@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import getOwner from 'ember-getowner-polyfill';
 
 const {
   get,
@@ -12,8 +11,8 @@ export default DS.RESTSerializer.extend({
   
   init: function() {
   	this._super(...arguments);
-  	
-    let config = getOwner(this).resolveRegistration('config:environment');
+
+    let config = Ember.getOwner(this).resolveRegistration('config:environment');
   	this.dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
   },
   
