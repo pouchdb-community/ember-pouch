@@ -1,9 +1,9 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import getOwner from 'ember-getowner-polyfill';
 
 const {
   get,
+  getOwner
 } = Ember;
 const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
