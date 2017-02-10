@@ -1,12 +1,12 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import getOwner from 'ember-getowner-polyfill';
 
 import {
   extractDeleteRecord
 } from '../utils';
 
 const {
+  getOwner,
   run: {
     bind
   },
