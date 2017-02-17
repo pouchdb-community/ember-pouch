@@ -278,15 +278,18 @@ export default Ember.Route.extend({
   model() {
     return this.store.query('smasher',  {
       filter: {
-        name: 'Mario'
-        sort: [
-          { debut: 'desc' }
-        ]
-      }
+        name: 'Mario',
+        debut: { '$gte': null }
+      },
+      sort: [
+        { debut: 'desc' }
+      ]
     })
   }
 });
 ```
+
+Note that this query would require a custom index including both fields `data.name` and `data.debut`.  Any field in `sort` must also be included in `filter`.  Only `$eq`, `$gt`, `$gte`, `$lt`, and `$lte` can be used when matching a custom index.
 
 ### store.queryRecord(model, options)
 
