@@ -401,15 +401,15 @@ If you want to go completely [offline-first](http://offlinefirst.org/), you'll a
 
 An easy way to secure your Ember Pouch-using app is to ensure that data can only be fetched from CouchDB &ndash; not from some other server (e.g. in an [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting)).
 
-To do so, add a Content Security Policy whitelist entry to `/config/environment.js`:
+You can use the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin to enable Content Security Policy in Ember CLI. You also will have to set the CSP HTTP header on your backend in production.
+
+To use, add a Content Security Policy whitelist entry to `/config/environment.js`:
 
 ```js
 ENV.contentSecurityPolicy = {
   "connect-src": "'self' http://your_couch_host.com:5984"
 };
 ```
-
-Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
 
 ### CORS setup (important!)
 
