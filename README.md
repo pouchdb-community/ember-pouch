@@ -513,6 +513,12 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.2.5**
+  - Correct Security documentation [*177](https://github.com/nolanlawson/ember-pouch/pull/177)
+  - Fix sort documentation and add additional notes [*176](https://github.com/nolanlawson/ember-pouch/pull/176)
+  - update ember-getowner-polyfill to remove deprecation warnings [*174](https://github.com/nolanlawson/ember-pouch/pull/174)
+* **4.2.4**
+  - Fix attachments typo in README [*170](https://github.com/nolanlawson/ember-pouch/pull/170)
 * **4.2.3**
   - Update pouchdb to the latest version
   - Minor typofix [#166](https://github.com/nolanlawson/ember-pouch/pull/166)
