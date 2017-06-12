@@ -1,11 +1,6 @@
 {
   "name": "ember-pouch",
   "dependencies": {
-    "ember": "~2.8.0",
-    "ember-cli-shims": "0.1.1",
-    "pouchdb": "^5.4.5",
-    "relational-pouch": "^1.4.4",
-    "pouchdb-find": "^0.10.3",
     "phantomjs-polyfill-object-assign": "chuckplantain/phantomjs-polyfill-object-assign"
   }
 }

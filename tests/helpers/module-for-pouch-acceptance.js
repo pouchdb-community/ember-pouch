@@ -6,15 +6,23 @@ import config from 'dummy/config/environment';
 import Ember from 'ember';
 /* globals PouchDB */
 
-export default function(name, options = {}) {
+export default function(name, options = {}, nested = undefined) {
   module(name, {
     beforeEach(assert) {
       var done = assert.async();
 
       Ember.RSVP.Promise.resolve().then(() => {
-        return (new PouchDB(config.emberpouch.localDb)).destroy();
+
+      	let db = new PouchDB(config.emberpouch.localDb);
+      	
+      	return db.getIndexes().then(data => {
+      		return Ember.RSVP.all(data.indexes.map(
+      		index => {
+      			return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
+      		}));
+      	}).then(() => db.destroy());
       }).then(() => {
-        this.application = startApp();
+      	this.application = startApp();
 
         this.lookup = function (item) {
           return this.application.__container__.lookup(item);
@@ -38,15 +46,18 @@ export default function(name, options = {}) {
         if (options.beforeEach) {
           options.beforeEach.apply(this, arguments);
         }
-      }).finally(done);
+        done();
+      });
     },
 
     afterEach() {
-      destroyApp(this.application);
+      if (this.application) {
+        destroyApp(this.application);
+	  }
 
       if (options.afterEach) {
         options.afterEach.apply(this, arguments);
       }
     }
-  });
+  }, nested);
 }

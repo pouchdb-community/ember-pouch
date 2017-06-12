@@ -1,7 +1,7 @@
 ---
 language: node_js
 node_js:
-  - "4"
+  - "6"
 
 sudo: false
 
@@ -10,19 +10,18 @@ cache:
     - node_modules
 
 env:
-  - EMBER_TRY_SCENARIO=ember-2.0-stack
-  - EMBER_TRY_SCENARIO=ember-2.1-stack
-  - EMBER_TRY_SCENARIO=ember-2.2-stack
-  - EMBER_TRY_SCENARIO=ember-2.3-stack
   - EMBER_TRY_SCENARIO=ember-2.4-stack
+  - EMBER_TRY_SCENARIO=ember-2.8-stack
+  - EMBER_TRY_SCENARIO=ember-2.10-stack
+  - EMBER_TRY_SCENARIO=ember-2.12-stack
   - EMBER_TRY_SCENARIO=ember-release
   - EMBER_TRY_SCENARIO=ember-beta
-  - EMBER_TRY_SCENARIO=ember-canary
+#  - EMBER_TRY_SCENARIO=ember-canary
 
 matrix:
   fast_finish: true
   allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-canary
+#    - env: EMBER_TRY_SCENARIO=ember-canary
 
 before_install:
   - npm config set spin false

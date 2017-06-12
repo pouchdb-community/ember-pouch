@@ -130,7 +130,19 @@ ENV.emberPouch.remoteDb = 'http://localhost:5984/my_couch';
 
 EmberPouch supports both `hasMany` and `belongsTo` relationships.
 
-### Saving
+### Don't save hasMany child ids
+
+To be more in line with the normal ember data way of saving `hasMany` - `belongsTo` relationships, ember-pouch now has an option to not save the child ids on the `hasMany` side. This prevents the extra need to save the `hasMany` side as explained below. For a more detailed explanation please read the [relational-pouch documentation](https://github.com/nolanlawson/relational-pouch#dont-save-hasmany)
+
+This new mode can be selected for a `hasMany` relationship by specifying the option `dontsave: true` on the relationship. An application wide setting named `ENV.emberpouch.dontsavehasmany` can also be set to `true` to make all `hasMany` relationships behave this way.
+
+Using this mode does impose a slight runtime overhead, since this will use `db.find` and database indexes to search for the child ids. The indexes are created automatically for you. But large changes to the model might require you to clean up old, unused indexes.
+
+### Saving child ids
+
+When you do save child ids on the `hasMany` side, you have to follow the directions below to make sure the data is saved correctly.
+
+#### Adding entries
 
 When saving a `hasMany` - `belongsTo` relationship, both sides of the relationship (the child and the parent) must be saved. Note that the parent needs to have been saved at least once prior to adding children to it.
 
@@ -163,7 +175,7 @@ export default Ember.Route.extend({
 
 ```
 
-### Removing
+#### Removing child ids
 
 When removing a `hasMany` - `belongsTo` relationship, the children must be removed prior to the parent being removed.
 
@@ -196,16 +208,116 @@ export default Ember.Route.extend({
 });
 ```
 
+### Query and QueryRecord
+
+query and queryRecord are relying on [pouchdb-find](https://github.com/nolanlawson/pouchdb-find)
+
+### db.createIndex(index [, callback])
+
+Create an index if it doesn't exist.
+
+```javascript
+// app/adapters/application.js
+function createDb() {
+  ...
+
+  db.createIndex({
+    index: {
+      fields: ['data.name']
+    }
+  }).then((result) => {
+    // {'result': 'created'} index was created
+  });
+
+  return db;
+};
+```
+
+### store.query(model, options)
+
+Find all docs where doc.name === 'Mario'
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: { name: 'Mario' }
+    });
+  }
+});
+```
+
+Find all docs where doc.name === 'Mario' and doc.debut > 1990:
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario'
+        debut: { $gt: 1990 }
+      }
+    });
+  }
+});
+```
+
+Sorted by doc.debut descending.
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario',
+        debut: { '$gte': null }
+      },
+      sort: [
+        { debut: 'desc' }
+      ]
+    })
+  }
+});
+```
+
+Note that this query would require a custom index including both fields `data.name` and `data.debut`.  Any field in `sort` must also be included in `filter`.  Only `$eq`, `$gt`, `$gte`, `$lt`, and `$lte` can be used when matching a custom index.
+
+### store.queryRecord(model, options)
+
+Find one document where doc.name === 'Mario'
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.queryRecord('smasher',  {
+      filter: { name: 'Mario' }
+    });
+  }
+});
+```
+
 ## Attachments
 
-`Ember-Pouch` provides an `attachment` transform for your models, which makes working with attachments as simple as working with any other field.
+`Ember-Pouch` provides an `attachments` transform for your models, which makes working with attachments as simple as working with any other field.
 
-Add a `DS.attr('attachment')` field to your model. Provide a default value for it to be an empty array.
+Add a `DS.attr('attachments')` field to your model. Provide a default value for it to be an empty array.
 
 ```js
 // myapp/models/photo-album.js
 export default DS.Model.extend({
-  photos: DS.attr('attachment', {
+  photos: DS.attr('attachments', {
     defaultValue: function() {
       return [];
     }
@@ -287,17 +399,17 @@ If you want to go completely [offline-first](http://offlinefirst.org/), you'll a
 
 ### Security
 
-An easy way to secure your Ember Pouch-using app is to ensure that data can only be fetched from CouchDB &ndash; not from some other sever (e.g. in an [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting)).
+An easy way to secure your Ember Pouch-using app is to ensure that data can only be fetched from CouchDB &ndash; not from some other server (e.g. in an [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting)).
 
-To do so, add a Content Security Policy whitelist entry to `/config/environment.js`:
+You can use the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin to enable Content Security Policy in Ember CLI. You also will have to set the CSP HTTP header on your backend in production.
+
+To use, add a Content Security Policy whitelist entry to `/config/environment.js`:
 
 ```js
 ENV.contentSecurityPolicy = {
   "connect-src": "'self' http://your_couch_host.com:5984"
 };
 ```
-
-Ember CLI includes the [content-security-policy](https://github.com/rwjblue/ember-cli-content-security-policy) plugin by default to ensure that CSP is kept in the forefront of your thoughts. You still have actually to set the CSP HTTP header on your backend in production.
 
 ### CORS setup (important!)
 
@@ -401,7 +513,30 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
 
 ## Changelog
-
+* **4.2.5**
+  - Correct Security documentation [*177](https://github.com/nolanlawson/ember-pouch/pull/177)
+  - Fix sort documentation and add additional notes [*176](https://github.com/nolanlawson/ember-pouch/pull/176)
+  - update ember-getowner-polyfill to remove deprecation warnings [*174](https://github.com/nolanlawson/ember-pouch/pull/174)
+* **4.2.4**
+  - Fix attachments typo in README [*170](https://github.com/nolanlawson/ember-pouch/pull/170)
+* **4.2.3**
+  - Update pouchdb to the latest version
+  - Minor typofix [#166](https://github.com/nolanlawson/ember-pouch/pull/166)
+* **4.2.2**
+  - Update pouchdb to the latest version
+* **4.2.1**
+  - Fix `Init` some more
+  - Fix `Init` `_super.Init` error
+* **4.2.0**
+  - Switch to npm versions
+* **4.1.0**
+  - async is now true when not specified for relationships
+  - hasMany relationship can have option dontsave
+* **4.0.3**
+  - Fixes [#158](https://github.com/nolanlawson/ember-pouch/pull/158)
+* **4.0.2**
+  - Updated ember-cli fixes and some minor changes [#147](https://github.com/nolanlawson/ember-pouch/pull/147)
+  - Added Version badge and Ember Observer badge [#142](https://github.com/nolanlawson/ember-pouch/pull/142)
 * **4.0.0**
   - Add support for Attachments [#135](https://github.com/nolanlawson/ember-pouch/pull/135)
   - Implement glue code for query and queryRecord using pouchdb-find [#130](https://github.com/nolanlawson/ember-pouch/pull/130)

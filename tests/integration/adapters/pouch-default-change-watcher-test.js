@@ -15,9 +15,9 @@ moduleForIntegration('Integration | Adapter | Default Change Watcher', {
       return this.db().bulkDocs([
         { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
         { _id: 'tacoSoup_2_B', data: { flavor: 'black bean', ingredients: ['Z'] } },
-        { _id: 'foodItem_2_X', data: { name: 'pineapple' } },
-        { _id: 'foodItem_2_Y', data: { name: 'pork loin' } },
-        { _id: 'foodItem_2_Z', data: { name: 'black beans' } }
+        { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'A' } },
+        { _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'A' } },
+        { _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'B' } }
       ]);
     }).finally(done);
   }
@@ -51,7 +51,7 @@ test('a loaded instance automatically reflects directly-made database changes', 
       var alreadyLoadedSoupB = this.store().peekRecord('taco-soup', 'B');
       assert.equal(alreadyLoadedSoupB.get('flavor'), 'carnitas',
         'the loaded instance should automatically reflect the change in the database');
-    }, 15);
+    }, 100);
   }).finally(done);
 });
 
@@ -111,7 +111,7 @@ test('a deleted record is automatically unloaded', function (assert) {
     return promiseToRunLater(() => {
       assert.equal(null, this.store().peekRecord('taco-soup', 'B'),
         'the corresponding instance should no longer be loaded');
-    }, 15);
+    }, 100);
   }).finally(done);
 });
 
