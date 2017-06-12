@@ -226,8 +226,12 @@ test('creating an associated record stores a reference to it in the parent', fun
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
+  	var s = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor'} };
+  	if (savingHasMany()) {
+  		s.data.ingredients = [];
+  	}
     return this.db().bulkDocs([
-      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: [] } }
+      s
     ]);
   }).then(() => {
     return this.store().findRecord('taco-soup', 'C');
@@ -236,8 +240,9 @@ test('creating an associated record stores a reference to it in the parent', fun
       name: 'pineapple',
       soup: tacoSoup
     });
-
-    return newIngredient.save().then(() => tacoSoup.save());
+	
+	//tacoSoup.save() actually not needed in !savingHasmany mode, but should still work
+    return newIngredient.save().then(() => savingHasMany() ? tacoSoup.save() : tacoSoup);
   }).then(() => {
   	this.store().unloadAll();
   	
