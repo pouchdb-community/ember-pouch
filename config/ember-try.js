@@ -68,7 +68,7 @@ module.exports = {
       npm: {
         devDependencies: {
           'ember-data': 'components/ember-data#release',
-          'ember-source': 'latest',
+          'ember-source': 'components/ember#release',
         },
       },
     },
@@ -77,22 +77,18 @@ module.exports = {
       npm: {
         devDependencies: {
           'ember-data': 'components/ember-data#beta',
-          'ember-source': 'beta',
+          'ember-source': 'components/ember#beta',
         },
       },
     },
-//    {
-//      name: 'ember-canary',
-//      npm: {
-//        devDependencies: {
-//          'ember-data': 'components/ember-data#canary',
-//          'ember-source': 'emberjs/ember.js#master',
-//          'ember-cli-htmlbars-inline-precompile': '^0.4.0',
-//        },
-//        dependencies: {
-//          'ember-cli-babel': '6.0.0',
-//		}
-//      },
-//    }
+    {
+      name: 'ember-canary',
+      npm: {
+        devDependencies: {
+          'ember-data': 'components/ember-data#canary',
+          'ember-source': 'components/ember#canary',
+        },
+      },
+    }
   ]
 };
