@@ -340,7 +340,16 @@ export default DS.RESTAdapter.extend({
   },
 
   queryRecord: function(store, type, query) {
-    return this.query(store, type, query);
+    return this.query(store, type, query).then(results => {
+      let result = {};
+      let recordType = this.getRecordTypeName(type);
+      if(results[pluralize(recordType)].length > 0){
+        result[recordType] = results[pluralize(recordType)][0];
+      } else {
+        result[recordType] = null;
+      }
+      return result;
+    });
   },
 
   /**

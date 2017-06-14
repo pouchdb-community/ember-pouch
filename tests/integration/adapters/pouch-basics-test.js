@@ -116,6 +116,34 @@ test('can query multi-field queries', function (assert) {
   }).finally(done);
 });
 
+test('queryRecord returns null when no record is found', function (assert) {
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().createIndex({ index: {
+      fields: ['data.flavor'] }
+    }).then(() => {
+      return this.db().bulkDocs([
+        { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
+        { _id: 'tacoSoup_2_D', data: { flavor: 'black bean', ingredients: ['Z'] } },
+        { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
+        { _id: 'foodItem_2_Y', data: { name: 'pork loin' }},
+        { _id: 'foodItem_2_Z', data: { name: 'black beans' }}
+      ]);
+    });
+  }).then(() => {
+    return this.store().queryRecord('taco-soup', {
+      filter: {flavor: 'all pastor' }
+    });
+  }).then((found) => {
+    assert.equal(found, null, 'should be null');
+    done();
+  }).catch((error) => {
+    console.error('error in test', error);
+    assert.ok(false, 'error in test:' + error);
+    done();
+  });
+});
+
 function savingHasMany() {
 	return !config.emberpouch.dontsavehasmany;
 }
