@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "4.2.5",
+  "version": "4.2.6",
   "description": "PouchDB adapter for Ember Data",
   "directories": {
     "doc": "doc",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nolanlawson/ember-pouch.git"
+    "url": "https://github.com/pouchdb-community/ember-pouch.git"
   },
   "keywords": [
     "ember-addon",
@@ -29,7 +29,7 @@
   "author": "Nolan Lawson",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/nolanlawson/ember-pouch/issues"
+    "url": "https://github.com/pouchdb-community/ember-pouch/issues"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",

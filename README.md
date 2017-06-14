@@ -1,4 +1,4 @@
-# Ember Pouch [![Build Status](https://travis-ci.org/nolanlawson/ember-pouch.svg)](https://travis-ci.org/nolanlawson/ember-pouch) [![GitHub version](https://badge.fury.io/gh/nolanlawson%2Fember-pouch.svg)](https://badge.fury.io/gh/nolanlawson%2Fember-pouch) [![Ember Observer Score](https://emberobserver.com/badges/ember-pouch.svg)](https://emberobserver.com/addons/ember-pouch)
+# Ember Pouch [![Build Status](https://travis-ci.org/pouchdb-community/ember-pouch.svg)](https://travis-ci.org/pouchdb-community/ember-pouch) [![GitHub version](https://badge.fury.io/gh/pouchdb-community%2Fember-pouch.svg)](https://badge.fury.io/gh/pouchdb-community%2Fember-pouch) [![Ember Observer Score](https://emberobserver.com/badges/ember-pouch.svg)](https://emberobserver.com/addons/ember-pouch)
 
 [**Changelog**](#changelog)
 
@@ -132,7 +132,7 @@ EmberPouch supports both `hasMany` and `belongsTo` relationships.
 
 ### Don't save hasMany child ids
 
-To be more in line with the normal ember data way of saving `hasMany` - `belongsTo` relationships, ember-pouch now has an option to not save the child ids on the `hasMany` side. This prevents the extra need to save the `hasMany` side as explained below. For a more detailed explanation please read the [relational-pouch documentation](https://github.com/nolanlawson/relational-pouch#dont-save-hasmany)
+To be more in line with the normal ember data way of saving `hasMany` - `belongsTo` relationships, ember-pouch now has an option to not save the child ids on the `hasMany` side. This prevents the extra need to save the `hasMany` side as explained below. For a more detailed explanation please read the [relational-pouch documentation](https://github.com/pouchdb-community/relational-pouch#dont-save-hasmany)
 
 This new mode can be selected for a `hasMany` relationship by specifying the option `dontsave: true` on the relationship. An application wide setting named `ENV.emberpouch.dontsavehasmany` can also be set to `true` to make all `hasMany` relationships behave this way.
 
@@ -210,7 +210,7 @@ export default Ember.Route.extend({
 
 ### Query and QueryRecord
 
-query and queryRecord are relying on [pouchdb-find](https://github.com/nolanlawson/pouchdb-find)
+query and queryRecord are relying on [pouchdb-find](https://github.com/pouchdb-community/pouchdb-find)
 
 ### db.createIndex(index [, callback])
 
@@ -391,7 +391,7 @@ app.import('bower_components/pouchdb-authentication/dist/pouchdb.authentication.
 
 ### Relational Pouch
 
-Ember Pouch is really just a thin layer of Ember-y goodness over [Relational Pouch](https://github.com/nolanlawson/relational-pouch). Before you file an issue, check to see if it's more appropriate to file over there.
+Ember Pouch is really just a thin layer of Ember-y goodness over [Relational Pouch](https://github.com/pouchdb-community/relational-pouch). Before you file an issue, check to see if it's more appropriate to file over there.
 
 ### Offline first
 
@@ -510,18 +510,22 @@ For more information on using ember-cli, visit [http://www.ember-cli.com/](http:
 
 This project was originally based on the [ember-data-hal-adapter](https://github.com/locks/ember-data-hal-adapter) by [@locks](https://github.com/locks), and I really benefited from his guidance during its creation.
 
-And of course thanks to all our wonderful contributors, [here](https://github.com/nolanlawson/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/nolanlawson/relational-pouch/graphs/contributors)!
+And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.2.6**
+  - Fixes queryRecord deprecation [*152](https://github.com/pouchdb-community/ember-pouch/pull/152)
+  - Change links to `pouchdb-community`
+  - Use npm for ember-source [*183](https://github.com/pouchdb-community/ember-pouch/pull/183)
 * **4.2.5**
-  - Correct Security documentation [*177](https://github.com/nolanlawson/ember-pouch/pull/177)
-  - Fix sort documentation and add additional notes [*176](https://github.com/nolanlawson/ember-pouch/pull/176)
-  - update ember-getowner-polyfill to remove deprecation warnings [*174](https://github.com/nolanlawson/ember-pouch/pull/174)
+  - Correct Security documentation [*177](https://github.com/pouchdb-community/ember-pouch/pull/177)
+  - Fix sort documentation and add additional notes [*176](https://github.com/pouchdb-community/ember-pouch/pull/176)
+  - update ember-getowner-polyfill to remove deprecation warnings [*174](https://github.com/pouchdb-community/ember-pouch/pull/174)
 * **4.2.4**
-  - Fix attachments typo in README [*170](https://github.com/nolanlawson/ember-pouch/pull/170)
+  - Fix attachments typo in README [*170](https://github.com/pouchdb-community/ember-pouch/pull/170)
 * **4.2.3**
   - Update pouchdb to the latest version
-  - Minor typofix [#166](https://github.com/nolanlawson/ember-pouch/pull/166)
+  - Minor typofix [#166](https://github.com/pouchdb-community/ember-pouch/pull/166)
 * **4.2.2**
   - Update pouchdb to the latest version
 * **4.2.1**
@@ -533,35 +537,35 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
   - async is now true when not specified for relationships
   - hasMany relationship can have option dontsave
 * **4.0.3**
-  - Fixes [#158](https://github.com/nolanlawson/ember-pouch/pull/158)
+  - Fixes [#158](https://github.com/pouchdb-community/ember-pouch/pull/158)
 * **4.0.2**
-  - Updated ember-cli fixes and some minor changes [#147](https://github.com/nolanlawson/ember-pouch/pull/147)
-  - Added Version badge and Ember Observer badge [#142](https://github.com/nolanlawson/ember-pouch/pull/142)
+  - Updated ember-cli fixes and some minor changes [#147](https://github.com/pouchdb-community/ember-pouch/pull/147)
+  - Added Version badge and Ember Observer badge [#142](https://github.com/pouchdb-community/ember-pouch/pull/142)
 * **4.0.0**
-  - Add support for Attachments [#135](https://github.com/nolanlawson/ember-pouch/pull/135)
-  - Implement glue code for query and queryRecord using pouchdb-find [#130](https://github.com/nolanlawson/ember-pouch/pull/130)
+  - Add support for Attachments [#135](https://github.com/pouchdb-community/ember-pouch/pull/135)
+  - Implement glue code for query and queryRecord using pouchdb-find [#130](https://github.com/pouchdb-community/ember-pouch/pull/130)
 * **3.2.2**
-  - Update Bower dependencies [#137](https://github.com/nolanlawson/ember-pouch/pull/137)
-  - Correct import of Ember Data model blueprint [#131](https://github.com/nolanlawson/ember-pouch/pull/131)
+  - Update Bower dependencies [#137](https://github.com/pouchdb-community/ember-pouch/pull/137)
+  - Correct import of Ember Data model blueprint [#131](https://github.com/pouchdb-community/ember-pouch/pull/131)
 * **3.2.1**
-  - Fix(Addon): Call super in init [#129](https://github.com/nolanlawson/ember-pouch/pull/129)
+  - Fix(Addon): Call super in init [#129](https://github.com/pouchdb-community/ember-pouch/pull/129)
 * **3.2.0**
-  - Make adapter call a hook when encountering a change for a record that is not yet loaded [#108](https://github.com/nolanlawson/ember-pouch/pull/108)
+  - Make adapter call a hook when encountering a change for a record that is not yet loaded [#108](https://github.com/pouchdb-community/ember-pouch/pull/108)
 * **3.1.1**
-  - Bugfix for hasMany relations by [@backspace](https://github.com/backspace) ([#111](https://github.com/nolanlawson/ember-pouch/pull/111)).
+  - Bugfix for hasMany relations by [@backspace](https://github.com/backspace) ([#111](https://github.com/pouchdb-community/ember-pouch/pull/111)).
 * **3.1.0**
-  - Database can now be dynamically switched on the adapter ([#89](https://github.com/nolanlawson/ember-pouch/pull/89)). Thanks to [@olivierchatry](https://github.com/olivierchatry) for this!
-  - Various bugfixes by [@backspace](https://github.com/backspace), [@jkleinsc](https://github.com/jkleinsc), [@rsutphin](https://github.com/rsutphin), [@mattmarcum](https://github.com/mattmarcum), [@broerse](https://github.com/broerse), and [@olivierchatry](https://github.com/olivierchatry). See [the full commit log](https://github.com/nolanlawson/ember-pouch/compare/7c216311ffacd2f08b57df4fe34d49f4e7c373f1...v3.1.0) for details. Thank you!
+  - Database can now be dynamically switched on the adapter ([#89](https://github.com/pouchdb-community/ember-pouch/pull/89)). Thanks to [@olivierchatry](https://github.com/olivierchatry) for this!
+  - Various bugfixes by [@backspace](https://github.com/backspace), [@jkleinsc](https://github.com/jkleinsc), [@rsutphin](https://github.com/rsutphin), [@mattmarcum](https://github.com/mattmarcum), [@broerse](https://github.com/broerse), and [@olivierchatry](https://github.com/olivierchatry). See [the full commit log](https://github.com/pouchdb-community/ember-pouch/compare/7c216311ffacd2f08b57df4fe34d49f4e7c373f1...v3.1.0) for details. Thank you!
 * **3.0.1**
-  - Add blueprints for model and adapter (see above for details). Thanks [@mattmarcum](https://github.com/mattmarcum) ([#101](https://github.com/nolanlawson/ember-pouch/issues/101), [#102](https://github.com/nolanlawson/ember-pouch/issues/102)) and [@backspace](https://github.com/backspace) ([#103](https://github.com/nolanlawson/ember-pouch/issues/103)).
+  - Add blueprints for model and adapter (see above for details). Thanks [@mattmarcum](https://github.com/mattmarcum) ([#101](https://github.com/pouchdb-community/ember-pouch/issues/101), [#102](https://github.com/pouchdb-community/ember-pouch/issues/102)) and [@backspace](https://github.com/backspace) ([#103](https://github.com/pouchdb-community/ember-pouch/issues/103)).
 * **3.0.0**
   - Update for compatibility with Ember & Ember-Data 2.0+. The adapter now supports Ember & Ember-Data 1.13.x and 2.x only.
 * **2.0.3**
-  - Use Ember.get to reference the PouchDB instance property in the adapter (`db`), allowing it to be injected ([#84](https://github.com/nolanlawson/ember-pouch/issues/84)). Thanks to [@jkleinsc](https://github.com/jkleinsc)!
+  - Use Ember.get to reference the PouchDB instance property in the adapter (`db`), allowing it to be injected ([#84](https://github.com/pouchdb-community/ember-pouch/issues/84)). Thanks to [@jkleinsc](https://github.com/jkleinsc)!
   - Indicate to ember-data 1.13+ that reloading individual ember-pouch records is never necessary (due to the change
-    watcher that keeps them up to date as they are modified) ([#79](https://github.com/nolanlawson/ember-pouch/issues/79), [#83](https://github.com/nolanlawson/ember-pouch/issues/83)).
-* **2.0.2** - Use provide `findRecord` for ember-data 1.13 and later thanks to [@OleRoel](https://github.com/OleRoel) ([#72](https://github.com/nolanlawson/ember-pouch/issues/72))
-* **2.0.1** - Fixed [#62](https://github.com/nolanlawson/ember-pouch/issues/62) thanks to [@rsutphin](https://github.com/rsutphin) (deprecated `typekey` in Ember-Data 1.0.0-beta.18)
+    watcher that keeps them up to date as they are modified) ([#79](https://github.com/pouchdb-community/ember-pouch/issues/79), [#83](https://github.com/pouchdb-community/ember-pouch/issues/83)).
+* **2.0.2** - Use provide `findRecord` for ember-data 1.13 and later thanks to [@OleRoel](https://github.com/OleRoel) ([#72](https://github.com/pouchdb-community/ember-pouch/issues/72))
+* **2.0.1** - Fixed [#62](https://github.com/pouchdb-community/ember-pouch/issues/62) thanks to [@rsutphin](https://github.com/rsutphin) (deprecated `typekey` in Ember-Data 1.0.0-beta.18)
 * **2.0.0** - Ember CLI support, due to some amazing support by [@fsmanuel](https://github.com/fsmanuel)! Bower and npm support are deprecated now; you are recommended to use Ember CLI instead.
 * **1.2.5** - Last release with regular Bower/npm support via bundle javascript in the `dist/` directory.
 * **1.0.0** - First release
