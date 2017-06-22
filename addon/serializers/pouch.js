@@ -8,20 +8,20 @@ const {
 const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
 
-export default DS.RESTSerializer.extend({
-  
+var Serializer = DS.RESTSerializer.extend({
+
   init: function() {
   	this._super(...arguments);
-  	
+
     let config = getOwner(this).resolveRegistration('config:environment');
   	this.dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
   },
-  
+
   _getDontsave(relationship) {
   	return !Ember.isEmpty(relationship.options.dontsave) ? relationship.options.dontsave : this.dontsavedefault;
   },
 
-  _shouldSerializeHasMany: function(snapshot, key, relationship) {
+  shouldSerializeHasMany: function(snapshot, key, relationship) {
   	let dontsave = this._getDontsave(relationship);
   	let result = !dontsave;
     return result;
@@ -32,9 +32,9 @@ export default DS.RESTSerializer.extend({
   serializeHasMany(snapshot, json, relationship) {
   	if (this._shouldSerializeHasMany(snapshot, relationship.key, relationship)) {
 	    this._super.apply(this, arguments);
-	
+
 	    const key = relationship.key;
-	
+
 	    if (!json[key]) {
 	      json[key] = [];
 	    }
@@ -84,7 +84,7 @@ export default DS.RESTSerializer.extend({
     });
     return attributes;
   },
-  
+
   extractRelationships(modelClass) {
   	let relationships = this._super(...arguments);
 
@@ -93,7 +93,20 @@ export default DS.RESTSerializer.extend({
   	  	relationships[key] = { links: { related: key } };
   	  }
   	});
-  	
+
   	return relationships;
-  }
+  },
+
 });
+
+// DEPRECATION: The private method _shouldSerializeHasMany has been promoted to the public API
+// See https://www.emberjs.com/deprecations/ember-data/v2.x/#toc_jsonserializer-shouldserializehasmany
+ if( ! DS.JSONSerializer.prototype.shouldSerializeHasMany ) {
+   Serializer.reopen({
+     _shouldSerializeHasMany( snapshot, key, relationship ){
+       return this.shouldSerializeHasMany( snapshot, key, relationship );
+     }
+   });
+ }
+
+ export default Serializer;
