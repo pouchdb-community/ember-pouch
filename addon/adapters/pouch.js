@@ -332,7 +332,9 @@ export default DS.RESTAdapter.extend({
       query.sort = this._buildSort(query.sort);
     }
 
-    return db.find(query).then(pouchRes => return db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
+    return db.find(query).then(pouchRes => {
+      return db.rel.parseRelDocs(recordTypeName, pouchRes.docs)
+    });
   },
 
   queryRecord: function(store, type, query) {
