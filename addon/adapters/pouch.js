@@ -328,15 +328,11 @@ export default DS.RESTAdapter.extend({
     var recordTypeName = this.getRecordTypeName(type);
     var db = this.get('db');
 
-    var queryParams = {
-      selector: this._buildSelector(query.filter)
-    };
-
     if (!Ember.isEmpty(query.sort)) {
-      queryParams.sort = this._buildSort(query.sort);
+      query.sort = this._buildSort(query.sort);
     }
 
-    return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
+    return db.find(query).then(pouchRes => return db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
   },
 
   queryRecord: function(store, type, query) {
