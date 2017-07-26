@@ -1,4 +1,4 @@
-/*jshint node:true*/
+/* eslint-env node */
 module.exports = {
   scenarios: [
     {
@@ -19,7 +19,7 @@ module.exports = {
       }
     },
     {
-      name: 'ember-2.8-stack',
+      name: 'ember-lts-2.8',
       npm: {
         devDependencies: {
           'ember-data': '2.8.1',
@@ -53,7 +53,7 @@ module.exports = {
       }
     },
     {
-      name: 'ember-2.12-stack',
+      name: 'ember-lts-2.12',
       npm: {
         devDependencies: {
           'ember-data': '2.12.2',
