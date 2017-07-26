@@ -11,11 +11,11 @@ import config from 'dummy/config/environment';
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
 
-		
+
 moduleForIntegration('Integration | Adapter | Basic CRUD Ops', {}, function() {
 
 let allTests = function() {
-	
+
 test('can find all', function (assert) {
   assert.expect(3);
 
@@ -138,7 +138,6 @@ test('queryRecord returns null when no record is found', function (assert) {
     assert.equal(found, null, 'should be null');
     done();
   }).catch((error) => {
-    console.error('error in test', error);
     assert.ok(false, 'error in test:' + error);
     done();
   });
@@ -150,19 +149,19 @@ function savingHasMany() {
 
 function getDocsForRelations() {
 	let result = [];
-	
+
 	let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
 	if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
 	result.push(c);
-	
+
 	let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
 	if (savingHasMany()) { d.data.ingredients = ['Z']; }
 	result.push(d);
-	
+
 	result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
 	result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
 	result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
-    
+
     return result;
 }
 
@@ -254,10 +253,10 @@ test('creating an associated record stores a reference to it in the parent', fun
 
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
-  	var s = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor'} };
-  	if (savingHasMany()) {
-  		s.data.ingredients = [];
-  	}
+		var s = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor'} };
+		if (savingHasMany()) {
+			s.data.ingredients = [];
+		}
     return this.db().bulkDocs([
       s
     ]);
@@ -268,12 +267,12 @@ test('creating an associated record stores a reference to it in the parent', fun
       name: 'pineapple',
       soup: tacoSoup
     });
-	
+
 	//tacoSoup.save() actually not needed in !savingHasmany mode, but should still work
     return newIngredient.save().then(() => savingHasMany() ? tacoSoup.save() : tacoSoup);
   }).then(() => {
-  	this.store().unloadAll();
-  	
+		this.store().unloadAll();
+
     return this.store().findRecord('taco-soup', 'C');
   }).then(tacoSoup => {
     return tacoSoup.get('ingredients');
@@ -350,13 +349,13 @@ test('delete an existing record', function (assert) {
 			}
 		}, allTests);
 	};
-	
+
 	module('dont save hasMany', {
 		beforeEach: function() {
 			config.emberpouch.dontsavehasmany = true;
 		}
 	}, syncAsync);
-	
+
 	module('save hasMany', {
 		beforeEach: function() {
 			config.emberpouch.dontsavehasmany = false;
