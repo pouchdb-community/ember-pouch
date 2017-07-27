@@ -24,7 +24,7 @@
     "CouchDB"
   ],
   "engines": {
-    "node": ">= 0.10.0"
+    "node": "^4.5 || 6.* || >= 7.*"
   },
   "author": "Nolan Lawson",
   "license": "Apache-2.0",
@@ -54,6 +54,7 @@
     "ember-load-initializers": "^1.0.0",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.14.1",
+    "ember-try": "0.2.11",
     "loader.js": "^4.2.3"
   },
   "dependencies": {
@@ -61,9 +62,6 @@
     "pouchdb": "^6.3.4",
     "relational-pouch": "^1.4.5",
     "ember-cli-babel": "^6.3.0"
-  },
-  "engines": {
-    "node": "^4.5 || 6.* || >= 7.*"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
