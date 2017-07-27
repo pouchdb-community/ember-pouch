@@ -513,8 +513,10 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.2.8**
+  - Update Ember CLI and PouchDB [#186](https://github.com/pouchdb-community/ember-pouch/pull/186)
 * **4.2.7**
-  - Fix `_shouldSerializeHasMany` deprecation [#184](https://github.com/pouchdb-community/ember-pouch/pull/185)
+  - Fix `_shouldSerializeHasMany` deprecation [#185](https://github.com/pouchdb-community/ember-pouch/pull/185)
 * **4.2.6**
   - Fixes queryRecord deprecation [#152](https://github.com/pouchdb-community/ember-pouch/pull/152)
   - Change links to `pouchdb-community`
