@@ -30,7 +30,7 @@ before_install:
   - bower --version
   - npm install -g phantomjs-prebuilt
   - phantomjs --version
-  - which yarn
+  - rm /usr/local/bin/yarn
 
 install:
   - npm install
