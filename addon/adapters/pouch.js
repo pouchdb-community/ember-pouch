@@ -80,10 +80,11 @@ export default DS.RESTAdapter.extend({
       this.unloadedDocumentChanged(obj);
       return;
     }
-    if (!recordInStore.get('isLoaded') || recordInStore.get('hasDirtyAttributes')) {
+    if (!recordInStore.get('isLoaded') || recordInStore.get('rev') === change.changes[0].rev || recordInStore.get('hasDirtyAttributes')) {
       // The record either hasn't loaded yet or has unpersisted local changes.
       // In either case, we don't want to refresh it in the store
       // (and for some substates, attempting to do so will result in an error).
+      // We also ignore the change if we already have the latest revision
       return;
     }
 
