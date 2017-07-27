@@ -13,16 +13,17 @@ export default function(name, options = {}, nested = undefined) {
 
       Ember.RSVP.Promise.resolve().then(() => {
 
-      	let db = new PouchDB(config.emberpouch.localDb);
-      	
-      	return db.getIndexes().then(data => {
-      		return Ember.RSVP.all(data.indexes.map(
-      		index => {
-      			return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
-      		}));
-      	}).then(() => db.destroy());
+        let db = new PouchDB(config.emberpouch.localDb);
+
+        return db.getIndexes().then(data => {
+          return Ember.RSVP.all(data.indexes.map(
+            index => {
+              return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
+            }
+          ));
+        }).then(() => db.destroy());
       }).then(() => {
-      	this.application = startApp();
+        this.application = startApp();
 
         this.lookup = function (item) {
           return this.application.__container__.lookup(item);
@@ -53,7 +54,7 @@ export default function(name, options = {}, nested = undefined) {
     afterEach() {
       if (this.application) {
         destroyApp(this.application);
-	  }
+      }
 
       if (options.afterEach) {
         options.afterEach.apply(this, arguments);

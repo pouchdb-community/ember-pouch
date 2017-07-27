@@ -147,7 +147,7 @@ export default DS.RESTAdapter.extend({
     if (type.documentType) {
       schemaDef['documentType'] = type.documentType;
     }
-    
+
     let config = getOwner(this).resolveRegistration('config:environment');
     let dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
     // else it's new, so update
@@ -163,40 +163,36 @@ export default DS.RESTAdapter.extend({
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
-      	let includeRel = true;
-      	rel.options = rel.options || {};
-      	if (typeof(rel.options.async) === "undefined") {
-      		rel.options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
-      	}
-      	let options = Object.create(rel.options);
-        if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
-        	let inverse = type.inverseFor(rel.key, store);
-        	if (inverse) {
-	        	if (inverse.kind === 'belongsTo') {
-	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
-	        		if (options.async) {
-	        			includeRel = false;
-	        		} else {
-	        			options.queryInverse = inverse.name;
-	        		}
-	        	} else {
-	        		console.warn(type.modelName + " has a relationship with name " + rel.key + " that is many to many with type " + rel.type + ". This is not supported");
-	        	}
-	        } else {
-	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
-	        }
+        let includeRel = true;
+        rel.options = rel.options || {};
+        if (typeof(rel.options.async) === "undefined") {
+          rel.options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
         }
-        
+        let options = Object.create(rel.options);
+        if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
+          let inverse = type.inverseFor(rel.key, store);
+          if (inverse) {
+            if (inverse.kind === 'belongsTo') {
+              self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
+              if (options.async) {
+                includeRel = false;
+              } else {
+                options.queryInverse = inverse.name;
+              }
+            }
+          }
+        }
+
         if (includeRel) {
-	        relDef[rel.kind] = {
-	          type: self.getRecordTypeName(relModel),
-	          options: options
-	        };
-	        if (!schemaDef.relations) {
-	          schemaDef.relations = {};
-	        }
-	        schemaDef.relations[rel.key] = relDef;
-	    }
+          relDef[rel.kind] = {
+            type: self.getRecordTypeName(relModel),
+            options: options
+          };
+          if (!schemaDef.relations) {
+            schemaDef.relations = {};
+          }
+          schemaDef.relations[rel.key] = relDef;
+        }
         self._init(store, relModel);
       }
     });
@@ -308,18 +304,16 @@ export default DS.RESTAdapter.extend({
     this._init(store, type);
     return this.get('db').rel.find(this.getRecordTypeName(type), ids);
   },
-  
+
   findHasMany: function(store, record, link, rel) {
-  	let inverse = record.type.inverseFor(rel.key, store);
-  	if (inverse && inverse.kind === 'belongsTo') {
-  		return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
-	}
-	else {
-		console.warn("Can't find " + rel.key);
-  		let result = {};
-  		result[pluralize(rel.type)] = [];
-  		return result;//data;
-  	}
+    let inverse = record.type.inverseFor(rel.key, store);
+    if (inverse && inverse.kind === 'belongsTo') {
+      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+    } else {
+      let result = {};
+      result[pluralize(rel.type)] = [];
+      return result; //data;
+    }
   },
 
   query: function(store, type, query) {

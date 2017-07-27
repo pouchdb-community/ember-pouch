@@ -84,7 +84,6 @@ test('puts attachments into the `attachments` property when saving', function (a
 
     done();
   }).catch((error) => {
-    console.error('error in test', error);
     assert.ok(false, 'error in test:' + error);
     done();
   });
