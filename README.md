@@ -513,6 +513,8 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **4.3.0**
+  - Bundle pouchdb-find [#191](https://github.com/pouchdb-community/ember-pouch/pull/191)
 * **4.2.9**
   - Lock relational-pouch version until pouchdb-find bugs are solved
 * **4.2.8**
