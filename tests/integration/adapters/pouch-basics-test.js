@@ -7,6 +7,14 @@ import Ember from 'ember';
 
 import config from 'dummy/config/environment';
 
+function promiseToRunLater(timeout) {
+  return new Ember.RSVP.Promise((resolve) => {
+    Ember.run.later(() => {
+      resolve();
+    }, timeout);
+  });
+}
+
 /*
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
@@ -282,6 +290,32 @@ test('creating an associated record stores a reference to it in the parent', fun
   }).finally(done);
 });
 
+//TODO: only do this for async or dontsavehasmany?
+test('delete cascade null', function (assert) {
+  assert.expect(2);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs(getDocsForRelations());
+  }).then(() => this.store().findRecord('food-item', 'Z'))//prime ember-data store with Z
+  .then(found => found.get('soup'))//prime belongsTo
+//  .then(() => this.store().findRecord('taco-soup', 'D'))
+  .then((found) => {
+    return found.destroyRecord();
+  }).then(() => {
+    return this.store().findRecord('food-item', 'Z');//Z should be updated now
+  }).then((found) => {
+    return Ember.RSVP.Promise.resolve(found.get('soup')).catch(() => null).then((soup) => {
+      assert.equal(found.belongsTo('soup').id(), null,
+        'should set id of belongsTo to null');
+      return soup;
+    });
+  }).then((soup) => {
+    assert.ok(soup === null,
+      'deleted soup should have cascaded to a null value for the belongsTo');
+  }).finally(done);
+});
+
 // This test fails due to a bug in ember data
 // (https://github.com/emberjs/data/issues/3736)
 // starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
@@ -337,12 +371,65 @@ test('delete an existing record', function (assert) {
 
 };
 
+let asyncTests = function() {
+  test('eventually consistency - success', function (assert) {
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs([
+      { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }},
+      //{_id: 'tacoSoup_2_C', data: { flavor: 'test' } }
+    ]);
+  })
+  .then(() => this.store().findRecord('food-item', 'X'))
+  .then(foodItem => {
+    let result = [
+      foodItem.get('soup')
+        .then(soup => assert.equal(soup.id, 'C')),
+      
+      promiseToRunLater(0)
+      .then(() => this.db().bulkDocs([
+        {_id: 'tacoSoup_2_C', data: { flavor: 'test' } }
+      ])),
+    ];
+    
+    return Ember.RSVP.all(result);
+  })
+  .finally(done);
+});
+
+test('eventually consistency - deleted', function (assert) {
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs([
+      { _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }},
+      //{_id: 'tacoSoup_2_C', data: { flavor: 'test' } }
+    ]);
+  })
+  .then(() => this.store().findRecord('food-item', 'X'))
+  .then(foodItem => {
+    let result = [
+      foodItem.get('soup')
+        .then(() => assert.ok(false, 'isDeleted'))
+        .catch(() => assert.ok(true, 'isDeleted')),
+      
+      promiseToRunLater(0)
+      .then(() => this.db().bulkDocs([
+        {_id: 'tacoSoup_2_C', _deleted: true }
+      ])),
+    ];
+    
+    return Ember.RSVP.all(result);
+  })
+  .finally(done);
+});
+};
+
 	let syncAsync = function() {
 		module('async', {
 			beforeEach: function() {
 				config.emberpouch.async = true;
 			}
-		}, allTests);
+		}, () => { allTests(); asyncTests(); });
 		module('sync', {
 			beforeEach: function() {
 				config.emberpouch.async = false;

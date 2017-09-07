@@ -66,6 +66,18 @@ export default DS.RESTAdapter.extend({
 
     var store = this.store;
 
+    if (this.waitingForConsistency[change.id]) {
+      let promise = this.waitingForConsistency[change.id];
+      delete this.waitingForConsistency[change.id];
+      if (change.deleted) {
+        promise.reject("deleted");
+      } else {
+        let model = store.modelFor(obj.type);
+        promise.resolve(this.findRecord(store, model, obj.id));
+      }
+      return;
+    }
+    
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -361,7 +373,7 @@ export default DS.RESTAdapter.extend({
   findRecord: function (store, type, id) {
     this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
-    return this.get('db').rel.find(recordTypeName, id).then(function (payload) {
+    return this.get('db').rel.find(recordTypeName, id).then(payload => {
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
@@ -373,9 +385,18 @@ export default DS.RESTAdapter.extend({
           return payload;
         }
       }
-      throw new Error('Not found: type "' + recordTypeName +
-        '" with id "' + id + '"');
+      
+      return this._eventuallyConsistent(recordTypeName, id);
     });
+  },
+  
+  //TODO: cleanup promises on destroy or db change?
+  waitingForConsistency: {},
+  _eventuallyConsistent: function(type, id) {
+    let pouchID = this.get('db').rel.makeDocID({type, id});
+    let defer = Ember.RSVP.defer();
+    this.waitingForConsistency[pouchID] = defer;
+    return defer.promise;
   },
 
   createRecord: function(store, type, record) {
