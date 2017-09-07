@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+//import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
   extractDeleteRecord
@@ -18,8 +19,17 @@ const {
   }
 } = Ember;
 
+//BelongsToRelationship.reopen({
+//  findRecord() {
+//    return this._super().catch(() => {
+//      //not found: deleted
+//      this.clear();
+//    });
+//  }
+//});
+
 export default DS.RESTAdapter.extend({
-  coalesceFindRequests: true,
+  coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
@@ -393,10 +403,16 @@ export default DS.RESTAdapter.extend({
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: {},
   _eventuallyConsistent: function(type, id) {
-    let pouchID = this.get('db').rel.makeDocID({type, id});
-    let defer = Ember.RSVP.defer();
-    this.waitingForConsistency[pouchID] = defer;
-    return defer.promise;
+    return this.get('db').rel.isDeleted(type, id).then(deleted => {
+      if (deleted) {
+        throw "Document of type '" + type + "' with id '" + id + "' is deleted.";
+      } else {
+        let pouchID = this.get('db').rel.makeDocID({type, id});
+        let defer = Ember.RSVP.defer();
+        this.waitingForConsistency[pouchID] = defer;
+        return defer.promise;
+      }
+    });
   },
 
   createRecord: function(store, type, record) {

@@ -15,6 +15,35 @@ function promiseToRunLater(timeout) {
   });
 }
 
+//function delayPromise(timeout) {
+//  return function(res) {
+//    return promiseToRunLater(timeout).then(() => res);
+//  }
+//}
+
+
+function savingHasMany() {
+	return !config.emberpouch.dontsavehasmany;
+}
+
+function getDocsForRelations() {
+	let result = [];
+
+	let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
+	if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
+	result.push(c);
+
+	let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
+	if (savingHasMany()) { d.data.ingredients = ['Z']; }
+	result.push(d);
+
+	result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
+	result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
+	result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
+
+    return result;
+}
+
 /*
  * Tests basic CRUD behavior for an app using the ember-pouch adapter.
  */
@@ -151,28 +180,6 @@ test('queryRecord returns null when no record is found', function (assert) {
   });
 });
 
-function savingHasMany() {
-	return !config.emberpouch.dontsavehasmany;
-}
-
-function getDocsForRelations() {
-	let result = [];
-
-	let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
-	if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
-	result.push(c);
-
-	let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
-	if (savingHasMany()) { d.data.ingredients = ['Z']; }
-	result.push(d);
-
-	result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
-	result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
-	result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
-
-    return result;
-}
-
 test('can query one record', function (assert) {
   assert.expect(1);
 
@@ -290,32 +297,6 @@ test('creating an associated record stores a reference to it in the parent', fun
   }).finally(done);
 });
 
-//TODO: only do this for async or dontsavehasmany?
-test('delete cascade null', function (assert) {
-  assert.expect(2);
-
-  var done = assert.async();
-  Ember.RSVP.Promise.resolve().then(() => {
-    return this.db().bulkDocs(getDocsForRelations());
-  }).then(() => this.store().findRecord('food-item', 'Z'))//prime ember-data store with Z
-  .then(found => found.get('soup'))//prime belongsTo
-//  .then(() => this.store().findRecord('taco-soup', 'D'))
-  .then((found) => {
-    return found.destroyRecord();
-  }).then(() => {
-    return this.store().findRecord('food-item', 'Z');//Z should be updated now
-  }).then((found) => {
-    return Ember.RSVP.Promise.resolve(found.get('soup')).catch(() => null).then((soup) => {
-      assert.equal(found.belongsTo('soup').id(), null,
-        'should set id of belongsTo to null');
-      return soup;
-    });
-  }).then((soup) => {
-    assert.ok(soup === null,
-      'deleted soup should have cascaded to a null value for the belongsTo');
-  }).finally(done);
-});
-
 // This test fails due to a bug in ember data
 // (https://github.com/emberjs/data/issues/3736)
 // starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
@@ -409,10 +390,10 @@ test('eventually consistency - deleted', function (assert) {
   .then(foodItem => {
     let result = [
       foodItem.get('soup')
-        .then(() => assert.ok(false, 'isDeleted'))
+        .then((soup) => assert.ok(soup === null, 'isDeleted'))
         .catch(() => assert.ok(true, 'isDeleted')),
       
-      promiseToRunLater(0)
+      promiseToRunLater(100)
       .then(() => this.db().bulkDocs([
         {_id: 'tacoSoup_2_C', _deleted: true }
       ])),
@@ -421,6 +402,36 @@ test('eventually consistency - deleted', function (assert) {
     return Ember.RSVP.all(result);
   })
   .finally(done);
+});
+
+//TODO: only do this for async or dontsavehasmany?
+test('delete cascade null', function (assert) {
+  assert.timeout(5000);
+  assert.expect(2);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs(getDocsForRelations());
+  })
+//  .then(() => this.store().findRecord('food-item', 'Z'))//prime ember-data store with Z
+//  .then(found => found.get('soup'))//prime belongsTo
+  .then(() => this.store().findRecord('taco-soup', 'D'))
+  .then((found) => {
+    return found.destroyRecord();
+  }).then(() => {
+    this.store().unloadAll();//to make sure the record is unloaded, normally this would be done by onChange listeren
+    return this.store().findRecord('food-item', 'Z');//Z should be updated now
+  })
+  .then((found) => {
+    return Ember.RSVP.Promise.resolve(found.get('soup')).catch(() => null).then((soup) => {
+      assert.equal(found.belongsTo('soup').id(), null,
+        'should set id of belongsTo to null');
+      return soup;
+    });
+  }).then((soup) => {
+    assert.ok(soup === null,
+      'deleted soup should have cascaded to a null value for the belongsTo');
+  }).finally(done);
 });
 };
 
