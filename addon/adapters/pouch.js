@@ -82,8 +82,7 @@ export default DS.RESTAdapter.extend({
       if (change.deleted) {
         promise.reject("deleted");
       } else {
-        let model = store.modelFor(obj.type);
-        promise.resolve(this.findRecord(store, model, obj.id));
+        promise.resolve(this._findRecord(obj.type, obj.id));
       }
       return;
     }
@@ -383,6 +382,10 @@ export default DS.RESTAdapter.extend({
   findRecord: function (store, type, id) {
     this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
+    return this._findRecord(recordTypeName, id);
+  },
+  
+  _findRecord(recordTypeName, id) {
     return this.get('db').rel.find(recordTypeName, id).then(payload => {
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
@@ -403,14 +406,27 @@ export default DS.RESTAdapter.extend({
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: {},
   _eventuallyConsistent: function(type, id) {
+    let pouchID = this.get('db').rel.makeDocID({type, id});
+    let defer = Ember.RSVP.defer();
+    this.waitingForConsistency[pouchID] = defer;
+    
     return this.get('db').rel.isDeleted(type, id).then(deleted => {
+      //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
+        delete this.waitingForConsistency[pouchID];
         throw "Document of type '" + type + "' with id '" + id + "' is deleted.";
-      } else {
-        let pouchID = this.get('db').rel.makeDocID({type, id});
-        let defer = Ember.RSVP.defer();
-        this.waitingForConsistency[pouchID] = defer;
+      } else if (deleted === null) {
         return defer.promise;
+      } else {
+        Ember.assert('Status should be existing', deleted === false);
+        //TODO: should we reject or resolve the promise? or does JS GC still clean it?
+        if (this.waitingForConsistency[pouchID]) {
+          delete this.waitingForConsistency[pouchID];
+          return this._findRecord(type, id);
+        } else {
+          //findRecord is already handled by onChange
+          return defer.promise;
+        }
       }
     });
   },
