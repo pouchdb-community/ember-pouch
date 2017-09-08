@@ -15,9 +15,10 @@ env:
   - EMBER_TRY_SCENARIO=ember-lts-2.8
   - EMBER_TRY_SCENARIO=ember-2.10-stack
   - EMBER_TRY_SCENARIO=ember-lts-2.12
+  - EMBER_TRY_SCENARIO=ember-2.14-stack
   - EMBER_TRY_SCENARIO=ember-release
   - EMBER_TRY_SCENARIO=ember-beta
-  - EMBER_TRY_SCENARIO=ember-canary
+#  - EMBER_TRY_SCENARIO=ember-canary
 
 matrix:
   fast_finish: true

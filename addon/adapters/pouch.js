@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+//import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
   extractDeleteRecord
@@ -18,8 +19,17 @@ const {
   }
 } = Ember;
 
+//BelongsToRelationship.reopen({
+//  findRecord() {
+//    return this._super().catch(() => {
+//      //not found: deleted
+//      this.clear();
+//    });
+//  }
+//});
+
 export default DS.RESTAdapter.extend({
-  coalesceFindRequests: true,
+  coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
@@ -66,6 +76,17 @@ export default DS.RESTAdapter.extend({
 
     var store = this.store;
 
+    if (this.waitingForConsistency[change.id]) {
+      let promise = this.waitingForConsistency[change.id];
+      delete this.waitingForConsistency[change.id];
+      if (change.deleted) {
+        promise.reject("deleted");
+      } else {
+        promise.resolve(this._findRecord(obj.type, obj.id));
+      }
+      return;
+    }
+    
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -361,7 +382,11 @@ export default DS.RESTAdapter.extend({
   findRecord: function (store, type, id) {
     this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
-    return this.get('db').rel.find(recordTypeName, id).then(function (payload) {
+    return this._findRecord(recordTypeName, id);
+  },
+  
+  _findRecord(recordTypeName, id) {
+    return this.get('db').rel.find(recordTypeName, id).then(payload => {
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
@@ -373,8 +398,36 @@ export default DS.RESTAdapter.extend({
           return payload;
         }
       }
-      throw new Error('Not found: type "' + recordTypeName +
-        '" with id "' + id + '"');
+      
+      return this._eventuallyConsistent(recordTypeName, id);
+    });
+  },
+  
+  //TODO: cleanup promises on destroy or db change?
+  waitingForConsistency: {},
+  _eventuallyConsistent: function(type, id) {
+    let pouchID = this.get('db').rel.makeDocID({type, id});
+    let defer = Ember.RSVP.defer();
+    this.waitingForConsistency[pouchID] = defer;
+    
+    return this.get('db').rel.isDeleted(type, id).then(deleted => {
+      //TODO: should we test the status of the promise here? Could it be handled in onChange already?
+      if (deleted) {
+        delete this.waitingForConsistency[pouchID];
+        throw "Document of type '" + type + "' with id '" + id + "' is deleted.";
+      } else if (deleted === null) {
+        return defer.promise;
+      } else {
+        Ember.assert('Status should be existing', deleted === false);
+        //TODO: should we reject or resolve the promise? or does JS GC still clean it?
+        if (this.waitingForConsistency[pouchID]) {
+          delete this.waitingForConsistency[pouchID];
+          return this._findRecord(type, id);
+        } else {
+          //findRecord is already handled by onChange
+          return defer.promise;
+        }
+      }
     });
   },
 

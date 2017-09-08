@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "4.3.0",
+  "version": "5.0.0-beta.1",
   "description": "PouchDB adapter for Ember Data",
   "directories": {
     "doc": "doc",
@@ -47,10 +47,10 @@
     "ember-cli-sri": "^2.1.0",
     "ember-cli-test-loader": "^1.1.0",
     "ember-cli-uglify": "^1.2.0",
-    "ember-data": "2.14.4",
+    "ember-data": "2.14.10",
     "ember-disable-prototype-extensions": "^1.1.2",
     "ember-export-application-global": "^2.0.0",
-    "ember-inflector": "^1.9.4",
+    "ember-inflector": "^2.0.0",
     "ember-load-initializers": "^1.0.0",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.14.1",
@@ -59,7 +59,7 @@
   "dependencies": {
     "broccoli-stew": "^1.3.1",
     "pouchdb": "^6.3.4",
-    "relational-pouch": "^2.0.0",
+    "relational-pouch": "jlami/relational-pouch#isDeleted",
     "ember-cli-babel": "^6.3.0"
   },
   "engines": {
