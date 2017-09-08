@@ -351,6 +351,10 @@ export default DS.RESTAdapter.extend({
       queryParams.sort = this._buildSort(query.sort);
     }
 
+    if (!Ember.isEmpty(query.limit)) {
+      queryParams.limit = query.limit;
+    }
+
     return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
   },
 
