@@ -513,6 +513,8 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **5.0.0-beta.1**
+  - Eventually consistency added: documents that are not in the database will result in an 'eternal' promise. This promise will only resolve when an entry for that document is found. Deleted documents will also satisfy this promise. This mirrors the way that couchdb replication works, because the changes might not come in the order that ember-data expects. Foreign keys might therefor point to documents that have not been loaded yet. Ember-data normally resets these to null, but keeping the promise in a loading state will keep the relations intact until the actual data is loaded.
 * **4.3.0**
   - Bundle pouchdb-find [#191](https://github.com/pouchdb-community/ember-pouch/pull/191)
 * **4.2.9**
