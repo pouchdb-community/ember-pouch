@@ -39,20 +39,30 @@ export default DS.RESTAdapter.extend({
   _onInit : on('init', function()  {
     this._startChangesToStoreListener();
   }),
-  _startChangesToStoreListener: function () {
+  _startChangesToStoreListener: function() {
     var db = this.get('db');
-    if (db) {
+    if (db && !this.changes) { // only run this once
+      var onChangeListener = bind(this, 'onChange');
+      this.set('onChangeListener', onChangeListener);
       this.changes = db.changes({
         since: 'now',
         live: true,
         returnDocs: false
-      }).on('change', bind(this, 'onChange'));
+      });
+      this.changes.on('change', onChangeListener);
+    }
+  },
+
+  _stopChangesListener: function() {
+    if (this.changes) {
+      var onChangeListener = this.get('onChangeListener');
+      this.changes.removeListener('change', onChangeListener);
+      this.changes.cancel();
+      this.changes = undefined;
     }
   },
   changeDb: function(db) {
-    if (this.changes) {
-      this.changes.cancel();
-    }
+    this._stopChangesListener();
 
     var store = this.store;
     var schema = this._schema || [];
@@ -129,9 +139,7 @@ export default DS.RESTAdapter.extend({
   },
 
   willDestroy: function() {
-    if (this.changes) {
-      this.changes.cancel();
-    }
+    this._stopChangesListener();
   },
 
   _init: function (store, type) {
