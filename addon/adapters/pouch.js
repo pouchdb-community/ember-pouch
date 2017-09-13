@@ -359,15 +359,7 @@ export default DS.RESTAdapter.extend({
       queryParams.sort = this._buildSort(query.sort);
     }
 
-    var idType = type.documentType || recordTypeName;
-    var recordTypeNameRegex = new RegExp('^' + idType + '_[0-3]');
-
-    return db.find(queryParams)
-      .then(function({ docs }) {
-        let matchinDocs = docs.filter(({ _id }) => _id.match(recordTypeNameRegex));
-        return { docs: matchinDocs };
-      })
-      .then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
+    return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
   },
 
   queryRecord: function(store, type, query) {
