@@ -363,6 +363,10 @@ export default DS.RESTAdapter.extend({
       queryParams.limit = query.limit;
     }
 
+    if (!Ember.isEmpty(query.skip)) {
+      queryParams.skip = query.skip;
+    }
+
     return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
   },
 
