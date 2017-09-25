@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import OperationsWaiter from 'ember-pouch/operations-waiter';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
@@ -16,7 +17,8 @@ const {
     pluralize,
     camelize,
     classify
-  }
+  },
+  RSVP
 } = Ember;
 
 //BelongsToRelationship.reopen({
@@ -30,6 +32,7 @@ const {
 
 export default DS.RESTAdapter.extend({
   coalesceFindRequests: false,
+  operationsWaiter: new OperationsWaiter,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
@@ -96,7 +99,7 @@ export default DS.RESTAdapter.extend({
       }
       return;
     }
-    
+
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -324,20 +327,41 @@ export default DS.RESTAdapter.extend({
   },
 
   findAll: function(store, type /*, sinceToken */) {
+    this.operationsWaiter.incrementPendingOps();
     // TODO: use sinceToken
     this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type));
+    return this.get('db').rel.find(this.getRecordTypeName(type)).then(results => {
+      this.operationsWaiter.decrementPendingOps();
+      return results;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   },
 
   findMany: function(store, type, ids) {
+    this.operationsWaiter.incrementPendingOps();
     this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type), ids);
+    return this.get('db').rel.find(this.getRecordTypeName(type), ids).then(results => {
+      this.operationsWaiter.decrementPendingOps();
+      return results;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   },
 
   findHasMany: function(store, record, link, rel) {
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
-      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+      this.operationsWaiter.incrementPendingOps();
+      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id).then(results => {
+        this.operationsWaiter.decrementPendingOps();
+        return results;
+      }).catch(() => {
+        this.operationsWaiter.decrementPendingOps();
+        return RSVP.reject(...arguments);
+      });
     } else {
       let result = {};
       result[pluralize(rel.type)] = [];
@@ -363,11 +387,20 @@ export default DS.RESTAdapter.extend({
       queryParams.limit = query.limit;
     }
 
-    return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
+    this.operationsWaiter.incrementPendingOps();
+    return db.find(queryParams).then(pouchRes => {
+      this.operationsWaiter.decrementPendingOps();
+      return db.rel.parseRelDocs(recordTypeName, pouchRes.docs);
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   },
 
   queryRecord: function(store, type, query) {
+    this.operationsWaiter.incrementPendingOps();
     return this.query(store, type, query).then(results => {
+      this.operationsWaiter.decrementPendingOps();
       let recordType = this.getRecordTypeName(type);
       let recordTypePlural = pluralize(recordType);
       if(results[recordTypePlural].length > 0){
@@ -377,6 +410,9 @@ export default DS.RESTAdapter.extend({
       }
       delete results[recordTypePlural];
       return results;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
     });
   },
 
@@ -396,9 +432,11 @@ export default DS.RESTAdapter.extend({
     var recordTypeName = this.getRecordTypeName(type);
     return this._findRecord(recordTypeName, id);
   },
-  
+
   _findRecord(recordTypeName, id) {
+    this.operationsWaiter.incrementPendingOps();
     return this.get('db').rel.find(recordTypeName, id).then(payload => {
+      this.operationsWaiter.decrementPendingOps();
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
@@ -410,18 +448,21 @@ export default DS.RESTAdapter.extend({
           return payload;
         }
       }
-      
+
       return this._eventuallyConsistent(recordTypeName, id);
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
     });
   },
-  
+
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: {},
   _eventuallyConsistent: function(type, id) {
     let pouchID = this.get('db').rel.makeDocID({type, id});
     let defer = Ember.RSVP.defer();
     this.waitingForConsistency[pouchID] = defer;
-    
+
     return this.get('db').rel.isDeleted(type, id).then(deleted => {
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
@@ -446,19 +487,41 @@ export default DS.RESTAdapter.extend({
   createRecord: function(store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.save(this.getRecordTypeName(type), data);
+
+    this.operationsWaiter.incrementPendingOps();
+    return this.get('db').rel.save(this.getRecordTypeName(type), data).then(results => {
+      this.operationsWaiter.decrementPendingOps();
+      return results;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   },
 
   updateRecord: function (store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.save(this.getRecordTypeName(type), data);
+    this.operationsWaiter.incrementPendingOps();
+    return this.get('db').rel.save(this.getRecordTypeName(type), data).then(results => {
+      this.operationsWaiter.decrementPendingOps();
+      return results;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   },
 
   deleteRecord: function (store, type, record) {
     this._init(store, type);
+    this.operationsWaiter.incrementPendingOps();
     var data = this._recordToData(store, type, record);
     return this.get('db').rel.del(this.getRecordTypeName(type), data)
-      .then(extractDeleteRecord);
+      .then(() => {
+        this.operationsWaiter.decrementPendingOps();
+        return extractDeleteRecord(...arguments);
+      }).catch(() => {
+        this.operationsWaiter.decrementPendingOps();
+        return RSVP.reject(...arguments);
+      });
   }
 });
