@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import OperationsWaiter from 'ember-pouch/operations-waiter';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
@@ -16,7 +17,8 @@ const {
     pluralize,
     camelize,
     classify
-  }
+  },
+  RSVP
 } = Ember;
 
 //BelongsToRelationship.reopen({
@@ -30,6 +32,7 @@ const {
 
 export default DS.RESTAdapter.extend({
   coalesceFindRequests: false,
+  operationsWaiter: new OperationsWaiter,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
@@ -96,7 +99,7 @@ export default DS.RESTAdapter.extend({
       }
       return;
     }
-    
+
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -326,18 +329,24 @@ export default DS.RESTAdapter.extend({
   findAll: function(store, type /*, sinceToken */) {
     // TODO: use sinceToken
     this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type));
+    return this._dbOperation(() => {
+      return this.get('db').rel.find(this.getRecordTypeName(type));
+    });
   },
 
   findMany: function(store, type, ids) {
     this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type), ids);
+    return this._dbOperation(() => {
+      return this.get('db').rel.find(this.getRecordTypeName(type), ids);
+    });
   },
 
   findHasMany: function(store, record, link, rel) {
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
-      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+      return this._dbOperation(() => {
+        return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+      });
     } else {
       let result = {};
       result[pluralize(rel.type)] = [];
@@ -363,20 +372,26 @@ export default DS.RESTAdapter.extend({
       queryParams.limit = query.limit;
     }
 
-    return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
+    return this._dbOperation(() => {
+      return db.find(queryParams).then(pouchRes => {
+        return db.rel.parseRelDocs(recordTypeName, pouchRes.docs);
+      });
+    });
   },
 
   queryRecord: function(store, type, query) {
-    return this.query(store, type, query).then(results => {
-      let recordType = this.getRecordTypeName(type);
-      let recordTypePlural = pluralize(recordType);
-      if(results[recordTypePlural].length > 0){
-        results[recordType] = results[recordTypePlural][0];
-      } else {
-        results[recordType] = null;
-      }
-      delete results[recordTypePlural];
-      return results;
+    return this._dbOperation(() => {
+      return this.query(store, type, query).then(results => {
+        let recordType = this.getRecordTypeName(type);
+        let recordTypePlural = pluralize(recordType);
+        if(results[recordTypePlural].length > 0){
+          results[recordType] = results[recordTypePlural][0];
+        } else {
+          results[recordType] = null;
+        }
+        delete results[recordTypePlural];
+        return results;
+      });
     });
   },
 
@@ -396,32 +411,34 @@ export default DS.RESTAdapter.extend({
     var recordTypeName = this.getRecordTypeName(type);
     return this._findRecord(recordTypeName, id);
   },
-  
-  _findRecord(recordTypeName, id) {
-    return this.get('db').rel.find(recordTypeName, id).then(payload => {
-      // Ember Data chokes on empty payload, this function throws
-      // an error when the requested data is not found
-      if (typeof payload === 'object' && payload !== null) {
-        var singular = recordTypeName;
-        var plural = pluralize(recordTypeName);
 
-        var results = payload[singular] || payload[plural];
-        if (results && results.length > 0) {
-          return payload;
+  _findRecord(recordTypeName, id) {
+    return this._dbOperation(() => {
+      return this.get('db').rel.find(recordTypeName, id).then(payload => {
+        // Ember Data chokes on empty payload, this function throws
+        // an error when the requested data is not found
+        if (typeof payload === 'object' && payload !== null) {
+          var singular = recordTypeName;
+          var plural = pluralize(recordTypeName);
+
+          var results = payload[singular] || payload[plural];
+          if (results && results.length > 0) {
+            return payload;
+          }
         }
-      }
-      
-      return this._eventuallyConsistent(recordTypeName, id);
+
+        return this._eventuallyConsistent(recordTypeName, id);
+      });
     });
   },
-  
+
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: {},
   _eventuallyConsistent: function(type, id) {
     let pouchID = this.get('db').rel.makeDocID({type, id});
     let defer = Ember.RSVP.defer();
     this.waitingForConsistency[pouchID] = defer;
-    
+
     return this.get('db').rel.isDeleted(type, id).then(deleted => {
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
@@ -446,19 +463,37 @@ export default DS.RESTAdapter.extend({
   createRecord: function(store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.save(this.getRecordTypeName(type), data);
+
+    return this._dbOperation(() => {
+      return this.get('db').rel.save(this.getRecordTypeName(type), data);
+    });
   },
 
   updateRecord: function (store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.save(this.getRecordTypeName(type), data);
+
+    return this._dbOperation(() => {
+      return this.get('db').rel.save(this.getRecordTypeName(type), data);
+    });
   },
 
   deleteRecord: function (store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.del(this.getRecordTypeName(type), data)
-      .then(extractDeleteRecord);
+    return this._dbOperation(() => {
+      return this.get('db').rel.del(this.getRecordTypeName(type), data).then(extractDeleteRecord);
+    });
+  },
+
+  _dbOperation(promise) {
+    this.operationsWaiter.incrementPendingOps();
+    return promise().then(result => {
+      this.operationsWaiter.decrementPendingOps();
+      return result;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   }
 });
