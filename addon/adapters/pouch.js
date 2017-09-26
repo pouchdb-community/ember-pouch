@@ -327,40 +327,25 @@ export default DS.RESTAdapter.extend({
   },
 
   findAll: function(store, type /*, sinceToken */) {
-    this.operationsWaiter.incrementPendingOps();
     // TODO: use sinceToken
     this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type)).then(results => {
-      this.operationsWaiter.decrementPendingOps();
-      return results;
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+    return this._dbOperation(() => {
+      return this.get('db').rel.find(this.getRecordTypeName(type));
     });
   },
 
   findMany: function(store, type, ids) {
-    this.operationsWaiter.incrementPendingOps();
     this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type), ids).then(results => {
-      this.operationsWaiter.decrementPendingOps();
-      return results;
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+    return this._dbOperation(() => {
+      return this.get('db').rel.find(this.getRecordTypeName(type), ids);
     });
   },
 
   findHasMany: function(store, record, link, rel) {
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
-      this.operationsWaiter.incrementPendingOps();
-      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id).then(results => {
-        this.operationsWaiter.decrementPendingOps();
-        return results;
-      }).catch(() => {
-        this.operationsWaiter.decrementPendingOps();
-        return RSVP.reject(...arguments);
+      return this._dbOperation(() => {
+        return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
       });
     } else {
       let result = {};
@@ -387,32 +372,26 @@ export default DS.RESTAdapter.extend({
       queryParams.limit = query.limit;
     }
 
-    this.operationsWaiter.incrementPendingOps();
-    return db.find(queryParams).then(pouchRes => {
-      this.operationsWaiter.decrementPendingOps();
-      return db.rel.parseRelDocs(recordTypeName, pouchRes.docs);
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+    return this._dbOperation(() => {
+      return db.find(queryParams).then(pouchRes => {
+        return db.rel.parseRelDocs(recordTypeName, pouchRes.docs);
+      });
     });
   },
 
   queryRecord: function(store, type, query) {
-    this.operationsWaiter.incrementPendingOps();
-    return this.query(store, type, query).then(results => {
-      this.operationsWaiter.decrementPendingOps();
-      let recordType = this.getRecordTypeName(type);
-      let recordTypePlural = pluralize(recordType);
-      if(results[recordTypePlural].length > 0){
-        results[recordType] = results[recordTypePlural][0];
-      } else {
-        results[recordType] = null;
-      }
-      delete results[recordTypePlural];
-      return results;
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+    return this._dbOperation(() => {
+      return this.query(store, type, query).then(results => {
+        let recordType = this.getRecordTypeName(type);
+        let recordTypePlural = pluralize(recordType);
+        if(results[recordTypePlural].length > 0){
+          results[recordType] = results[recordTypePlural][0];
+        } else {
+          results[recordType] = null;
+        }
+        delete results[recordTypePlural];
+        return results;
+      });
     });
   },
 
@@ -434,25 +413,22 @@ export default DS.RESTAdapter.extend({
   },
 
   _findRecord(recordTypeName, id) {
-    this.operationsWaiter.incrementPendingOps();
-    return this.get('db').rel.find(recordTypeName, id).then(payload => {
-      this.operationsWaiter.decrementPendingOps();
-      // Ember Data chokes on empty payload, this function throws
-      // an error when the requested data is not found
-      if (typeof payload === 'object' && payload !== null) {
-        var singular = recordTypeName;
-        var plural = pluralize(recordTypeName);
+    return this._dbOperation(() => {
+      return this.get('db').rel.find(recordTypeName, id).then(payload => {
+        // Ember Data chokes on empty payload, this function throws
+        // an error when the requested data is not found
+        if (typeof payload === 'object' && payload !== null) {
+          var singular = recordTypeName;
+          var plural = pluralize(recordTypeName);
 
-        var results = payload[singular] || payload[plural];
-        if (results && results.length > 0) {
-          return payload;
+          var results = payload[singular] || payload[plural];
+          if (results && results.length > 0) {
+            return payload;
+          }
         }
-      }
 
-      return this._eventuallyConsistent(recordTypeName, id);
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+        return this._eventuallyConsistent(recordTypeName, id);
+      });
     });
   },
 
@@ -488,40 +464,36 @@ export default DS.RESTAdapter.extend({
     this._init(store, type);
     var data = this._recordToData(store, type, record);
 
-    this.operationsWaiter.incrementPendingOps();
-    return this.get('db').rel.save(this.getRecordTypeName(type), data).then(results => {
-      this.operationsWaiter.decrementPendingOps();
-      return results;
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+    return this._dbOperation(() => {
+      return this.get('db').rel.save(this.getRecordTypeName(type), data);
     });
   },
 
   updateRecord: function (store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    this.operationsWaiter.incrementPendingOps();
-    return this.get('db').rel.save(this.getRecordTypeName(type), data).then(results => {
-      this.operationsWaiter.decrementPendingOps();
-      return results;
-    }).catch(() => {
-      this.operationsWaiter.decrementPendingOps();
-      return RSVP.reject(...arguments);
+
+    return this._dbOperation(() => {
+      return this.get('db').rel.save(this.getRecordTypeName(type), data);
     });
   },
 
   deleteRecord: function (store, type, record) {
     this._init(store, type);
-    this.operationsWaiter.incrementPendingOps();
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.del(this.getRecordTypeName(type), data)
-      .then(() => {
-        this.operationsWaiter.decrementPendingOps();
-        return extractDeleteRecord(...arguments);
-      }).catch(() => {
-        this.operationsWaiter.decrementPendingOps();
-        return RSVP.reject(...arguments);
-      });
+    return this._dbOperation(() => {
+      return this.get('db').rel.del(this.getRecordTypeName(type), data).then(extractDeleteRecord);
+    });
+  },
+
+  _dbOperation(promise) {
+    this.operationsWaiter.incrementPendingOps();
+    return promise().then(result => {
+      this.operationsWaiter.decrementPendingOps();
+      return result;
+    }).catch(() => {
+      this.operationsWaiter.decrementPendingOps();
+      return RSVP.reject(...arguments);
+    });
   }
 });
