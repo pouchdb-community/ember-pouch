@@ -437,7 +437,7 @@ export default DS.RESTAdapter.extend({
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
         delete this.waitingForConsistency[pouchID];
-        throw "Document of type '" + type + "' with id '" + id + "' is deleted.";
+        throw new Error("Document of type '" + type + "' with id '" + id + "' is deleted.");
       } else if (deleted === null) {
         return defer.promise;
       } else {
