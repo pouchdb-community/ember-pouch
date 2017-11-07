@@ -31,10 +31,6 @@ before_install:
   - bower --version
   - npm install -g phantomjs-prebuilt
   - phantomjs --version
-  - echo "echo fakeyarn" >> yarn
-  - chmod a+x yarn
-  - export PATH=.:$PATH
-  - echo $PATH
 
 install:
   - npm install
