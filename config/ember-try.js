@@ -64,31 +64,40 @@ module.exports = {
       },
     },
     {
+      name: 'ember-2.14-stack',
+      npm: {
+        devDependencies: {
+          'ember-data': '2.14.10',
+          'ember-source': '2.14.1',
+        }
+      },
+    },
+    {
       name: 'ember-release',
       npm: {
         devDependencies: {
-          'ember-data': 'components/ember-data#release',
-          'ember-source': 'components/ember#release',
+          'ember-data': 'latest',
+          'ember-source': 'latest',
         },
-      },
+      }
     },
     {
       name: 'ember-beta',
       npm: {
         devDependencies: {
-          'ember-data': 'components/ember-data#beta',
-          'ember-source': 'components/ember#beta',
+          'ember-data': 'beta',
+          'ember-source': 'beta',
         },
-      },
+      }
     },
-    {
-      name: 'ember-canary',
-      npm: {
-        devDependencies: {
-          'ember-data': 'components/ember-data#canary',
-          'ember-source': 'components/ember#canary',
-        },
-      },
-    }
+//    {
+//      name: 'ember-canary',
+//      npm: {
+//        devDependencies: {
+//          'ember-data': 'components/ember-data#canary',
+//          'ember-source': 'components/ember#canary',
+//        },
+//      },
+//    }
   ]
 };
