@@ -96,17 +96,15 @@ module.exports = {
       name: 'ember-canary',
       bower: {
         dependencies: {
-          'ember': 'components/ember#canary',
-          'ember-data': 'components/ember-data#canary'
+          'ember': 'components/ember#canary'
         },
         resolutions: {
-          'ember': 'canary',
-          'ember-data': 'canary'
+          'ember': 'canary'
         }
       },
       npm: {
         devDependencies: {
-          'ember-data': null,
+          'ember-data': 'emberjs/data#master',
           'ember-source': null
         }
       }
