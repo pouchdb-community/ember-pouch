@@ -104,7 +104,7 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-data': 'canary',
+          'ember-data': 'emberjs/data#master',
           'ember-source': null
         }
       }
