@@ -311,6 +311,28 @@ export default Ember.Route.extend({
 });
 ```
 
+Skip the first 5 documents
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario',
+        debut: { '$gte': null }
+      },
+      sort: [
+        { debut: 'desc' }
+      ],
+      skip: 5
+    })
+  }
+});
+```
+
 Note that this query would require a custom index including both fields `data.name` and `data.debut`.  Any field in `sort` must also be included in `filter`.  Only `$eq`, `$gt`, `$gte`, `$lt`, and `$lte` can be used when matching a custom index.
 
 ### store.queryRecord(model, options)
