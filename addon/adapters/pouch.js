@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import { pluralize } from 'ember-inflector';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
@@ -13,7 +14,6 @@ const {
   },
   on,
   String: {
-    pluralize,
     camelize,
     classify
   }
@@ -96,7 +96,7 @@ export default DS.RESTAdapter.extend({
       }
       return;
     }
-    
+
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -400,7 +400,7 @@ export default DS.RESTAdapter.extend({
     var recordTypeName = this.getRecordTypeName(type);
     return this._findRecord(recordTypeName, id);
   },
-  
+
   _findRecord(recordTypeName, id) {
     return this.get('db').rel.find(recordTypeName, id).then(payload => {
       // Ember Data chokes on empty payload, this function throws
@@ -414,18 +414,18 @@ export default DS.RESTAdapter.extend({
           return payload;
         }
       }
-      
+
       return this._eventuallyConsistent(recordTypeName, id);
     });
   },
-  
+
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: {},
   _eventuallyConsistent: function(type, id) {
     let pouchID = this.get('db').rel.makeDocID({type, id});
     let defer = Ember.RSVP.defer();
     this.waitingForConsistency[pouchID] = defer;
-    
+
     return this.get('db').rel.isDeleted(type, id).then(deleted => {
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
