@@ -1,6 +1,10 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+<<<<<<< HEAD
+import { pluralize } from 'ember-inflector';
+=======
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
+>>>>>>> upstream/master
 
 import {
   extractDeleteRecord
@@ -13,7 +17,6 @@ const {
   },
   on,
   String: {
-    pluralize,
     camelize,
     classify
   }
@@ -199,6 +202,23 @@ export default DS.RESTAdapter.extend({
         }
         let options = Object.create(rel.options);
         if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
+<<<<<<< HEAD
+        	let inverse = type.inverseFor(rel.key, store);
+        	if (inverse) {
+	        	if (inverse.kind === 'belongsTo') {
+	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
+	        		if (options.async) {
+	        			includeRel = false;
+	        		} else {
+	        			options.queryInverse = inverse.name;
+	        		}
+	        	} else {
+	        		console.warn(type.modelName + " has a relationship with name " + rel.key + " that is many to many with type " + rel.type + ". This is not supported");
+	        	}
+	        } else {
+	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
+	        }
+=======
           let inverse = type.inverseFor(rel.key, store);
           if (inverse) {
             if (inverse.kind === 'belongsTo') {
@@ -210,6 +230,7 @@ export default DS.RESTAdapter.extend({
               }
             }
           }
+>>>>>>> upstream/master
         }
 
         if (includeRel) {
