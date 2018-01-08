@@ -210,7 +210,7 @@ export default Ember.Route.extend({
 
 ### Query and QueryRecord
 
-query and queryRecord are relying on [pouchdb-find](https://github.com/pouchdb-community/pouchdb-find)
+query and queryRecord are relying on [pouchdb-find](https://github.com/pouchdb/pouchdb/tree/master/packages/node_modules/pouchdb-find)
 
 ### db.createIndex(index [, callback])
 
