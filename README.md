@@ -289,6 +289,50 @@ export default Ember.Route.extend({
 });
 ```
 
+Limit to 5 documents.
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario',
+        debut: { '$gte': null }
+      },
+      sort: [
+        { debut: 'desc' }
+      ],
+      limit: 5
+    })
+  }
+});
+```
+
+Skip the first 5 documents
+
+```javascript
+// app/routes/smasher/index.js
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model() {
+    return this.store.query('smasher',  {
+      filter: {
+        name: 'Mario',
+        debut: { '$gte': null }
+      },
+      sort: [
+        { debut: 'desc' }
+      ],
+      skip: 5
+    })
+  }
+});
+```
+
 Note that this query would require a custom index including both fields `data.name` and `data.debut`.  Any field in `sort` must also be included in `filter`.  Only `$eq`, `$gt`, `$gte`, `$lt`, and `$lte` can be used when matching a custom index.
 
 ### store.queryRecord(model, options)
@@ -513,16 +557,26 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **5.0.0-beta.1**
+  - Eventually consistency added: documents that are not in the database will result in an 'eternal' promise. This promise will only resolve when an entry for that document is found. Deleted documents will also satisfy this promise. This mirrors the way that couchdb replication works, because the changes might not come in the order that ember-data expects. Foreign keys might therefor point to documents that have not been loaded yet. Ember-data normally resets these to null, but keeping the promise in a loading state will keep the relations intact until the actual data is loaded.
+* **4.3.0**
+  - Bundle pouchdb-find [#191](https://github.com/pouchdb-community/ember-pouch/pull/191)
+* **4.2.9**
+  - Lock relational-pouch version until pouchdb-find bugs are solved
+* **4.2.8**
+  - Update Ember CLI and PouchDB [#186](https://github.com/pouchdb-community/ember-pouch/pull/186)
+* **4.2.7**
+  - Fix `_shouldSerializeHasMany` deprecation [#185](https://github.com/pouchdb-community/ember-pouch/pull/185)
 * **4.2.6**
-  - Fixes queryRecord deprecation [*152](https://github.com/pouchdb-community/ember-pouch/pull/152)
+  - Fixes queryRecord deprecation [#152](https://github.com/pouchdb-community/ember-pouch/pull/152)
   - Change links to `pouchdb-community`
-  - Use npm for ember-source [*183](https://github.com/pouchdb-community/ember-pouch/pull/183)
+  - Use npm for ember-source [#183](https://github.com/pouchdb-community/ember-pouch/pull/183)
 * **4.2.5**
-  - Correct Security documentation [*177](https://github.com/pouchdb-community/ember-pouch/pull/177)
-  - Fix sort documentation and add additional notes [*176](https://github.com/pouchdb-community/ember-pouch/pull/176)
-  - update ember-getowner-polyfill to remove deprecation warnings [*174](https://github.com/pouchdb-community/ember-pouch/pull/174)
+  - Correct Security documentation [#177](https://github.com/pouchdb-community/ember-pouch/pull/177)
+  - Fix sort documentation and add additional notes [#176](https://github.com/pouchdb-community/ember-pouch/pull/176)
+  - update ember-getowner-polyfill to remove deprecation warnings [#174](https://github.com/pouchdb-community/ember-pouch/pull/174)
 * **4.2.4**
-  - Fix attachments typo in README [*170](https://github.com/pouchdb-community/ember-pouch/pull/170)
+  - Fix attachments typo in README [#170](https://github.com/pouchdb-community/ember-pouch/pull/170)
 * **4.2.3**
   - Update pouchdb to the latest version
   - Minor typofix [#166](https://github.com/pouchdb-community/ember-pouch/pull/166)

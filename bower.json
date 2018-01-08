@@ -1,6 +1,0 @@
-{
-  "name": "ember-pouch",
-  "dependencies": {
-    "phantomjs-polyfill-object-assign": "chuckplantain/phantomjs-polyfill-object-assign"
-  }
-}

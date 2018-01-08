@@ -1,6 +1,10 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+<<<<<<< HEAD
 import { pluralize } from 'ember-inflector';
+=======
+//import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
+>>>>>>> upstream/master
 
 import {
   extractDeleteRecord
@@ -18,8 +22,17 @@ const {
   }
 } = Ember;
 
+//BelongsToRelationship.reopen({
+//  findRecord() {
+//    return this._super().catch(() => {
+//      //not found: deleted
+//      this.clear();
+//    });
+//  }
+//});
+
 export default DS.RESTAdapter.extend({
-  coalesceFindRequests: true,
+  coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
@@ -29,20 +42,30 @@ export default DS.RESTAdapter.extend({
   _onInit : on('init', function()  {
     this._startChangesToStoreListener();
   }),
-  _startChangesToStoreListener: function () {
+  _startChangesToStoreListener: function() {
     var db = this.get('db');
-    if (db) {
+    if (db && !this.changes) { // only run this once
+      var onChangeListener = bind(this, 'onChange');
+      this.set('onChangeListener', onChangeListener);
       this.changes = db.changes({
         since: 'now',
         live: true,
         returnDocs: false
-      }).on('change', bind(this, 'onChange'));
+      });
+      this.changes.on('change', onChangeListener);
+    }
+  },
+
+  _stopChangesListener: function() {
+    if (this.changes) {
+      var onChangeListener = this.get('onChangeListener');
+      this.changes.removeListener('change', onChangeListener);
+      this.changes.cancel();
+      this.changes = undefined;
     }
   },
   changeDb: function(db) {
-    if (this.changes) {
-      this.changes.cancel();
-    }
+    this._stopChangesListener();
 
     var store = this.store;
     var schema = this._schema || [];
@@ -66,6 +89,17 @@ export default DS.RESTAdapter.extend({
 
     var store = this.store;
 
+    if (this.waitingForConsistency[change.id]) {
+      let promise = this.waitingForConsistency[change.id];
+      delete this.waitingForConsistency[change.id];
+      if (change.deleted) {
+        promise.reject("deleted");
+      } else {
+        promise.resolve(this._findRecord(obj.type, obj.id));
+      }
+      return;
+    }
+    
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -108,9 +142,7 @@ export default DS.RESTAdapter.extend({
   },
 
   willDestroy: function() {
-    if (this.changes) {
-      this.changes.cancel();
-    }
+    this._stopChangesListener();
   },
 
   _init: function (store, type) {
@@ -163,13 +195,14 @@ export default DS.RESTAdapter.extend({
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
-      	let includeRel = true;
-      	rel.options = rel.options || {};
-      	if (typeof(rel.options.async) === "undefined") {
-      		rel.options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
-      	}
-      	let options = Object.create(rel.options);
+        let includeRel = true;
+        rel.options = rel.options || {};
+        if (typeof(rel.options.async) === "undefined") {
+          rel.options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
+        }
+        let options = Object.create(rel.options);
         if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
+<<<<<<< HEAD
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
 	        	if (inverse.kind === 'belongsTo') {
@@ -185,18 +218,31 @@ export default DS.RESTAdapter.extend({
 	        } else {
 	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
 	        }
+=======
+          let inverse = type.inverseFor(rel.key, store);
+          if (inverse) {
+            if (inverse.kind === 'belongsTo') {
+              self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
+              if (options.async) {
+                includeRel = false;
+              } else {
+                options.queryInverse = inverse.name;
+              }
+            }
+          }
+>>>>>>> upstream/master
         }
 
         if (includeRel) {
-	        relDef[rel.kind] = {
-	          type: self.getRecordTypeName(relModel),
-	          options: options
-	        };
-	        if (!schemaDef.relations) {
-	          schemaDef.relations = {};
-	        }
-	        schemaDef.relations[rel.key] = relDef;
-	    }
+          relDef[rel.kind] = {
+            type: self.getRecordTypeName(relModel),
+            options: options
+          };
+          if (!schemaDef.relations) {
+            schemaDef.relations = {};
+          }
+          schemaDef.relations[rel.key] = relDef;
+        }
         self._init(store, relModel);
       }
     });
@@ -310,16 +356,14 @@ export default DS.RESTAdapter.extend({
   },
 
   findHasMany: function(store, record, link, rel) {
-  	let inverse = record.type.inverseFor(rel.key, store);
-  	if (inverse && inverse.kind === 'belongsTo') {
-  		return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
-	}
-	else {
-		console.warn("Can't find " + rel.key);
-  		let result = {};
-  		result[pluralize(rel.type)] = [];
-  		return result;//data;
-  	}
+    let inverse = record.type.inverseFor(rel.key, store);
+    if (inverse && inverse.kind === 'belongsTo') {
+      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+    } else {
+      let result = {};
+      result[pluralize(rel.type)] = [];
+      return result; //data;
+    }
   },
 
   query: function(store, type, query) {
@@ -334,6 +378,14 @@ export default DS.RESTAdapter.extend({
 
     if (!Ember.isEmpty(query.sort)) {
       queryParams.sort = this._buildSort(query.sort);
+    }
+
+    if (!Ember.isEmpty(query.limit)) {
+      queryParams.limit = query.limit;
+    }
+
+    if (!Ember.isEmpty(query.skip)) {
+      queryParams.skip = query.skip;
     }
 
     return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
@@ -367,7 +419,11 @@ export default DS.RESTAdapter.extend({
   findRecord: function (store, type, id) {
     this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
-    return this.get('db').rel.find(recordTypeName, id).then(function (payload) {
+    return this._findRecord(recordTypeName, id);
+  },
+  
+  _findRecord(recordTypeName, id) {
+    return this.get('db').rel.find(recordTypeName, id).then(payload => {
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
@@ -379,8 +435,36 @@ export default DS.RESTAdapter.extend({
           return payload;
         }
       }
-      throw new Error('Not found: type "' + recordTypeName +
-        '" with id "' + id + '"');
+      
+      return this._eventuallyConsistent(recordTypeName, id);
+    });
+  },
+  
+  //TODO: cleanup promises on destroy or db change?
+  waitingForConsistency: {},
+  _eventuallyConsistent: function(type, id) {
+    let pouchID = this.get('db').rel.makeDocID({type, id});
+    let defer = Ember.RSVP.defer();
+    this.waitingForConsistency[pouchID] = defer;
+    
+    return this.get('db').rel.isDeleted(type, id).then(deleted => {
+      //TODO: should we test the status of the promise here? Could it be handled in onChange already?
+      if (deleted) {
+        delete this.waitingForConsistency[pouchID];
+        throw "Document of type '" + type + "' with id '" + id + "' is deleted.";
+      } else if (deleted === null) {
+        return defer.promise;
+      } else {
+        Ember.assert('Status should be existing', deleted === false);
+        //TODO: should we reject or resolve the promise? or does JS GC still clean it?
+        if (this.waitingForConsistency[pouchID]) {
+          delete this.waitingForConsistency[pouchID];
+          return this._findRecord(type, id);
+        } else {
+          //findRecord is already handled by onChange
+          return defer.promise;
+        }
+      }
     });
   },
 
