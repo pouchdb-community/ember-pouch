@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
+import { pluralize } from 'ember-inflector';
 
 import {
   extractDeleteRecord
@@ -12,7 +13,6 @@ const {
   },
   on,
   String: {
-    pluralize,
     camelize,
     classify
   }
@@ -147,7 +147,7 @@ export default DS.RESTAdapter.extend({
     if (type.documentType) {
       schemaDef['documentType'] = type.documentType;
     }
-    
+
     let config = getOwner(this).resolveRegistration('config:environment');
     let dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
     // else it's new, so update
@@ -173,7 +173,7 @@ export default DS.RESTAdapter.extend({
         	let inverse = type.inverseFor(rel.key, store);
         	if (inverse) {
 	        	if (inverse.kind === 'belongsTo') {
-	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});	
+	        		self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
 	        		if (options.async) {
 	        			includeRel = false;
 	        		} else {
@@ -186,7 +186,7 @@ export default DS.RESTAdapter.extend({
 	        	console.warn(type.modelName + " has a hasMany relationship with name " + rel.key + " that has no inverse.");
 	        }
         }
-        
+
         if (includeRel) {
 	        relDef[rel.kind] = {
 	          type: self.getRecordTypeName(relModel),
@@ -308,7 +308,7 @@ export default DS.RESTAdapter.extend({
     this._init(store, type);
     return this.get('db').rel.find(this.getRecordTypeName(type), ids);
   },
-  
+
   findHasMany: function(store, record, link, rel) {
   	let inverse = record.type.inverseFor(rel.key, store);
   	if (inverse && inverse.kind === 'belongsTo') {
