@@ -141,6 +141,8 @@ export default DS.RESTAdapter.extend({
   willDestroy: function() {
     this._stopChangesListener();
   },
+  
+  _indexPromises: [],
 
   _init: function (store, type) {
     var self = this,
@@ -202,7 +204,7 @@ export default DS.RESTAdapter.extend({
           let inverse = type.inverseFor(rel.key, store);
           if (inverse) {
             if (inverse.kind === 'belongsTo') {
-              self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
+              self._indexPromises.push(self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }}));
               if (options.async) {
                 includeRel = false;
               } else {
