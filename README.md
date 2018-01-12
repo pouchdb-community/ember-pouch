@@ -22,6 +22,8 @@ For more on PouchDB, check out [pouchdb.com](http://pouchdb.com).
 ember install ember-pouch
 ```
 
+Note: You can ingnore `UNMET PEER DEPENDENCY pouchdb-find` because we import `pouchdb-find` from `pouchdb`.
+
 For ember-data < 2.0:
 
 ```bash
@@ -557,6 +559,23 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **5.0.0-beta.5**
+  - Add pouchdb.find.js from pouchdb [#208](https://github.com/pouchdb-community/ember-pouch/pull/208)
+  - createIndex promises should be done before removing [#208](https://github.com/pouchdb-community/ember-pouch/pull/208)
+  - Change sudo to required (see travis-ci/travis-ci#8836) [#208](https://github.com/pouchdb-community/ember-pouch/pull/208)
+  - Ignore same revision changes [#189](https://github.com/pouchdb-community/ember-pouch/pull/189)
+* **5.0.0-beta.4**
+  - Resolve Ember.String.pluralize() deprecation [#206](https://github.com/pouchdb-community/ember-pouch/pull/206)
+  - allow usage of skip parameter in pouchdb adapter queries [#198](https://github.com/pouchdb-community/ember-pouch/pull/198)
+* **5.0.0-beta.3**
+  - Fix Ember Data canary ember-try scenario [#202](https://github.com/pouchdb-community/ember-pouch/pull/202)
+  - Restore ember-try configuration for Ember Data [#201](https://github.com/pouchdb-community/ember-pouch/pull/201)
+  - Fix some jobs on Travis Trusty [#187](https://github.com/pouchdb-community/ember-pouch/pull/187)
+  - clean up db changes listener [#195](https://github.com/pouchdb-community/ember-pouch/pull/195)
+  - filter results of pouch adapter query by correct type [#194](https://github.com/pouchdb-community/ember-pouch/pull/194)
+  - allow usage of limit parameter in pouchdb adapter queries [#193](https://github.com/pouchdb-community/ember-pouch/pull/193)
+* **5.0.0-beta.2**
+  - version fix [#196](https://github.com/pouchdb-community/ember-pouch/pull/196)
 * **5.0.0-beta.1**
   - Eventually consistency added: documents that are not in the database will result in an 'eternal' promise. This promise will only resolve when an entry for that document is found. Deleted documents will also satisfy this promise. This mirrors the way that couchdb replication works, because the changes might not come in the order that ember-data expects. Foreign keys might therefor point to documents that have not been loaded yet. Ember-data normally resets these to null, but keeping the promise in a loading state will keep the relations intact until the actual data is loaded.
 * **4.3.0**
