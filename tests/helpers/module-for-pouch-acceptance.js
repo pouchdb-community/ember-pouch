@@ -1,28 +1,17 @@
 import { module } from 'qunit';
 import startApp from '../helpers/start-app';
 import destroyApp from '../helpers/destroy-app';
-import config from 'dummy/config/environment';
 
 import Ember from 'ember';
-/* globals PouchDB */
 
 export default function(name, options = {}, nested = undefined) {
   module(name, {
-    beforeEach(assert) {
-      var done = assert.async();
-
-      Ember.RSVP.Promise.resolve().then(() => {
-
-        let db = new PouchDB(config.emberpouch.localDb);
-
-        return db.getIndexes().then(data => {
-          return Ember.RSVP.all(data.indexes.map(
-            index => {
-              return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
-            }
-          ));
-        }).then(() => db.destroy());
-      }).then(() => {
+    beforeEach() {
+      return Ember.RSVP.Promise.resolve().then(() => {
+        if (options.beforeEach) {
+          options.beforeEach.apply(this, arguments);
+        }
+        
         this.application = startApp();
 
         this.lookup = function (item) {
@@ -43,22 +32,30 @@ export default function(name, options = {}, nested = undefined) {
         this.db = function db() {
           return this.adapter().get('db');
         };
-
-        if (options.beforeEach) {
-          options.beforeEach.apply(this, arguments);
-        }
-        done();
       });
     },
 
-    afterEach() {
-      if (this.application) {
-        destroyApp(this.application);
-      }
+    afterEach() {     
+      let db = this.db();
+      return Ember.RSVP.all(this.adapter()._indexPromises)
+      .then(() => {
+        return db.getIndexes().then(data => {
+          return Ember.RSVP.all(data.indexes.map(
+            index => {
+              return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
+            }
+          ));
+        })
+      }).then(() => db.destroy())
+        .then(() => {
+          if (this.application) {
+            destroyApp(this.application);
+          }
 
-      if (options.afterEach) {
-        options.afterEach.apply(this, arguments);
-      }
+          if (options.afterEach) {
+            options.afterEach.apply(this, arguments);
+          }    
+        });
     }
   }, nested);
 }

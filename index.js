@@ -28,6 +28,11 @@ module.exports = {
       files: ['pouchdb.relational-pouch.js']
     });
 
+    var pouchdbFind = stew.find(path.join(path.dirname(require.resolve('pouchdb')), '..', 'dist'), {
+      destDir: 'pouchdb',
+      files: ['pouchdb.find.js']
+    });
+
     var shims = stew.find(__dirname + '/vendor/pouchdb', {
       destDir: 'pouchdb',
       files: ['shims.js']
@@ -36,6 +41,7 @@ module.exports = {
     return stew.find([
       pouchdb,
       relationalPouch,
+      pouchdbFind,
       shims
     ]);
   },
@@ -43,6 +49,7 @@ module.exports = {
   included(app) {
     app.import('vendor/pouchdb/pouchdb.js');
     app.import('vendor/pouchdb/pouchdb.relational-pouch.js');
+    app.import('vendor/pouchdb/pouchdb.find.js');
     app.import('vendor/pouchdb/shims.js', {
       exports: { 'pouchdb': [ 'default' ]}
     });
