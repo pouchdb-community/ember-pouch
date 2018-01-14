@@ -457,7 +457,7 @@ We recommend using [Ember Service Worker](http://ember-service-worker.com) to ge
 
 You can also take a look at Martin Broerse his [ember-cli-blog](https://github.com/broerse/ember-cli-blog/blob/14b95b443b851afa3632be3cbe631f055664b340/ember-cli-build.js) configuration for the plugin.
 
-⚠️ iOS does not yet support Service Workers. If you want to make your assets available offline for an iPhone of iPad, you have to go for the Application Cache strategy. Since Jan 10, 2018, [Safari Technology Preview does support Service Workers](https://webkit.org/blog/8060/release-notes-for-safari-technology-preview-47/). It's expected to land in iOS 12, but there's no certainity about that.
+⚠️ iOS does not yet support Service Workers. If you want to make your assets available offline for an iPhone or iPad, you have to go for the Application Cache strategy. Since Jan 10, 2018, [Safari Technology Preview does support Service Workers](https://webkit.org/blog/8060/release-notes-for-safari-technology-preview-47/). It's expected to land in iOS 12, but there's no certainity about that.
 
 
 ### Security
