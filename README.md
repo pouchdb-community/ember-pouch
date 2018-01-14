@@ -443,9 +443,9 @@ Ember Pouch is really just a thin layer of Ember-y goodness over [Relational Pou
 
 Saving data locally using PouchDB is one part of making a web application [Offline First](http://offlinefirst.org/). However, you will also need to make your static assets available offline.
 
-There are two possible approaches to this. The first one is using the Application Cache (AP). The second one is using Service Workers (SW). The Application Cache specification has been [removed from the Web standards](https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache). Mozilla now recommends to use [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers) instead.
+There are two possible approaches to this. The first one is using the Application Cache (AP) feature. The second one is using Service Workers (SW). The Application Cache specification has been [removed from the Web standards](https://developer.mozilla.org/en-US/docs/Web/HTML/Using_the_application_cache). Mozilla now recommends to use [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers) instead.
 
-Most browser vendors still provide support for AC and are in the process of implementing Service Workers. So depending on the browsers you target, you should go for one or the other. You can track the progress via [caniuse.com](https://caniuse.com/#feat=serviceworkers).
+Most browser vendors still provide support for Application Cache and are in the process of implementing Service Workers. So depending on the browsers you target, you should go for one or the other. You can track the progress via [caniuse.com](https://caniuse.com/#feat=serviceworkers).
 
 #### 1. Application Cache
 
@@ -456,6 +456,8 @@ You can use [broccoli-manifest](https://github.com/racido/broccoli-manifest) to 
 We recommend using [Ember Service Worker](http://ember-service-worker.com) to get started with Service Workers for your web application. The website provide's an easy to follow guide on getting started with the addon.
 
 You can also take a look at Martin Broerse his [ember-cli-blog](https://github.com/broerse/ember-cli-blog/blob/14b95b443b851afa3632be3cbe631f055664b340/ember-cli-build.js) configuration for the plugin.
+
+⚠️ iOS does not yet support Service Workers. If you want to make your assets available offline for an iPhone of iPad, you have to go for the Application Cache strategy. Since Jan 10, 2018, [Safari Technology Preview does support Service Workers](https://webkit.org/blog/8060/release-notes-for-safari-technology-preview-47/). It's expected to land in iOS 12, but there's no certainity about that.
 
 
 ### Security
