@@ -3,10 +3,6 @@ import DS from 'ember-data';
 import { pluralize } from 'ember-inflector';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
-import {
-  extractDeleteRecord
-} from '../utils';
-
 const {
   getOwner,
   run: {
@@ -462,10 +458,27 @@ export default DS.RESTAdapter.extend({
     return this.get('db').rel.save(this.getRecordTypeName(type), data);
   },
 
-  deleteRecord: function (store, type, record) {
+  deleteRecord: function (store, type, snapshot) {
     this._init(store, type);
-    var data = this._recordToData(store, type, record);
-    return this.get('db').rel.del(this.getRecordTypeName(type), data)
-      .then(extractDeleteRecord);
+    let data = this._recordToData(store, type, snapshot);
+    let deletedChildren = [];
+    snapshot.eachRelationship((name, descriptor) => {
+      if(descriptor.kind === 'hasMany' && descriptor.options.dependent === 'destroy') {
+        let mappedPromise = snapshot.record.get(name).then(childRecords => {
+          return Ember.RSVP.all(childRecords.map(childRecord => childRecord.destroyRecord()));
+        });
+        deletedChildren.push(mappedPromise);
+      }
+    });
+    let deletePromise = new Ember.RSVP.Promise((resolve, reject) => {
+      Ember.RSVP.all(deletedChildren).then(() => {
+        this.get('db').rel.del(this.getRecordTypeName(type), data).then(() => {
+          resolve();
+        }).catch(err => {
+          reject(err);
+        });
+      });
+    });
+    return deletePromise;
   }
 });

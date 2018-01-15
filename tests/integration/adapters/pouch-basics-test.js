@@ -297,6 +297,77 @@ test('creating an associated record stores a reference to it in the parent', fun
   }).finally(done);
 });
 
+test('deleting a parent record deletes the children as well when dependent is set to destroy', function (assert) {
+  assert.expect(3);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs([
+      { _id: 'gyro_2_C', data: { flavor: 'lamb', ingredients: ['X', 'Y'] } },
+      { _id: 'gyroIngredient_2_X', data: { name: 'onion', gyro: 'C' } },
+      { _id: 'gyroIngredient_2_Y', data: { name: 'tomato', gyro: 'C' } }
+    ]);
+  }).then(() => {
+    return this.store().findRecord('gyro', 'C');
+  }).then(gyro => {
+    return gyro.destroyRecord();
+  }).then(() => {
+    let promises = [];
+
+    promises.push(this.db().get('gyro_2_C'));
+    promises.push(this.db().get('gyroIngredient_2_X'));
+    promises.push(this.db().get('gyroIngredient_2_Y'));
+    return Ember.RSVP.allSettled(promises);
+  }).then((results) => {
+    results.forEach((result) => {
+      if(result.reason) {
+        assert.equal(result.reason.status, 404, 'document should no longer exist');
+      } else {
+        assert.ok(false, 'document ' + result.value._id + ' should have been deleted');
+      }
+    });
+    done();
+  });
+});
+
+test('deleting a parent record should not delete the children when dependent is not set to destroy', function (assert) {
+  assert.expect(3);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs([
+      { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
+      { _id: 'foodItem_2_X', data: { name: 'pineapple' }},
+      { _id: 'foodItem_2_Y', data: { name: 'pork loin' }}
+    ]);
+  }).then(() => {
+    return this.store().findRecord('taco-soup', 'C');
+  }).then(tacoSoup => {
+    return tacoSoup.destroyRecord();
+  }).then(() => {
+    let promises = [];
+
+    promises.push(this.db().get('tacoSoup_2_C'));
+    promises.push(this.db().get('foodItem_2_X'));
+    promises.push(this.db().get('foodItem_2_Y'));
+    return Ember.RSVP.allSettled(promises);
+  }).then((results) => {
+    if(results[0].reason) {
+      assert.equal(results[0].reason.status, 404, 'document should no longer exist');
+    } else {
+      assert.ok(false, 'document ' + results[0].value._id + ' should have been deleted');
+    }
+    for(let i = 1; i < 3 ; i += 1) {
+      if(results[i].value) {
+        assert.ok(results[i].value._id, results[i].value._id + ' document should still exist');
+      } else {
+        assert.ok(false, 'document should not have been deleted');
+      }
+    }
+    done();
+  });
+});
+
 // This test fails due to a bug in ember data
 // (https://github.com/emberjs/data/issues/3736)
 // starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
