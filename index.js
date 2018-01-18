@@ -3,6 +3,8 @@
 
 var path = require('path');
 var stew = require('broccoli-stew');
+var writeFile = require('broccoli-file-creator');
+var version = require('./package.json').version;
 
 module.exports = {
   name: 'ember-pouch',
@@ -38,20 +40,35 @@ module.exports = {
       files: ['shims.js']
     });
 
+    var content = "Ember.libraries.register('Ember Pouch', '" + version + "');";
+    var registerVersionTree = writeFile(
+      'ember-pouch/register-version.js',
+      content
+    );
+
     return stew.find([
       pouchdb,
       relationalPouch,
       pouchdbFind,
-      shims
+      shims,
+      registerVersionTree
     ]);
   },
 
   included(app) {
+    this._super.included.apply(this, arguments);
+
+    // see: https://github.com/ember-cli/ember-cli/issues/3718
+    if (typeof app.import !== 'function' && app.app) {
+      app = app.app;
+    }
+
     app.import('vendor/pouchdb/pouchdb.js');
     app.import('vendor/pouchdb/pouchdb.relational-pouch.js');
     app.import('vendor/pouchdb/pouchdb.find.js');
     app.import('vendor/pouchdb/shims.js', {
       exports: { 'pouchdb': [ 'default' ]}
     });
+    app.import('vendor/ember-pouch/register-version.js');
   }
 };
