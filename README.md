@@ -576,6 +576,9 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **5.0.0-beta.6**
+  - Add register-version.js to vendor/ember-pouch [#210](https://github.com/pouchdb-community/ember-pouch/pull/210)
+  - Update documentation about Offline First [#209](https://github.com/pouchdb-community/ember-pouch/pull/209)
 * **5.0.0-beta.5**
   - Add pouchdb.find.js from pouchdb [#208](https://github.com/pouchdb-community/ember-pouch/pull/208)
   - createIndex promises should be done before removing [#208](https://github.com/pouchdb-community/ember-pouch/pull/208)
