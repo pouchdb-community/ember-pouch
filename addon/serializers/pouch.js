@@ -1,9 +1,12 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 
+import {
+  shouldSaveRelationship
+} from '../utils';
+
 const {
-  get,
-  getOwner
+  get  
 } = Ember;
 const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
@@ -12,18 +15,10 @@ var Serializer = DS.RESTSerializer.extend({
 
   init: function() {
     this._super(...arguments);
-
-    let config = getOwner(this).resolveRegistration('config:environment');
-    this.dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
-  },
-
-  _getDontsave(relationship) {
-    return !Ember.isEmpty(relationship.options.dontsave) ? relationship.options.dontsave : this.dontsavedefault;
   },
 
   shouldSerializeHasMany: function(snapshot, key, relationship) {
-    let dontsave = this._getDontsave(relationship);
-    let result = !dontsave;
+    let result = shouldSaveRelationship(this, relationship);
     return result;
   },
 
@@ -89,7 +84,7 @@ var Serializer = DS.RESTSerializer.extend({
     let relationships = this._super(...arguments);
 
     modelClass.eachRelationship((key, relationshipMeta) => {
-      if (relationshipMeta.kind === 'hasMany' && this._getDontsave(relationshipMeta) && !!relationshipMeta.options.async) {
+      if (relationshipMeta.kind === 'hasMany' && !shouldSaveRelationship(this, relationshipMeta) && !!relationshipMeta.options.async) {
         relationships[key] = { links: { related: key } };
       }
     });
