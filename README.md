@@ -136,7 +136,7 @@ EmberPouch supports both `hasMany` and `belongsTo` relationships.
 
 To be more in line with the normal ember data way of saving `hasMany` - `belongsTo` relationships, ember-pouch now has an option to not save the child ids on the `hasMany` side. This prevents the extra need to save the `hasMany` side as explained below. For a more detailed explanation please read the [relational-pouch documentation](https://github.com/pouchdb-community/relational-pouch#dont-save-hasmany)
 
-This new mode can be disabled for a `hasMany` relationship by specifying the option `save: false` on the relationship. An application wide setting named `ENV.emberPouch.saveHasMany` can also be set to `false` to make all `hasMany` relationships behave the old way.
+This new mode can be disabled for a `hasMany` relationship by specifying the option `save: true` on the relationship. An application wide setting named `ENV.emberPouch.saveHasMany` can also be set to `true` to make all `hasMany` relationships behave the old way.
 
 Using this mode does impose a slight runtime overhead, since this will use `db.find` and database indexes to search for the child ids. The indexes are created automatically for you. But large changes to the model might require you to clean up old, unused indexes.
 
@@ -587,6 +587,12 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **5.0.0**
+  - Add warning for old `dontsavehasmany` use [#216](https://github.com/pouchdb-community/ember-pouch/pull/216)
+  - forcing the default serializer [#215](https://github.com/pouchdb-community/ember-pouch/pull/215)
+  - test + flag + doc for eventually-consistent [#214](https://github.com/pouchdb-community/ember-pouch/pull/214)
+  - config changes [#213](https://github.com/pouchdb-community/ember-pouch/pull/213)
+  - Update pouchdb to version 6.4.2 [#211](https://github.com/pouchdb-community/ember-pouch/pull/211)
 * **5.0.0-beta.6**
   - Add register-version.js to vendor/ember-pouch [#210](https://github.com/pouchdb-community/ember-pouch/pull/210)
   - Update documentation about Offline First [#209](https://github.com/pouchdb-community/ember-pouch/pull/209)
