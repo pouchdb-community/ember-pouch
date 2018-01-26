@@ -13,7 +13,7 @@ export function shouldSaveRelationship(container, relationship) {
   if (relationship.kind === 'belongsTo') return true;
   
   //TODO: save default locally? probably on container?
-  let saveDefault = configFlagEnabled('saveHasMany');//default is false if not specified
+  let saveDefault = configFlagEnabled(container, 'saveHasMany');//default is false if not specified
   
   return saveDefault;
 }
