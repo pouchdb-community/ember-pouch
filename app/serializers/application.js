@@ -1,3 +1,3 @@
 import { Serializer } from 'ember-pouch';
 
-export default Serializer;
+export default Serializer.extend();

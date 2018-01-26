@@ -13,9 +13,25 @@ export function shouldSaveRelationship(container, relationship) {
   if (relationship.kind === 'belongsTo') return true;
   
   //TODO: save default locally? probably on container?
-  let config = Ember.getOwner(container).resolveRegistration('config:environment');
-  let saveDefault = config['emberPouch'] && config['emberPouch']['saveHasMany'];
-  //default is false if not specified
+  let saveDefault = configFlagEnabled('saveHasMany');//default is false if not specified
   
   return saveDefault;
+}
+
+export function configFlagDisabled(container, key) {
+  //default is on
+  let config = Ember.getOwner(container).resolveRegistration('config:environment');
+  let result = config['emberPouch'] &&
+    (typeof config['emberPouch'][key] !== 'undefined') &&
+    !config['emberPouch'][key];
+  
+  return result;
+}
+
+export function configFlagEnabled(container, key) {
+  //default is off
+  let config = Ember.getOwner(container).resolveRegistration('config:environment');
+  let result = config['emberPouch'] && config['emberPouch'][key];
+  
+  return result;
 }
