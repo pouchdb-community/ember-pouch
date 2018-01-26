@@ -70,5 +70,12 @@ module.exports = {
       exports: { 'pouchdb': [ 'default' ]}
     });
     app.import('vendor/ember-pouch/register-version.js');
+
+    let env = this.project.config(app.env);
+    if (env.emberpouch) {
+      if (env.emberpouch.hasOwnProperty('dontsavehasmany')) {
+        this.ui.writeWarnLine('The `dontsavehasmany` flag is no longer needed in `config/environment.js`');
+      }
+    }
   }
 };
