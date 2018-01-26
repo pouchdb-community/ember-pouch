@@ -550,6 +550,14 @@ function changeProjectDatabase(dbName, dbUser, dbPassword) {
 ```
 
 
+## Eventually Consistent
+
+Following the CouchDB consistency model, we have introduced `ENV.emberPouch.eventuallyConsistent`. This feature is on by default. So if you want the old behavior you'll have to disable this flag.
+
+`findRecord` now returns a long running Promise if the record is not found. It only rejects the promise if a deletion of the record is found. Otherwise this promise will wait for eternity to resolve.
+This makes sure that belongsTo relations that have been loaded in an unexpected order will still resolve correctly. This makes sure that ember-data does not set the belongsTo to null if the Pouch replicate would have loaded the related object later on. (This only works for async belongsTo, sync versions will need this to be implemented in relational-pouch)
+
+
 ## Installation
 
 * `git clone` this repository

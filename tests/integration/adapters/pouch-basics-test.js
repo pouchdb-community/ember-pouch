@@ -437,6 +437,28 @@ test('delete cascade null', function (assert) {
       'deleted soup should have cascaded to a null value for the belongsTo');
   }).finally(done);
 });
+
+module('not eventually consistent', { beforeEach: function() {
+  config.emberPouch.eventuallyConsistent = false;
+  },
+  afterEach: function() {
+    config.emberPouch.eventuallyConsistent = true;
+  }
+  }, function() {
+    test('not found', function (assert) {
+      assert.expect(2);
+      assert.ok(config.emberPouch.eventuallyConsistent == false, 'eventuallyConsistent is false');
+      let done = assert.async();
+      
+      Ember.RSVP.Promise.resolve().then(() => this.store().findRecord('food-item', 'non-existent')
+        .then(() => assert.ok(false))
+        .catch(() => {
+          assert.ok(true, 'item is not found');
+          done();
+        }));
+  });
+});
+
 };
 
 	let syncAsync = function() {
