@@ -23,7 +23,7 @@ function promiseToRunLater(timeout) {
 
 
 function savingHasMany() {
-	return !config.emberpouch.dontsavehasmany;
+	return config.emberPouch.saveHasMany;
 }
 
 function getDocsForRelations() {
@@ -442,25 +442,25 @@ test('delete cascade null', function (assert) {
 	let syncAsync = function() {
 		module('async', {
 			beforeEach: function() {
-				config.emberpouch.async = true;
+				config.emberPouch.async = true;
 			}
 		}, () => { allTests(); asyncTests(); });
 		module('sync', {
 			beforeEach: function() {
-				config.emberpouch.async = false;
+				config.emberPouch.async = false;
 			}
 		}, allTests);
 	};
 
 	module('dont save hasMany', {
 		beforeEach: function() {
-			config.emberpouch.dontsavehasmany = true;
+			config.emberPouch.saveHasMany = false;
 		}
 	}, syncAsync);
 
 	module('save hasMany', {
 		beforeEach: function() {
-			config.emberpouch.dontsavehasmany = false;
+			config.emberPouch.saveHasMany = true;
 		}
 	}, syncAsync);
 });

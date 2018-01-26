@@ -5,7 +5,7 @@ module.exports = function(environment) {
   let ENV = {
     modulePrefix: 'dummy',
     environment,
-    emberpouch: { localDb: 'ember-pouch-test' },
+    emberPouch: { localDb: 'ember-pouch-test' },
     rootURL: '/',
     locationType: 'auto',
     EmberENV: {

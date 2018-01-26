@@ -4,7 +4,8 @@ import { pluralize } from 'ember-inflector';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
-  extractDeleteRecord
+  extractDeleteRecord,
+  shouldSaveRelationship
 } from '../utils';
 
 const {
@@ -181,7 +182,6 @@ export default DS.RESTAdapter.extend({
     }
 
     let config = getOwner(this).resolveRegistration('config:environment');
-    let dontsavedefault = config['emberpouch'] && config['emberpouch']['dontsavehasmany'];
     // else it's new, so update
     this._schema.push(schemaDef);
     // check all the subtypes
@@ -198,10 +198,10 @@ export default DS.RESTAdapter.extend({
         let includeRel = true;
         rel.options = rel.options || {};
         if (typeof(rel.options.async) === "undefined") {
-          rel.options.async = config.emberpouch && !Ember.isEmpty(config.emberpouch.async) ? config.emberpouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
+          rel.options.async = config.emberPouch && !Ember.isEmpty(config.emberPouch.async) ? config.emberPouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
         }
         let options = Object.create(rel.options);
-        if (rel.kind === 'hasMany' && (options.dontsave || typeof(options.dontsave) === 'undefined' && dontsavedefault)) {
+        if (rel.kind === 'hasMany' && !shouldSaveRelationship(self, rel)) {
           let inverse = type.inverseFor(rel.key, store);
           if (inverse) {
             if (inverse.kind === 'belongsTo') {

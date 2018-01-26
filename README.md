@@ -136,9 +136,12 @@ EmberPouch supports both `hasMany` and `belongsTo` relationships.
 
 To be more in line with the normal ember data way of saving `hasMany` - `belongsTo` relationships, ember-pouch now has an option to not save the child ids on the `hasMany` side. This prevents the extra need to save the `hasMany` side as explained below. For a more detailed explanation please read the [relational-pouch documentation](https://github.com/pouchdb-community/relational-pouch#dont-save-hasmany)
 
-This new mode can be selected for a `hasMany` relationship by specifying the option `dontsave: true` on the relationship. An application wide setting named `ENV.emberpouch.dontsavehasmany` can also be set to `true` to make all `hasMany` relationships behave this way.
+This new mode can be disabled for a `hasMany` relationship by specifying the option `save: false` on the relationship. An application wide setting named `ENV.emberPouch.saveHasMany` can also be set to `false` to make all `hasMany` relationships behave the old way.
 
 Using this mode does impose a slight runtime overhead, since this will use `db.find` and database indexes to search for the child ids. The indexes are created automatically for you. But large changes to the model might require you to clean up old, unused indexes.
+
+!Important
+This mode is the default from version 5 onwards. Before that it was called `dontsave` and `dontsavehasmany`
 
 ### Saving child ids
 
