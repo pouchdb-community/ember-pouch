@@ -5,7 +5,8 @@ import { pluralize } from 'ember-inflector';
 
 import {
   extractDeleteRecord,
-  shouldSaveRelationship
+  shouldSaveRelationship,
+  configFlagDisabled
 } from '../utils';
 
 const {
@@ -418,7 +419,10 @@ export default DS.RESTAdapter.extend({
         }
       }
 
-      return this._eventuallyConsistent(recordTypeName, id);
+      if (configFlagDisabled(this, 'eventuallyConsistent'))
+        throw "Document of type '" + recordTypeName + "' with id '" + id + "' not found.";
+      else
+        return this._eventuallyConsistent(recordTypeName, id);
     });
   },
 
