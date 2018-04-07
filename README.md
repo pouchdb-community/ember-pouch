@@ -140,8 +140,7 @@ This new mode can be disabled for a `hasMany` relationship by specifying the opt
 
 Using this mode does impose a slight runtime overhead, since this will use `db.find` and database indexes to search for the child ids. The indexes are created automatically for you. But large changes to the model might require you to clean up old, unused indexes.
 
-!Important
-This mode is the default from version 5 onwards. Before that it was called `dontsave` and `dontsavehasmany`
+ℹ️ This mode is the default from version 5 onwards. Before that it was called `dontsave` and `dontsavehasmany`
 
 ### Saving child ids
 
