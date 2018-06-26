@@ -31,6 +31,7 @@ const {
 //});
 
 export default DS.RESTAdapter.extend({
+  fixDeleteBug: true,
   coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date
@@ -110,7 +111,11 @@ export default DS.RESTAdapter.extend({
     var recordInStore = store.peekRecord(obj.type, obj.id);
     if (!recordInStore) {
       // The record hasn't been loaded into the store; no need to reload its data.
-      this.unloadedDocumentChanged(obj);
+      if (this.createdRecords[obj.id]) {
+        delete this.createdRecords[obj.id];
+      } else {
+        this.unloadedDocumentChanged(obj);
+      }
       return;
     }
     if (!recordInStore.get('isLoaded') || recordInStore.get('rev') === change.changes[0].rev || recordInStore.get('hasDirtyAttributes')) {
@@ -122,6 +127,9 @@ export default DS.RESTAdapter.extend({
     }
 
     if (change.deleted) {
+      if (this.fixDeleteBug) {
+        recordInStore._internalModel.transitionTo('deleted.saved');//work around ember-data bug
+      }
       store.unloadRecord(recordInStore);
     } else {
       recordInStore.reload();
@@ -420,7 +428,7 @@ export default DS.RESTAdapter.extend({
       }
 
       if (configFlagDisabled(this, 'eventuallyConsistent'))
-        throw "Document of type '" + recordTypeName + "' with id '" + id + "' not found.";
+        throw new Error("Document of type '" + recordTypeName + "' with id '" + id + "' not found.");
       else
         return this._eventuallyConsistent(recordTypeName, id);
     });
@@ -437,7 +445,7 @@ export default DS.RESTAdapter.extend({
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
         delete this.waitingForConsistency[pouchID];
-        throw "Document of type '" + type + "' with id '" + id + "' is deleted.";
+        throw new Error("Document of type '" + type + "' with id '" + id + "' is deleted.");
       } else if (deleted === null) {
         return defer.promise;
       } else {
@@ -454,10 +462,22 @@ export default DS.RESTAdapter.extend({
     });
   },
 
+  createdRecords: {},
   createRecord: function(store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.save(this.getRecordTypeName(type), data);
+    let rel = this.get('db').rel;
+    
+    let id = data.id;
+    if (!id) {
+      id = data.id = rel.uuid();
+    }
+    this.createdRecords[id] = true;
+    
+    return rel.save(this.getRecordTypeName(type), data).catch((e) => {
+      delete this.createdRecords[id];
+      throw e;
+    });
   },
 
   updateRecord: function (store, type, record) {
