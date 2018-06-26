@@ -53,10 +53,28 @@ module.exports = {
       name: 'ember-2.14-stack',
       npm: {
         devDependencies: {
-          'ember-data': '2.14.10',
-          'ember-source': '2.14.1',
+          'ember-data': '~2.14.0',
+          'ember-source': '~2.14.0',
         }
       },
+    },
+    {
+      name: 'ember-lts-2.16',
+      npm: {
+        devDependencies: {
+          'ember-data': '~2.16.0',
+          'ember-source': '~2.16.0',
+        }
+      }
+    },
+    {
+      name: 'ember-lts-2.18',
+      npm: {
+        devDependencies: {
+          'ember-data': '~2.18.0',
+          'ember-source': '~2.18.0',
+        }
+      }
     },
     {
       name: 'ember-release',
