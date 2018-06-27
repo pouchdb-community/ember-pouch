@@ -428,8 +428,8 @@ test('delete cascade null', function (assert) {
   })
   .then((found) => {
     return Ember.RSVP.Promise.resolve(found.get('soup')).catch(() => null).then((soup) => {
-      assert.ok(!found.belongsTo || found.belongsTo('soup').id() === null,
-        'should set id of belongsTo to null');
+      assert.ok(!found.belongsTo || found.belongsTo('soup').value() === null,
+        'should set value of belongsTo to null');
       return soup;
     });
   }).then((soup) => {
