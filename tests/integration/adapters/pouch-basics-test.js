@@ -438,6 +438,72 @@ test('delete cascade null', function (assert) {
   }).finally(done);
 });
 
+test('remote delete removes belongsTo relationship', function (assert) {
+  assert.timeout(5000);
+  assert.expect(2);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs(getDocsForRelations());
+  })
+  .then(() => this.store().findRecord('food-item', 'Z'))//prime ember-data store with Z
+  .then(found => found.get('soup'))//prime belongsTo
+  .then((found) => {
+    let id = "tacoSoup_2_" + found.id;
+    let promise = this.adapter().waitForChangeWithID(id);
+    
+    this.db().remove(id, found.get('rev'));
+    
+    return promise;
+  }).then(() => {
+    return this.store().findRecord('food-item', 'Z');//Z should be updated now
+  })
+  .then((found) => {
+    return Ember.RSVP.Promise.resolve(found.get('soup')).catch(() => null).then((soup) => {
+      assert.ok(!found.belongsTo || found.belongsTo('soup').value() === null,
+        'should set value of belongsTo to null');
+      return soup;
+    });
+  }).then((soup) => {
+    assert.ok(soup === null,
+      'deleted soup should have cascaded to a null value for the belongsTo');
+  }).finally(done);
+});
+
+test('remote delete removes hasMany relationship', function (assert) {
+  assert.timeout(5000);
+  assert.expect(3);
+  
+  let liveIngredients = null;
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    return this.db().bulkDocs(getDocsForRelations());
+  })
+  .then(() => this.store().findRecord('taco-soup', 'C'))//prime ember-data store with C
+  .then(found => found.get('ingredients'))//prime hasMany
+  .then((ingredients) => {
+    liveIngredients = ingredients;//save for later
+    
+    assert.equal(ingredients.length, 2, "should be 2 food items initially");
+    
+    let itemToDelete = ingredients.toArray()[0];
+    let id = "foodItem_2_" + itemToDelete.id;
+    let promise = this.adapter().waitForChangeWithID(id);
+    
+    this.db().remove(id, itemToDelete.get('rev'));
+    
+    return promise;
+  }).then(() => {
+    return this.store().findRecord('taco-soup', 'C');//get updated soup.ingredients
+  })
+  .then(found => found.get('ingredients'))
+  .then((ingredients) => {
+    assert.equal(    ingredients.length, 1, "1 food item should be removed from the relationship");
+    assert.equal(liveIngredients.length, 1, "1 food item should be removed from the live relationship");
+  }).finally(done);
+});
+
 module('not eventually consistent', { beforeEach: function() {
   config.emberPouch.eventuallyConsistent = false;
   },

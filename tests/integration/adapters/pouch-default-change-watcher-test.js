@@ -94,7 +94,7 @@ test('a new record is not automatically loaded', function (assert) {
   }).finally(done);
 });
 
-test('a deleted record is automatically unloaded', function (assert) {
+test('a deleted record is automatically marked deleted', function (assert) {
   assert.expect(2);
   var done = assert.async();
 
@@ -109,8 +109,8 @@ test('a deleted record is automatically unloaded', function (assert) {
     return this.db().remove(soupBRecord);
   }).then(() => {
     return promiseToRunLater(() => {
-      assert.equal(null, this.store().peekRecord('taco-soup', 'B'),
-        'the corresponding instance should no longer be loaded');
+      assert.equal(true, this.store().peekRecord('taco-soup', 'B').get('isDeleted'),
+        'the corresponding instance should now be deleted');
     }, 100);
   }).finally(done);
 });

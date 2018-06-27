@@ -28,5 +28,24 @@ export default Adapter.extend({
   init() {
     this._super(...arguments);
     this.set('db', createDb());
-  }
+  },
+  
+  onChangeListenerTest: null,
+  onChange() {
+    this._super(...arguments);
+    if (this.onChangeListenerTest) {
+      this.onChangeListenerTest(...arguments);
+    }
+  },
+  
+  waitForChangeWithID(id) {
+    let defer = Ember.RSVP.defer();
+    this.onChangeListenerTest = (c) => {
+      if (c.id === id) {
+        this.onChangeListenerTest = null;
+        defer.resolve(c);
+      }
+    }
+    return defer.promise;
+  },
 });
