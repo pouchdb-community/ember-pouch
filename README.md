@@ -586,6 +586,8 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **5.1.0**
+  - Don't unloadRecord a deleted document in onChange, only mark as deleted. This fixes some bugs with hasMany arrays corrupting in newer ember-data versions. Not unloading records also seems safer for routes that have that model active.
 * **5.0.1**
   - Adapter `fixDeleteBug` flag. Defaults to `true`. Fixes [https://github.com/emberjs/data/issues/4963](https://github.com/emberjs/data/issues/4963) and related issues that don't seem to work well with server side delete notifications.
   - Track newly inserted records, so `unloadedDocumentChanged` is not called for those. Otherwise a race-condition can occur where onChange is faster than the save. This can result in the document being inserted in the store via `unloadedDocumentChanged` before the save returns to ember-data. This will result in an assert that the id is already present in the store.
