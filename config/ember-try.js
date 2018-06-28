@@ -1,5 +1,14 @@
 /* eslint-env node */
-module.exports = {
+
+const getChannelURL = require('ember-source-channel-url');
+
+module.exports = function() {
+  return Promise.all([
+    getChannelURL('release'),
+    getChannelURL('beta'),
+    getChannelURL('canary')
+  ]).then((urls) => {
+    return {
   scenarios: [
     {
       name: 'ember-2.4-stack',
@@ -78,52 +87,28 @@ module.exports = {
     },
     {
       name: 'ember-release',
-      bower: {
-        dependencies: {
-          'ember': 'components/ember#release'
-        },
-        resolutions: {
-          'ember': 'release'
-        }
-      },
       npm: {
         devDependencies: {
           'ember-data': 'latest',
-          'ember-source': null
+          'ember-source': urls[0]
         }
       }
     },
     {
       name: 'ember-beta',
-      bower: {
-        dependencies: {
-          'ember': 'components/ember#beta'
-        },
-        resolutions: {
-          'ember': 'beta'
-        }
-      },
       npm: {
         devDependencies: {
           'ember-data': 'beta',
-          'ember-source': null
+          'ember-source': urls[1]
         }
       }
     },
     {
       name: 'ember-canary',
-      bower: {
-        dependencies: {
-          'ember': 'components/ember#canary'
-        },
-        resolutions: {
-          'ember': 'canary'
-        }
-      },
       npm: {
         devDependencies: {
           'ember-data': 'emberjs/data#master',
-          'ember-source': null
+          'ember-source': urls[2]
         }
       }
     },
@@ -134,4 +119,6 @@ module.exports = {
       }
     }
   ]
+    };
+  });
 };

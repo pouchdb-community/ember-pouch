@@ -129,8 +129,9 @@ export default DS.RESTAdapter.extend({
     if (change.deleted) {
       if (this.fixDeleteBug) {
         recordInStore._internalModel.transitionTo('deleted.saved');//work around ember-data bug
+      } else {
+        store.unloadRecord(recordInStore);
       }
-      store.unloadRecord(recordInStore);
     } else {
       recordInStore.reload();
     }

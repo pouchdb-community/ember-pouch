@@ -94,13 +94,16 @@ test('a new record is not automatically loaded', function (assert) {
   }).finally(done);
 });
 
-test('a deleted record is automatically unloaded', function (assert) {
+test('a deleted record is automatically marked deleted', function (assert) {
   assert.expect(2);
   var done = assert.async();
+  
+  let initialRecord = null;
 
   Ember.RSVP.resolve().then(() => {
     return this.store().find('taco-soup', 'B');
   }).then((soupB) => {
+    initialRecord = soupB;
     assert.equal('black bean', soupB.get('flavor'),
       'the loaded instance should reflect the initial test data');
 
@@ -109,8 +112,8 @@ test('a deleted record is automatically unloaded', function (assert) {
     return this.db().remove(soupBRecord);
   }).then(() => {
     return promiseToRunLater(() => {
-      assert.equal(null, this.store().peekRecord('taco-soup', 'B'),
-        'the corresponding instance should no longer be loaded');
+      assert.ok(initialRecord.get('isDeleted'),
+        'the corresponding instance should now be deleted');
     }, 100);
   }).finally(done);
 });
