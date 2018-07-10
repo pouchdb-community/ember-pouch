@@ -206,7 +206,8 @@ export default DS.RESTAdapter.extend({
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
         let includeRel = true;
-        rel.options = rel.options || {};
+        if (!('options' in rel)) rel.options = {};
+        
         if (typeof(rel.options.async) === "undefined") {
           rel.options.async = config.emberPouch && !Ember.isEmpty(config.emberPouch.async) ? config.emberPouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
         }
