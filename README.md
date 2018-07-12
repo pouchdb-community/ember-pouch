@@ -586,6 +586,8 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **6.0.0**
+  - Switch to PouchDB 7.0.0
 * **5.1.0**
   - Don't unloadRecord a deleted document in onChange, only mark as deleted. This fixes some bugs with hasMany arrays corrupting in newer ember-data versions. Not unloading records also seems safer for routes that have that model active.
 * **5.0.1**
