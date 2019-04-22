@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "ember build",
+    "license": "license-checker --summary --failOn GPL",
     "lint:js": "eslint ./*.js addon addon-test-support app config lib server test-support tests",
     "start": "ember server",
     "test": "ember try:each"
@@ -55,6 +56,7 @@
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.18.0",
     "ember-source-channel-url": "^1.0.1",
+    "license-checker": "^25.0.1",
     "loader.js": "^4.2.3"
   },
   "dependencies": {
