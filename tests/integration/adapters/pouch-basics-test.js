@@ -266,6 +266,8 @@ test('create a new record', function (assert) {
 test('creating an associated record stores a reference to it in the parent', function (assert) {
   assert.expect(1);
 
+  var brokenTest = !config.emberPouch.saveHasMany && !config.emberPouch.async;
+
   var done = assert.async();
   Ember.RSVP.Promise.resolve().then(() => {
 		var s = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor'} };
@@ -290,8 +292,15 @@ test('creating an associated record stores a reference to it in the parent', fun
 
     return this.store().findRecord('taco-soup', 'C');
   }).then(tacoSoup => {
+    if (brokenTest) {
+      console.log(JSON.stringify(tacoSoup._internalModel._recordData._relationships.get('ingredients').members.list.map(m => { return {id: m.id, clientId: m.clientId, data: m._data}; }), null, 2)); //eslint-disable-line
+    }
     return tacoSoup.get('ingredients');
   }).then(foundIngredients => {
+    if (brokenTest) {
+      console.log('found ingredients:', foundIngredients.map(i => `${i.id}: ${i.name}`)); //eslint-disable-line
+    }
+
     assert.deepEqual(foundIngredients.mapBy('name'), ['pineapple'],
       'should have fully loaded the associated items');
   }).finally(done);
