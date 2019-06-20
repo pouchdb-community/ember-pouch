@@ -526,7 +526,7 @@ For best results, only create/update records using the full model definition. Tr
 
 ## Multiple databases for the same model
 
-In some cases it might diserable (security related, where you want a given user to only have some informations stored on his computer) to have multiple databases for the same model of data.
+In some cases it might be desirable (security related, where you want a given user to only have some informations stored on his computer) to have multiple databases for the same model of data.
 
 `Ember-Pouch` allows you to dynamically change the database a model is using by calling the function `changeDb` on the adapter.
 
