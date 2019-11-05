@@ -96,6 +96,11 @@ You can also turn on debugging:
 ```js
 import PouchDB from 'pouchdb';
 
+// For v7.0.0 and newer you must first load the 'pouchdb-debug' plugin
+// see https://github.com/pouchdb/pouchdb/tree/39ac9a7a1f582cf7a8d91c6bf9caa936632283a6/packages/node_modules/pouchdb-debug
+import pouchDebugPlugin from 'pouchdb-debug'; // (assumed available via ember-auto-import or shim)
+PouchDB.plugin(pouchDebugPlugin);
+
 PouchDB.debug.enable('*');
 ```
 
