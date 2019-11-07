@@ -6,12 +6,12 @@ import {
 } from '../utils';
 
 const {
-  get  
+  get
 } = Ember;
 const keys = Object.keys || Ember.keys;
 const assign = Object.assign || Ember.assign;
 
-var Serializer = DS.RESTSerializer.extend({
+const Serializer = DS.RESTSerializer.extend({
 
   init: function() {
     this._super(...arguments);
@@ -44,7 +44,7 @@ var Serializer = DS.RESTSerializer.extend({
     this._super(snapshot, json, key, attribute);
     if (this._isAttachment(attribute)) {
       // if provided, use the mapping provided by `attrs` in the serializer
-      var payloadKey = this._getMappedKey(key, snapshot.type);
+      let payloadKey = this._getMappedKey(key, snapshot.type);
       if (payloadKey === key && this.keyForAttribute) {
         payloadKey = this.keyForAttribute(key, 'serialize');
       }
@@ -96,12 +96,12 @@ var Serializer = DS.RESTSerializer.extend({
 
 // DEPRECATION: The private method _shouldSerializeHasMany has been promoted to the public API
 // See https://www.emberjs.com/deprecations/ember-data/v2.x/#toc_jsonserializer-shouldserializehasmany
- if( ! DS.JSONSerializer.prototype.shouldSerializeHasMany ) {
-   Serializer.reopen({
-     _shouldSerializeHasMany( snapshot, key, relationship ){
-       return this.shouldSerializeHasMany( snapshot, key, relationship );
-     }
-   });
- }
+if( ! DS.JSONSerializer.prototype.shouldSerializeHasMany ) {
+  Serializer.reopen({
+    _shouldSerializeHasMany( snapshot, key, relationship ){
+      return this.shouldSerializeHasMany( snapshot, key, relationship );
+    }
+  });
+}
 
- export default Serializer;
+export default Serializer;

@@ -44,9 +44,9 @@ export default DS.RESTAdapter.extend({
     this._startChangesToStoreListener();
   }),
   _startChangesToStoreListener: function() {
-    var db = this.get('db');
+    const db = this.get('db');
     if (db && !this.changes) { // only run this once
-      var onChangeListener = bind(this, 'onChange');
+      const onChangeListener = bind(this, 'onChange');
       this.set('onChangeListener', onChangeListener);
       this.changes = db.changes({
         since: 'now',
@@ -59,7 +59,7 @@ export default DS.RESTAdapter.extend({
 
   _stopChangesListener: function() {
     if (this.changes) {
-      var onChangeListener = this.get('onChangeListener');
+      const onChangeListener = this.get('onChangeListener');
       this.changes.removeListener('change', onChangeListener);
       this.changes.cancel();
       this.changes = undefined;
@@ -68,10 +68,10 @@ export default DS.RESTAdapter.extend({
   changeDb: function(db) {
     this._stopChangesListener();
 
-    var store = this.store;
-    var schema = this._schema || [];
+    const store = this.store;
+    const schema = this._schema || [];
 
-    for (var i = 0, len = schema.length; i < len; i++) {
+    for (let i = 0, len = schema.length; i < len; i++) {
       store.unloadAll(schema[i].singular);
     }
 
@@ -84,14 +84,12 @@ export default DS.RESTAdapter.extend({
     // in the store to update.
     if (!this.get('db').rel) { return; }
 
-    var obj = this.get('db').rel.parseDocID(change.id);
+    const obj = this.get('db').rel.parseDocID(change.id);
     // skip changes for non-relational_pouch docs. E.g., design docs.
     if (!obj.type || !obj.id || obj.type === '') { return; }
 
-    var store = this.store;
-
     if (this.waitingForConsistency[change.id]) {
-      let promise = this.waitingForConsistency[change.id];
+      const promise = this.waitingForConsistency[change.id];
       delete this.waitingForConsistency[change.id];
       if (change.deleted) {
         promise.reject("deleted");
@@ -101,6 +99,7 @@ export default DS.RESTAdapter.extend({
       return;
     }
 
+    const store = this.store;
     try {
       store.modelFor(obj.type);
     } catch (e) {
@@ -109,7 +108,7 @@ export default DS.RESTAdapter.extend({
       return;
     }
 
-    var recordInStore = store.peekRecord(obj.type, obj.id);
+    const recordInStore = store.peekRecord(obj.type, obj.id);
     if (!recordInStore) {
       // The record hasn't been loaded into the store; no need to reload its data.
       if (this.createdRecords[obj.id]) {
@@ -158,32 +157,32 @@ export default DS.RESTAdapter.extend({
   _indexPromises: [],
 
   _init: function (store, type) {
-    var self = this,
+    const self = this,
         recordTypeName = this.getRecordTypeName(type);
     if (!this.get('db') || typeof this.get('db') !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
     if (!Ember.get(type, 'attributes').has('rev')) {
-      var modelName = classify(recordTypeName);
+      const modelName = classify(recordTypeName);
       throw new Error('Please add a `rev` attribute of type `string`' +
         ' on the ' + modelName + ' model.');
     }
 
     this._schema = this._schema || [];
 
-    var singular = recordTypeName;
-    var plural = pluralize(recordTypeName);
+    const singular = recordTypeName;
+    const plural = pluralize(recordTypeName);
 
     // check that we haven't already registered this model
-    for (var i = 0, len = this._schema.length; i < len; i++) {
-      var currentSchemaDef = this._schema[i];
+    for (let i = 0, len = this._schema.length; i < len; i++) {
+      const currentSchemaDef = this._schema[i];
       if (currentSchemaDef.singular === singular) {
         return;
       }
     }
 
-    var schemaDef = {
+    const schemaDef = {
       singular: singular,
       plural: plural
     };
@@ -203,7 +202,7 @@ export default DS.RESTAdapter.extend({
         // TODO: support inverse as well
         return; // skip
       }
-      var relDef = {},
+      const relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
         let includeRel = true;
@@ -246,13 +245,13 @@ export default DS.RESTAdapter.extend({
   },
 
   _recordToData: function (store, type, record) {
-    var data = {};
+    let data = {};
     // Though it would work to use the default recordTypeName for modelName &
     // serializerKey here, these uses are conceptually distinct and may vary
     // independently.
-    var modelName = type.modelName || type.typeKey;
-    var serializerKey = camelize(modelName);
-    var serializer = store.serializerFor(modelName);
+    const modelName = type.modelName || type.typeKey;
+    const serializerKey = camelize(modelName);
+    const serializer = store.serializerFor(modelName);
 
     serializer.serializeIntoHash(
       data,
@@ -275,27 +274,24 @@ export default DS.RESTAdapter.extend({
    * Return key that conform to data adapter
    * ex: 'name' become 'data.name'
    */
-  _dataKey: function(key) {
-    var dataKey ='data.' + key;
-    return ""+ dataKey + "";
-  },
+  _dataKey: (key) => `data.${key}`,
 
   /**
    * Returns the modified selector key to comform data key
    * Ex: selector: {name: 'Mario'} wil become selector: {'data.name': 'Mario'}
    */
   _buildSelector: function(selector) {
-    var dataSelector = {};
-    var selectorKeys = [];
+    const dataSelector = {};
+    const selectorKeys = [];
 
-    for (var key in selector) {
+    for (let key in selector) {
       if(selector.hasOwnProperty(key)){
         selectorKeys.push(key);
       }
     }
 
     selectorKeys.forEach(function(key) {
-      var dataKey = this._dataKey(key);
+      const dataKey = this._dataKey(key);
       dataSelector[dataKey] = selector[key];
     }.bind(this));
 
@@ -309,9 +305,9 @@ export default DS.RESTAdapter.extend({
    */
   _buildSort: function(sort) {
     return sort.map(function (value) {
-      var sortKey = {};
+      const sortKey = {};
       if (typeof value === 'object' && value !== null) {
-        for (var key in value) {
+        for (let key in value) {
           if(value.hasOwnProperty(key)){
             sortKey[this._dataKey(key)] = value[key];
           }
@@ -364,10 +360,10 @@ export default DS.RESTAdapter.extend({
   query: function(store, type, query) {
     this._init(store, type);
 
-    var recordTypeName = this.getRecordTypeName(type);
-    var db = this.get('db');
+    const recordTypeName = this.getRecordTypeName(type);
+    const db = this.get('db');
 
-    var queryParams = {
+    const queryParams = {
       selector: this._buildSelector(query.filter)
     };
 
@@ -388,8 +384,8 @@ export default DS.RESTAdapter.extend({
 
   queryRecord: function(store, type, query) {
     return this.query(store, type, query).then(results => {
-      let recordType = this.getRecordTypeName(type);
-      let recordTypePlural = pluralize(recordType);
+      const recordType = this.getRecordTypeName(type);
+      const recordTypePlural = pluralize(recordType);
       if(results[recordTypePlural].length > 0){
         results[recordType] = results[recordTypePlural][0];
       } else {
@@ -413,7 +409,7 @@ export default DS.RESTAdapter.extend({
 
   findRecord: function (store, type, id) {
     this._init(store, type);
-    var recordTypeName = this.getRecordTypeName(type);
+    const recordTypeName = this.getRecordTypeName(type);
     return this._findRecord(recordTypeName, id);
   },
 
@@ -422,10 +418,10 @@ export default DS.RESTAdapter.extend({
       // Ember Data chokes on empty payload, this function throws
       // an error when the requested data is not found
       if (typeof payload === 'object' && payload !== null) {
-        var singular = recordTypeName;
-        var plural = pluralize(recordTypeName);
+        const singular = recordTypeName;
+        const plural = pluralize(recordTypeName);
 
-        var results = payload[singular] || payload[plural];
+        const results = payload[singular] || payload[plural];
         if (results && results.length > 0) {
           return payload;
         }
@@ -488,7 +484,7 @@ export default DS.RESTAdapter.extend({
     }
 
     this._init(store, type);
-    var data = this._recordToData(store, type, snapshot);
+    const data = this._recordToData(store, type, snapshot);
     const rel = this.get('db').rel;
     const id = data.id;
     this.createdRecords[id] = true;
@@ -505,13 +501,13 @@ export default DS.RESTAdapter.extend({
 
   updateRecord: function (store, type, snapshot) {
     this._init(store, type);
-    var data = this._recordToData(store, type, snapshot);
+    const data = this._recordToData(store, type, snapshot);
     return this.get('db').rel.save(this.getRecordTypeName(type), data);
   },
 
   deleteRecord: function (store, type, record) {
     this._init(store, type);
-    var data = this._recordToData(store, type, record);
+    const data = this._recordToData(store, type, record);
     return this.get('db').rel.del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
   }
