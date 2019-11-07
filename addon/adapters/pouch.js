@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 import { pluralize } from 'ember-inflector';
+import { v4 } from 'uuid';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
@@ -153,7 +154,7 @@ export default DS.RESTAdapter.extend({
   willDestroy: function() {
     this._stopChangesListener();
   },
-  
+
   _indexPromises: [],
 
   _init: function (store, type) {
@@ -206,8 +207,9 @@ export default DS.RESTAdapter.extend({
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
       if (relModel) {
         let includeRel = true;
-        if (!('options' in rel)) rel.options = {};
-        
+        if (!('options' in rel)) {
+          rel.options = {};
+        }
         if (typeof(rel.options.async) === "undefined") {
           rel.options.async = config.emberPouch && !Ember.isEmpty(config.emberPouch.async) ? config.emberPouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
         }
@@ -464,27 +466,46 @@ export default DS.RESTAdapter.extend({
     });
   },
 
-  createdRecords: {},
-  createRecord: function(store, type, record) {
-    this._init(store, type);
-    var data = this._recordToData(store, type, record);
-    let rel = this.get('db').rel;
-    
-    let id = data.id;
-    if (!id) {
-      id = data.id = rel.uuid();
-    }
-    this.createdRecords[id] = true;
-    
-    return rel.save(this.getRecordTypeName(type), data).catch((e) => {
-      delete this.createdRecords[id];
-      throw e;
-    });
+  generateIdForRecord: function(/* store, type, inputProperties */) {
+    return v4();
   },
 
-  updateRecord: function (store, type, record) {
+  createdRecords: {},
+  createRecord: function(store, type, snapshot) {
+    const record = snapshot.record;
+    if (record._emberPouchSavePromise) {
+      const changes = record.changedAttributes();
+      record._emberPouchSavePromise = record._emberPouchSavePromise.then(records => {
+        // If there have been changes since the document was created then we should update the record now
+        if (Object.keys(changes).length > 0) {
+          const rev = records[Object.keys(records)[0]][0].rev;
+          (snapshot.__attributes || snapshot._attributes).rev = rev; // FIXME: it should be possible to do this elsewhere
+          return this.updateRecord(store, type, snapshot);
+        }
+        return records;
+      });
+      return record._emberPouchSavePromise;
+    }
+
     this._init(store, type);
-    var data = this._recordToData(store, type, record);
+    var data = this._recordToData(store, type, snapshot);
+    const rel = this.get('db').rel;
+    const id = data.id;
+    this.createdRecords[id] = true;
+    Object.defineProperty(record, '_emberPouchSavePromise', {
+      enumerable: false,
+      writable: true,
+      value: rel.save(this.getRecordTypeName(type), data).catch((e) => {
+        delete this.createdRecords[id];
+        throw e;
+      }),
+    });
+    return record._emberPouchSavePromise;
+  },
+
+  updateRecord: function (store, type, snapshot) {
+    this._init(store, type);
+    var data = this._recordToData(store, type, snapshot);
     return this.get('db').rel.save(this.getRecordTypeName(type), data);
   },
 
