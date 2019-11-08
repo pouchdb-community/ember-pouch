@@ -1,6 +1,6 @@
-import { moduleFor, test } from 'ember-qunit';
+import EmberObject from '@ember/object';
 
-import Ember from 'ember';
+import { moduleFor, test } from 'ember-qunit';
 
 let testSerializedData = {
   'hello.txt': {
@@ -18,13 +18,13 @@ let testSerializedData = {
 };
 
 let testDeserializedData = [
-  Ember.Object.create({
+  EmberObject.create({
     name: 'hello.txt',
     content_type: 'text/plain',
     data: 'aGVsbG8gd29ybGQ=',
     digest: 'md5-7mkg+nM0HN26sZkLN8KVSA=='
   }),
-  Ember.Object.create({
+  EmberObject.create({
     name: 'stub.txt',
     content_type: 'text/plain',
     stub: true,

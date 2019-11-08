@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import { getOwner } from '@ember/application';
 
 // ember-data doesn't like getting a json response of {deleted: true}
 export function extractDeleteRecord() {
@@ -20,7 +20,7 @@ export function shouldSaveRelationship(container, relationship) {
 
 export function configFlagDisabled(container, key) {
   //default is on
-  let config = Ember.getOwner(container).resolveRegistration('config:environment');
+  let config = getOwner(container).resolveRegistration('config:environment');
   let result = config['emberPouch'] &&
     (typeof config['emberPouch'][key] !== 'undefined') &&
     !config['emberPouch'][key];
@@ -30,7 +30,7 @@ export function configFlagDisabled(container, key) {
 
 export function configFlagEnabled(container, key) {
   //default is off
-  let config = Ember.getOwner(container).resolveRegistration('config:environment');
+  let config = getOwner(container).resolveRegistration('config:environment');
   let result = config['emberPouch'] && config['emberPouch'][key];
   
   return result;

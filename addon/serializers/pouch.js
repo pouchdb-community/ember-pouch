@@ -1,15 +1,13 @@
-import Ember from 'ember';
+import { keys, assign } from '@ember/polyfills';
+import { get } from '@ember/object';
 import DS from 'ember-data';
 
 import {
   shouldSaveRelationship
 } from '../utils';
 
-const {
-  get
-} = Ember;
-const keys = Object.keys || Ember.keys;
-const assign = Object.assign || Ember.assign;
+const keys = Object.keys || keys;
+const assign = Object.assign || assign;
 
 const Serializer = DS.RESTSerializer.extend({
 

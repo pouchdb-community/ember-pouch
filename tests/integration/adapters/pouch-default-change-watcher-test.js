@@ -1,7 +1,7 @@
+import { later } from '@ember/runloop';
+import { Promise, resolve } from 'rsvp';
 import { test } from 'qunit';
 import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
-
-import Ember from 'ember';
 
 /*
  * Tests for the default automatic change listener.
@@ -11,7 +11,7 @@ moduleForIntegration('Integration | Adapter | Default Change Watcher', {
   beforeEach(assert) {
     var done = assert.async();
 
-    Ember.RSVP.Promise.resolve().then(() => {
+    Promise.resolve().then(() => {
       return this.db().bulkDocs([
         { _id: 'tacoSoup_2_A', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
         { _id: 'tacoSoup_2_B', data: { flavor: 'black bean', ingredients: ['Z'] } },
@@ -24,8 +24,8 @@ moduleForIntegration('Integration | Adapter | Default Change Watcher', {
 });
 
 function promiseToRunLater(callback, timeout) {
-  return new Ember.RSVP.Promise((resolve) => {
-    Ember.run.later(() => {
+  return new Promise((resolve) => {
+    later(() => {
       callback();
       resolve();
     }, timeout);
@@ -36,7 +36,7 @@ test('a loaded instance automatically reflects directly-made database changes', 
   assert.expect(2);
   var done = assert.async();
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     return this.store().find('taco-soup', 'B');
   }).then((soupB) => {
     assert.equal('black bean', soupB.get('flavor'),
@@ -59,7 +59,7 @@ test('a record that is not loaded stays not loaded when it is changed', function
   assert.expect(2);
   var done = assert.async();
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     assert.equal(null, this.store().peekRecord('taco-soup', 'A'),
       'test setup: record should not be loaded already');
 
@@ -79,7 +79,7 @@ test('a new record is not automatically loaded', function (assert) {
   assert.expect(2);
   var done = assert.async();
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     assert.equal(null, this.store().peekRecord('taco-soup', 'C'),
       'test setup: record should not be loaded already');
 
@@ -100,7 +100,7 @@ test('a deleted record is automatically marked deleted', function (assert) {
   
   let initialRecord = null;
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     return this.store().find('taco-soup', 'B');
   }).then((soupB) => {
     initialRecord = soupB;
@@ -122,7 +122,7 @@ test('a change to a record with a non-relational-pouch ID does not cause an erro
   assert.expect(0);
   var done = assert.async();
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     // do some op to cause relational-pouch to be initialized
     return this.store().find('taco-soup', 'B');
   }).then(() => {
@@ -136,7 +136,7 @@ test('a change to a record of an unknown type does not cause an error', function
   assert.expect(0);
   var done = assert.async();
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     // do some op to cause relational-pouch to be initialized
     return this.store().find('taco-soup', 'B');
   }).then(() => {
@@ -156,7 +156,7 @@ moduleForIntegration('Integration | Adapter | With unloadedDocumentChanged imple
       return this.adapter().get('db');
     };
 
-    Ember.RSVP.Promise.resolve().then(() => {
+    Promise.resolve().then(() => {
       return this.db().bulkDocs([
         { _id: 'tacoSalad_2_A', data: { flavor: 'al pastor', ingredients: ['X', 'Y'] } },
         { _id: 'tacoSalad_2_B', data: { flavor: 'black bean', ingredients: ['Z'] } },
@@ -172,7 +172,7 @@ test('a new record is automatically loaded', function (assert) {
   assert.expect(4);
   var done = assert.async();
 
-  Ember.RSVP.resolve().then(() => {
+  resolve().then(() => {
     return this.store().find('taco-salad', 'B');
   }).then((soupB) => {
     assert.equal('black bean', soupB.get('flavor'),

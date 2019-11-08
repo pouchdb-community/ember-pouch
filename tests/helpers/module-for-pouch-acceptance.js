@@ -1,13 +1,13 @@
+import { Promise, all, resolve } from 'rsvp';
 import { module } from 'qunit';
 import startApp from '../helpers/start-app';
-import destroyApp from '../helpers/destroy-app';
 
-import Ember from 'ember';
+import destroyApp from '../helpers/destroy-app';
 
 export default function(name, options = {}, nested = undefined) {
   module(name, {
     beforeEach() {
-      return Ember.RSVP.Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
         if (options.beforeEach) {
           options.beforeEach.apply(this, arguments);
         }
@@ -37,15 +37,15 @@ export default function(name, options = {}, nested = undefined) {
 
     afterEach() {     
       let db = this.db();
-      return Ember.RSVP.all(this.adapter()._indexPromises)
+      return all(this.adapter()._indexPromises)
       .then(() => {
         return db.getIndexes().then(data => {
-          return Ember.RSVP.all(data.indexes.map(
+          return all(data.indexes.map(
             index => {
-              return index.ddoc ? (db.deleteIndex(index)) : (Ember.RSVP.resolve());
+              return index.ddoc ? (db.deleteIndex(index)) : (resolve());
             }
           ));
-        })
+        });
       }).then(() => db.destroy())
         .then(() => {
           if (this.application) {
