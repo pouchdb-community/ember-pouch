@@ -1,13 +1,14 @@
 import { assert } from '@ember/debug';
-import { defer } from 'rsvp';
-import { isEmpty } from '@ember/utils';
-import { get } from '@ember/object';
 import { getOwner } from '@ember/application';
-import { bind } from '@ember/runloop';
+import { get } from '@ember/object';
 import { on } from '@ember/object/evented';
+import { isEmpty } from '@ember/utils';
+import { bind } from '@ember/runloop';
 import { classify, camelize } from '@ember/string';
+
 import DS from 'ember-data';
 import { pluralize } from 'ember-inflector';
+import RSVP from 'rsvp';
 import { v4 } from 'uuid';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
@@ -30,12 +31,19 @@ export default DS.RESTAdapter.extend({
   fixDeleteBug: true,
   coalesceFindRequests: false,
 
+  init() {
+    this._super(arguments);
+    this._indexPromises = [];
+    this.createdRecords = {};
+    this.waitingForConsistency = {};
+  },
+
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
   // reloading redundant.
   shouldReloadRecord: function () { return false; },
   shouldBackgroundReloadRecord: function () { return false; },
-  _onInit : on('init', function()  {
+  _onInit: on('init', function()  {
     this._startChangesToStoreListener();
   }),
   _startChangesToStoreListener: function() {
@@ -149,7 +157,7 @@ export default DS.RESTAdapter.extend({
     this._stopChangesListener();
   },
 
-  _indexPromises: [],
+  _indexPromises: null,
 
   _init: function (store, type) {
     const self = this,
@@ -430,10 +438,10 @@ export default DS.RESTAdapter.extend({
   },
 
   //TODO: cleanup promises on destroy or db change?
-  waitingForConsistency: {},
+  waitingForConsistency: null,
   _eventuallyConsistent: function(type, id) {
     let pouchID = this.get('db').rel.makeDocID({type, id});
-    let defer = defer();
+    let defer = RSVP.defer();
     this.waitingForConsistency[pouchID] = defer;
 
     return this.get('db').rel.isDeleted(type, id).then(deleted => {
@@ -461,7 +469,7 @@ export default DS.RESTAdapter.extend({
     return v4();
   },
 
-  createdRecords: {},
+  createdRecords: null,
   createRecord: function(store, type, snapshot) {
     const record = snapshot.record;
     if (record._emberPouchSavePromise) {

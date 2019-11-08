@@ -15,6 +15,7 @@ module.exports = {
   plugins: ['ember'],
   rules: {
     'ember/no-jquery': 'error',
+    'ember/no-restricted-resolver-tests': 'warn',
   },
   overrides: [
     {
@@ -45,6 +46,9 @@ module.exports = {
       plugins: ['node'],
       rules: Object.assign({}, require('eslint-plugin-node').configs.recommended.rules, {
         // add your custom rules and overrides for node files here
+        "node/no-missing-require": ["error", {
+            "allowModules": ["ember-cli"],
+        }],
         "node/no-unpublished-require": ["error", {
             "allowModules": ["ember-data", "ember-cli"],
         }],
