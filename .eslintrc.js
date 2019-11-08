@@ -5,16 +5,20 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
-  extends: 'eslint:recommended',
+  extends: [
+    'eslint:recommended',
+    'plugin:ember/recommended',
+  ],
   env: {
-    browser: true
+    browser: true,
   },
+  plugins: ['ember'],
   rules: {
-    'ember/no-jquery': 'error'
+    'ember/no-jquery': 'error',
   },
   overrides: [
-    // node files
     {
+      // node files
       files: [
         '.eslintrc.js',
         '.template-lintrc.js',
@@ -41,6 +45,9 @@ module.exports = {
       plugins: ['node'],
       rules: Object.assign({}, require('eslint-plugin-node').configs.recommended.rules, {
         // add your custom rules and overrides for node files here
+        "node/no-unpublished-require": ["error", {
+            "allowModules": ["ember-data", "ember-cli"],
+        }],
       })
     }
   ]
