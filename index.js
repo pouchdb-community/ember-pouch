@@ -1,14 +1,13 @@
 /* eslint-env node */
 'use strict';
 
-var path = require('path');
-var stew = require('broccoli-stew');
-var writeFile = require('broccoli-file-creator');
-var version = require('./package.json').version;
+const path = require('path');
+const stew = require('broccoli-stew');
+const writeFile = require('broccoli-file-creator');
+const { name, version } = require('./package.json');
 
 module.exports = {
-  name: 'ember-pouch',
-
+  name,
   init: function() {
     this._super.init && this._super.init.apply(this, arguments);
 

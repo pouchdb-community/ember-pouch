@@ -1,9 +1,5 @@
-import Ember from 'ember';
+import { isNone } from '@ember/utils';
 import AttachmentsTransform from './attachments';
-
-const {
-  isNone
-} = Ember;
 
 export default AttachmentsTransform.extend({
   deserialize: function(serialized) {

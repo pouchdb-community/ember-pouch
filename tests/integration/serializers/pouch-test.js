@@ -1,7 +1,7 @@
+import { Promise } from 'rsvp';
 import { test } from 'qunit';
-import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
-import Ember from 'ember';
+import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 /*
  * Tests attachments behavior for an app using the ember-pouch serializer.
@@ -31,7 +31,7 @@ test('puts attachments into the `attachments` property when saving', function (a
   assert.expect(11);
 
   var done = assert.async();
-  Ember.RSVP.Promise.resolve().then(() => {
+  Promise.resolve().then(() => {
     var newRecipe = this.store().createRecord('taco-recipe', {
       id,
       coverImage: coverImage,
