@@ -263,6 +263,27 @@ test('create a new record', function (assert) {
   }).finally(done);
 });
 
+test('update a newly created record before it has finished saving', function (assert) {
+  assert.expect(2);
+
+  const done = assert.async();
+  Promise.resolve().then(() => {
+    var newSoup = this.store().createRecord('taco-soup', { id: 'E', flavor: 'oops-wrong-flavor' });
+    newSoup.save();
+    newSoup.set('flavor', 'balsamic');
+    return newSoup.save();
+  }).then(() => {
+    return this.db().get('tacoSoup_2_E');
+  }).then((newDoc) => {
+    assert.equal(newDoc.data.flavor, 'balsamic', 'should have saved the attribute');
+
+    var recordInStore = this.store().peekRecord('tacoSoup', 'E');
+    assert.equal(newDoc._rev, recordInStore.get('rev'),
+      'should have associated the ember-data record with the rev for the new record');
+
+  }).finally(done);
+});
+
 test('creating an associated record stores a reference to it in the parent', function (assert) {
   assert.expect(1);
 
