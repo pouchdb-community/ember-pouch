@@ -46,6 +46,7 @@ module.exports = async function() {
         name: 'ember-lts-2.12',
         npm: {
           devDependencies: {
+            '@ember/jquery': '^1.1.0',
             'ember-data': '2.12.2',
             'ember-inflector': '^1.9.4',
             'ember-source': '2.12.2',
@@ -57,6 +58,7 @@ module.exports = async function() {
         name: 'ember-2.14-stack',
         npm: {
           devDependencies: {
+            '@ember/jquery': '^1.1.0',
             'ember-data': '~2.14.0',
             'ember-source': '~2.14.0',
           }
@@ -66,6 +68,7 @@ module.exports = async function() {
         name: 'ember-lts-2.16',
         npm: {
           devDependencies: {
+            '@ember/jquery': '^1.1.0',
             'ember-data': '~2.16.0',
             'ember-source': '~2.16.0',
           }
@@ -75,6 +78,7 @@ module.exports = async function() {
         name: 'ember-lts-2.18',
         npm: {
           devDependencies: {
+            '@ember/jquery': '^1.1.0',
             'ember-data': '~2.18.0',
             'ember-source': '~2.18.0',
           }
