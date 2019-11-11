@@ -263,6 +263,27 @@ test('create a new record', function (assert) {
   }).finally(done);
 });
 
+test('update a newly created record before it has finished saving', function (assert) {
+  assert.expect(2);
+
+  var done = assert.async();
+  Ember.RSVP.Promise.resolve().then(() => {
+    var newSoup = this.store().createRecord('taco-soup', { id: 'E', flavor: 'oops-wrong-flavor' });
+    newSoup.save();
+    newSoup.set('flavor', 'balsamic');
+    return newSoup.save();
+  }).then(() => {
+    return this.db().get('tacoSoup_2_E');
+  }).then((newDoc) => {
+    assert.equal(newDoc.data.flavor, 'balsamic', 'should have saved the attribute');
+
+    var recordInStore = this.store().peekRecord('tacoSoup', 'E');
+    assert.equal(newDoc._rev, recordInStore.get('rev'),
+      'should have associated the ember-data record with the rev for the new record');
+
+  }).finally(done);
+});
+
 test('creating an associated record stores a reference to it in the parent', function (assert) {
   assert.expect(1);
 
@@ -367,14 +388,14 @@ test('eventually consistency - success', function (assert) {
     let result = [
       foodItem.get('soup')
         .then(soup => assert.equal(soup.id, 'C')),
-      
+
       promiseToRunLater(0)
       .then(() => {
         return this.db().bulkDocs([
         {_id: 'tacoSoup_2_C', data: { flavor: 'test' } }
       ]);}),
     ];
-    
+
     return Ember.RSVP.all(result);
   })
   .finally(done);
@@ -395,13 +416,13 @@ test('eventually consistency - deleted', function (assert) {
       foodItem.get('soup')
         .then((soup) => assert.ok(soup === null, 'isDeleted'))
         .catch(() => assert.ok(true, 'isDeleted')),
-      
+
       promiseToRunLater(100)
       .then(() => this.db().bulkDocs([
         {_id: 'tacoSoup_2_C', _deleted: true }
       ])),
     ];
-    
+
     return Ember.RSVP.all(result);
   })
   .finally(done);
@@ -450,9 +471,9 @@ test('remote delete removes belongsTo relationship', function (assert) {
   .then((found) => {
     let id = "tacoSoup_2_" + found.id;
     let promise = this.adapter().waitForChangeWithID(id);
-    
+
     this.db().remove(id, found.get('rev'));
-    
+
     return promise;
   }).then(() => {
     return this.store().findRecord('food-item', 'Z');//Z should be updated now
@@ -472,7 +493,7 @@ test('remote delete removes belongsTo relationship', function (assert) {
 test('remote delete removes hasMany relationship', function (assert) {
   assert.timeout(5000);
   assert.expect(3);
-  
+
   let liveIngredients = null;
 
   var done = assert.async();
@@ -483,15 +504,15 @@ test('remote delete removes hasMany relationship', function (assert) {
   .then(found => found.get('ingredients'))//prime hasMany
   .then((ingredients) => {
     liveIngredients = ingredients;//save for later
-    
+
     assert.equal(ingredients.length, 2, "should be 2 food items initially");
-    
+
     let itemToDelete = ingredients.toArray()[0];
     let id = "foodItem_2_" + itemToDelete.id;
     let promise = this.adapter().waitForChangeWithID(id);
-    
+
     this.db().remove(id, itemToDelete.get('rev'));
-    
+
     return promise;
   }).then(() => {
     return this.store().findRecord('taco-soup', 'C');//get updated soup.ingredients
@@ -514,7 +535,7 @@ module('not eventually consistent', { beforeEach: function() {
       assert.expect(2);
       assert.ok(config.emberPouch.eventuallyConsistent == false, 'eventuallyConsistent is false');
       let done = assert.async();
-      
+
       Ember.RSVP.Promise.resolve().then(() => this.store().findRecord('food-item', 'non-existent')
         .then(() => assert.ok(false))
         .catch(() => {
