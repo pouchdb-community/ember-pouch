@@ -286,8 +286,7 @@ test('creating an associated record stores a reference to it in the parent', fun
 	//tacoSoup.save() actually not needed in !savingHasmany mode, but should still work
     return newIngredient.save().then(() => savingHasMany() ? tacoSoup.save() : tacoSoup);
   }).then(() => {
-		this.store().unloadAll();
-
+    Ember.run(() => this.store().unloadAll());
     return this.store().findRecord('taco-soup', 'C');
   }).then(tacoSoup => {
     return tacoSoup.get('ingredients');
@@ -423,7 +422,7 @@ test('delete cascade null', function (assert) {
   .then((found) => {
     return found.destroyRecord();
   }).then(() => {
-    this.store().unloadAll();//to make sure the record is unloaded, normally this would be done by onChange listeren
+    Ember.run(() => this.store().unloadAll()); // normally this would be done by onChange listener
     return this.store().findRecord('food-item', 'Z');//Z should be updated now
   })
   .then((found) => {
