@@ -23,23 +23,23 @@ function promiseToRunLater(timeout) {
 
 
 function savingHasMany() {
-	return config.emberPouch.saveHasMany;
+  return config.emberPouch.saveHasMany;
 }
 
 function getDocsForRelations() {
-	let result = [];
+  let result = [];
 
-	let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
-	if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
-	result.push(c);
+  let c = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } };
+  if (savingHasMany()) { c.data.ingredients = ['X', 'Y']; }
+  result.push(c);
 
-	let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
-	if (savingHasMany()) { d.data.ingredients = ['Z']; }
-	result.push(d);
+  let d = { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } };
+  if (savingHasMany()) { d.data.ingredients = ['Z']; }
+  result.push(d);
 
-	result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
-	result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
-	result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
+  result.push({ _id: 'foodItem_2_X', data: { name: 'pineapple', soup: 'C' }});
+  result.push({ _id: 'foodItem_2_Y', data: { name: 'pork loin', soup: 'C' }});
+  result.push({ _id: 'foodItem_2_Z', data: { name: 'black beans', soup: 'D' }});
 
     return result;
 }
@@ -268,10 +268,10 @@ test('creating an associated record stores a reference to it in the parent', fun
 
   var done = assert.async();
   Promise.resolve().then(() => {
-		var s = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor'} };
-		if (savingHasMany()) {
-			s.data.ingredients = [];
-		}
+    var s = { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor'} };
+    if (savingHasMany()) {
+      s.data.ingredients = [];
+    }
     return this.db().bulkDocs([
       s
     ]);
@@ -283,10 +283,10 @@ test('creating an associated record stores a reference to it in the parent', fun
       soup: tacoSoup
     });
 
-	//tacoSoup.save() actually not needed in !savingHasmany mode, but should still work
+    //tacoSoup.save() actually not needed in !savingHasmany mode, but should still work
     return newIngredient.save().then(() => savingHasMany() ? tacoSoup.save() : tacoSoup);
   }).then(() => {
-		this.store().unloadAll();
+    this.store().unloadAll();
 
     return this.store().findRecord('taco-soup', 'C');
   }).then(tacoSoup => {
@@ -368,14 +368,14 @@ test('eventually consistency - success', function (assert) {
     let result = [
       foodItem.get('soup')
         .then(soup => assert.equal(soup.id, 'C')),
-      
+
       promiseToRunLater(0)
       .then(() => {
         return this.db().bulkDocs([
         {_id: 'tacoSoup_2_C', data: { flavor: 'test' } }
       ]);}),
     ];
-    
+
     return all(result);
   })
   .finally(done);
@@ -396,13 +396,13 @@ test('eventually consistency - deleted', function (assert) {
       foodItem.get('soup')
         .then((soup) => assert.ok(soup === null, 'isDeleted'))
         .catch(() => assert.ok(true, 'isDeleted')),
-      
+
       promiseToRunLater(100)
       .then(() => this.db().bulkDocs([
         {_id: 'tacoSoup_2_C', _deleted: true }
       ])),
     ];
-    
+
     return all(result);
   })
   .finally(done);
@@ -451,9 +451,9 @@ test('remote delete removes belongsTo relationship', function (assert) {
   .then((found) => {
     let id = "tacoSoup_2_" + found.id;
     let promise = this.adapter().waitForChangeWithID(id);
-    
+
     this.db().remove(id, found.get('rev'));
-    
+
     return promise;
   }).then(() => {
     return this.store().findRecord('food-item', 'Z');//Z should be updated now
@@ -473,7 +473,7 @@ test('remote delete removes belongsTo relationship', function (assert) {
 test('remote delete removes hasMany relationship', function (assert) {
   assert.timeout(5000);
   assert.expect(3);
-  
+
   let liveIngredients = null;
 
   var done = assert.async();
@@ -484,15 +484,15 @@ test('remote delete removes hasMany relationship', function (assert) {
   .then(found => found.get('ingredients'))//prime hasMany
   .then((ingredients) => {
     liveIngredients = ingredients;//save for later
-    
+
     assert.equal(ingredients.length, 2, "should be 2 food items initially");
-    
+
     let itemToDelete = ingredients.toArray()[0];
     let id = "foodItem_2_" + itemToDelete.id;
     let promise = this.adapter().waitForChangeWithID(id);
-    
+
     this.db().remove(id, itemToDelete.get('rev'));
-    
+
     return promise;
   }).then(() => {
     return this.store().findRecord('taco-soup', 'C');//get updated soup.ingredients
@@ -515,7 +515,7 @@ module('not eventually consistent', { beforeEach: function() {
       assert.expect(2);
       assert.ok(config.emberPouch.eventuallyConsistent == false, 'eventuallyConsistent is false');
       let done = assert.async();
-      
+
       Promise.resolve().then(() => this.store().findRecord('food-item', 'non-existent')
         .then(() => assert.ok(false))
         .catch(() => {
@@ -527,28 +527,28 @@ module('not eventually consistent', { beforeEach: function() {
 
 };
 
-	let syncAsync = function() {
-		module('async', {
-			beforeEach: function() {
-				config.emberPouch.async = true;
-			}
-		}, () => { allTests(); asyncTests(); });
-		module('sync', {
-			beforeEach: function() {
-				config.emberPouch.async = false;
-			}
-		}, allTests);
-	};
+  let syncAsync = function() {
+    module('async', {
+      beforeEach: function() {
+        config.emberPouch.async = true;
+      }
+    }, () => { allTests(); asyncTests(); });
+    module('sync', {
+      beforeEach: function() {
+        config.emberPouch.async = false;
+      }
+    }, allTests);
+  };
 
-	module('dont save hasMany', {
-		beforeEach: function() {
-			config.emberPouch.saveHasMany = false;
-		}
-	}, syncAsync);
+  module('dont save hasMany', {
+    beforeEach: function() {
+      config.emberPouch.saveHasMany = false;
+    }
+  }, syncAsync);
 
-	module('save hasMany', {
-		beforeEach: function() {
-			config.emberPouch.saveHasMany = true;
-		}
-	}, syncAsync);
+  module('save hasMany', {
+    beforeEach: function() {
+      config.emberPouch.saveHasMany = true;
+    }
+  }, syncAsync);
 });
