@@ -26,7 +26,7 @@
     "CouchDB"
   ],
   "engines": {
-    "node": "^4.5 || 6.* || >= 7.*"
+    "node": ">= 6.*"
   },
   "author": "Nolan Lawson",
   "license": "Apache-2.0",
@@ -62,9 +62,11 @@
   "dependencies": {
     "broccoli-file-creator": "^2.1.1",
     "broccoli-stew": "^2.1.0",
+    "ember-auto-import": "^1.5.3",
+    "ember-cli-babel": "^7.7.3",
     "pouchdb": "^7.1.1",
     "relational-pouch": "^3.1.0",
-    "ember-cli-babel": "^7.7.3"
+    "uuid": "^3.3.3"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
