@@ -9,6 +9,6 @@ export default Adapter.extend({
 				rel.options.save = config.emberPouch.saveHasMany;
 			}
 		});
-		this._super(...arguments);
+		return this._super(...arguments);
 	},
 });

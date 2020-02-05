@@ -156,7 +156,7 @@ export default DS.RESTAdapter.extend({
   
   _indexPromises: [],
 
-  _init: function (store, type) {
+  _init: async function (store, type) {
     var self = this,
         recordTypeName = this.getRecordTypeName(type);
     if (!this.get('db') || typeof this.get('db') !== 'object') {
@@ -197,10 +197,14 @@ export default DS.RESTAdapter.extend({
     // check all the subtypes
     // We check the type of `rel.type`because with ember-data beta 19
     // `rel.type` switched from DS.Model to string
-    type.eachRelationship(function (_, rel) {
+    
+    var rels = [];//extra array is needed since type.relationships/byName return a Map that is not iterable
+    type.eachRelationship((_relName, rel) => rels.push(rel));
+    
+    for (let rel of rels) {
       if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
         // TODO: support inverse as well
-        return; // skip
+        continue; // skip
       }
       var relDef = {},
           relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
@@ -216,7 +220,7 @@ export default DS.RESTAdapter.extend({
           let inverse = type.inverseFor(rel.key, store);
           if (inverse) {
             if (inverse.kind === 'belongsTo') {
-              self._indexPromises.push(self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }}));
+              await self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
               if (options.async) {
                 includeRel = false;
               } else {
@@ -236,9 +240,9 @@ export default DS.RESTAdapter.extend({
           }
           schemaDef.relations[rel.key] = relDef;
         }
-        self._init(store, relModel);
+        await self._init(store, relModel);
       }
-    });
+    }
 
     this.get('db').setSchema(this._schema);
   },
@@ -337,18 +341,19 @@ export default DS.RESTAdapter.extend({
     return camelize(type.modelName);
   },
 
-  findAll: function(store, type /*, sinceToken */) {
+  findAll: async function(store, type /*, sinceToken */) {
     // TODO: use sinceToken
-    this._init(store, type);
+    await this._init(store, type);
     return this.get('db').rel.find(this.getRecordTypeName(type));
   },
 
-  findMany: function(store, type, ids) {
-    this._init(store, type);
+  findMany: async function(store, type, ids) {
+    await this._init(store, type);
     return this.get('db').rel.find(this.getRecordTypeName(type), ids);
   },
 
-  findHasMany: function(store, record, link, rel) {
+  findHasMany: async function(store, record, link, rel) {
+    await this._init(store, record.type);
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
       return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
@@ -359,8 +364,8 @@ export default DS.RESTAdapter.extend({
     }
   },
 
-  query: function(store, type, query) {
-    this._init(store, type);
+  query: async function(store, type, query) {
+    await this._init(store, type);
 
     var recordTypeName = this.getRecordTypeName(type);
     var db = this.get('db');
@@ -381,21 +386,21 @@ export default DS.RESTAdapter.extend({
       queryParams.skip = query.skip;
     }
 
-    return db.find(queryParams).then(pouchRes => db.rel.parseRelDocs(recordTypeName, pouchRes.docs));
+    let pouchRes = await db.find(queryParams);
+    return db.rel.parseRelDocs(recordTypeName, pouchRes.docs);
   },
 
-  queryRecord: function(store, type, query) {
-    return this.query(store, type, query).then(results => {
-      let recordType = this.getRecordTypeName(type);
-      let recordTypePlural = pluralize(recordType);
-      if(results[recordTypePlural].length > 0){
-        results[recordType] = results[recordTypePlural][0];
-      } else {
-        results[recordType] = null;
-      }
-      delete results[recordTypePlural];
-      return results;
-    });
+  queryRecord: async function(store, type, query) {
+    let results = await this.query(store, type, query);
+    let recordType = this.getRecordTypeName(type);
+    let recordTypePlural = pluralize(recordType);
+    if(results[recordTypePlural].length > 0){
+      results[recordType] = results[recordTypePlural][0];
+    } else {
+      results[recordType] = null;
+    }
+    delete results[recordTypePlural];
+    return results;
   },
 
   /**
@@ -405,35 +410,34 @@ export default DS.RESTAdapter.extend({
    * `findRecord`. This can be removed when the library drops support
    * for deprecated methods.
   */
-  find: function (store, type, id) {
+  find: function (store, type, id) {  
     return this.findRecord(store, type, id);
   },
 
-  findRecord: function (store, type, id) {
-    this._init(store, type);
+  findRecord: async function (store, type, id) {
+    await this._init(store, type);
     var recordTypeName = this.getRecordTypeName(type);
     return this._findRecord(recordTypeName, id);
   },
 
-  _findRecord(recordTypeName, id) {
-    return this.get('db').rel.find(recordTypeName, id).then(payload => {
-      // Ember Data chokes on empty payload, this function throws
-      // an error when the requested data is not found
-      if (typeof payload === 'object' && payload !== null) {
-        var singular = recordTypeName;
-        var plural = pluralize(recordTypeName);
+  async _findRecord(recordTypeName, id) {
+    let payload = await this.get('db').rel.find(recordTypeName, id);
+    // Ember Data chokes on empty payload, this function throws
+    // an error when the requested data is not found
+    if (typeof payload === 'object' && payload !== null) {
+      var singular = recordTypeName;
+      var plural = pluralize(recordTypeName);
 
-        var results = payload[singular] || payload[plural];
-        if (results && results.length > 0) {
-          return payload;
-        }
+      var results = payload[singular] || payload[plural];
+      if (results && results.length > 0) {
+        return payload;
       }
+    }
 
-      if (configFlagDisabled(this, 'eventuallyConsistent'))
-        throw new Error("Document of type '" + recordTypeName + "' with id '" + id + "' not found.");
-      else
-        return this._eventuallyConsistent(recordTypeName, id);
-    });
+    if (configFlagDisabled(this, 'eventuallyConsistent'))
+      throw new Error("Document of type '" + recordTypeName + "' with id '" + id + "' not found.");
+    else
+      return this._eventuallyConsistent(recordTypeName, id);
   },
 
   //TODO: cleanup promises on destroy or db change?
@@ -466,7 +470,7 @@ export default DS.RESTAdapter.extend({
 
   createdRecords: {},
   createRecord: async function(store, type, record) {
-    this._init(store, type);
+    await this._init(store, type);
     var data = this._recordToData(store, type, record);
     let rel = this.get('db').rel;
     
@@ -490,7 +494,7 @@ export default DS.RESTAdapter.extend({
   },
 
   updateRecord: async function (store, type, record) {
-    this._init(store, type);
+    await this._init(store, type);
     var data = this._recordToData(store, type, record);
     let typeName = this.getRecordTypeName(type);
     let saved = await this.get('db').rel.save(typeName, data);
@@ -500,8 +504,8 @@ export default DS.RESTAdapter.extend({
     return result;
   },
 
-  deleteRecord: function (store, type, record) {
-    this._init(store, type);
+  deleteRecord: async function (store, type, record) {
+    await this._init(store, type);
     var data = this._recordToData(store, type, record);
     return this.get('db').rel.del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
