@@ -156,7 +156,7 @@ export default DS.RESTAdapter.extend({
   
   _indexPromises: [],
 
-  _init: async function (store, type) {
+  _init: function (store, type, indexPromises) {
     var self = this,
         recordTypeName = this.getRecordTypeName(type);
     if (!this.get('db') || typeof this.get('db') !== 'object') {
@@ -178,7 +178,7 @@ export default DS.RESTAdapter.extend({
     for (var i = 0, len = this._schema.length; i < len; i++) {
       var currentSchemaDef = this._schema[i];
       if (currentSchemaDef.singular === singular) {
-        return;
+        return Ember.RSVP.all(this._indexPromises);
       }
     }
 
@@ -201,6 +201,11 @@ export default DS.RESTAdapter.extend({
     var rels = [];//extra array is needed since type.relationships/byName return a Map that is not iterable
     type.eachRelationship((_relName, rel) => rels.push(rel));
     
+    let rootCall = indexPromises == undefined;
+    if (rootCall) {
+      indexPromises = [];
+    }
+    
     for (let rel of rels) {
       if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
         // TODO: support inverse as well
@@ -220,7 +225,7 @@ export default DS.RESTAdapter.extend({
           let inverse = type.inverseFor(rel.key, store);
           if (inverse) {
             if (inverse.kind === 'belongsTo') {
-              await self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }});
+              indexPromises.push(self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }}));
               if (options.async) {
                 includeRel = false;
               } else {
@@ -240,11 +245,19 @@ export default DS.RESTAdapter.extend({
           }
           schemaDef.relations[rel.key] = relDef;
         }
-        await self._init(store, relModel);
+        
+        self._init(store, relModel, indexPromises);
       }
     }
 
     this.get('db').setSchema(this._schema);
+    
+    if (rootCall) {
+      this._indexPromises = this._indexPromises.concat(indexPromises);
+      return Ember.RSVP.all(indexPromises).then(() => {
+        this._indexPromises = this._indexPromises.filter(x => !indexPromises.includes(x));
+      });
+    }
   },
 
   _recordToData: function (store, type, record) {
