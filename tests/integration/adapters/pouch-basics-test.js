@@ -407,6 +407,25 @@ test('eventually consistency - deleted', function (assert) {
   .finally(done);
 });
 
+test('_init should work', function (assert) {
+  let db = this.db();
+  
+  assert.ok(db.rel == undefined, "should start without schema");
+  
+  let promises = [];
+  
+  let adapter = this.adapter();
+  promises.push(adapter._init(this.store(), this.store().modelFor('taco-soup')));
+
+//this tests _init synchronously by design, as re-entry and infitinite loop detection works this way
+  assert.ok(db.rel != undefined, "_init should set schema");
+  assert.equal(this.adapter()._schema.length, 2, "should have set all relationships on the schema");
+  
+  promises.push(adapter._init(this.store(), this.store().modelFor('taco-soup')));
+  
+  return Ember.RSVP.all(promises);
+});
+
 //TODO: only do this for async or dontsavehasmany?
 test('delete cascade null', function (assert) {
   assert.timeout(5000);
