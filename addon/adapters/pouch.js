@@ -465,7 +465,7 @@ export default DS.RESTAdapter.extend({
   },
 
   createdRecords: {},
-  createRecord: function(store, type, record) {
+  createRecord: async function(store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
     let rel = this.get('db').rel;
@@ -476,16 +476,28 @@ export default DS.RESTAdapter.extend({
     }
     this.createdRecords[id] = true;
     
-    return rel.save(this.getRecordTypeName(type), data).catch((e) => {
+    let typeName = this.getRecordTypeName(type);
+    try {
+      let saved = await rel.save(typeName, data);
+      Object.assign(data, saved);
+      let result = {};
+      result[pluralize(typeName)] = [data];
+      return result;
+    } catch(e) {
       delete this.createdRecords[id];
       throw e;
-    });
+    }
   },
 
-  updateRecord: function (store, type, record) {
+  updateRecord: async function (store, type, record) {
     this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.save(this.getRecordTypeName(type), data);
+    let typeName = this.getRecordTypeName(type);
+    let saved = await this.get('db').rel.save(typeName, data);
+    Object.assign(data, saved);//TODO: could only set .rev
+    let result = {};
+    result[pluralize(typeName)] = [data];
+    return result;
   },
 
   deleteRecord: function (store, type, record) {
