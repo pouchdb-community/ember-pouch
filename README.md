@@ -22,8 +22,6 @@ For more on PouchDB, check out [pouchdb.com](http://pouchdb.com).
 ember install ember-pouch
 ```
 
-Note: You can ingnore `UNMET PEER DEPENDENCY pouchdb-find` because we import `pouchdb-find` from `pouchdb`.
-
 For ember-data < 2.0:
 
 ```bash
@@ -37,7 +35,7 @@ npm install ember-pouch@3.2.2 --save-dev
 ```
 
 This provides
-- `import PouchDB from 'pouchdb'`
+- `import PouchDB from 'ember-pouch/pouchdb';`
 - `import {Model, Adapter, Serializer} from 'ember-pouch'`
 
 `Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
@@ -75,7 +73,7 @@ A local PouchDB that syncs with a remote CouchDB looks like this:
 ```js
 // app/adapters/application.js
 
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 import { Adapter } from 'ember-pouch';
 
 var remote = new PouchDB('http://localhost:5984/my_couch');
@@ -94,7 +92,7 @@ export default Adapter.extend({
 You can also turn on debugging:
 
 ```js
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 
 // For v7.0.0 and newer you must first load the 'pouchdb-debug' plugin
 // see https://github.com/pouchdb/pouchdb/tree/39ac9a7a1f582cf7a8d91c6bf9caa936632283a6/packages/node_modules/pouchdb-debug
@@ -591,6 +589,9 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
+* **7.0.0**
+  - Use ember-auto-import and pouchdb-browser to ease the installation process
+  - relational-pouch@4.0.0
 * **6.0.0**
   - Switch to PouchDB 7.0.0
 * **5.1.0**
