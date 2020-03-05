@@ -1,5 +1,5 @@
 import Adapter from 'dummy/adapter';
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
 import Ember from 'ember';
 

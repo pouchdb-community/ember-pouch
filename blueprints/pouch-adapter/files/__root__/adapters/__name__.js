@@ -1,5 +1,5 @@
 import { Adapter } from 'ember-pouch';
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 import config from '<%= dasherizedPackageName %>/config/environment';
 import Ember from 'ember';
 
