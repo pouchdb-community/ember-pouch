@@ -1,9 +1,10 @@
 ---
 language: node_js
 node_js:
-  - "8"
+  # we recommend testing addons with the same minimum supported node version as Ember CLI
+  # so that your addon works for all apps
+  - "10"
 
-sudo: required
 dist: trusty
 
 addons:
@@ -17,30 +18,53 @@ env:
   global:
     # See https://git.io/vdao3 for details.
     - JOBS=1
-  matrix:
-    # we recommend new addons test the current and previous LTS
-    # as well as latest stable release (bonus points to beta/canary)
-    - EMBER_TRY_SCENARIO=ember-2.4-stack
-    - EMBER_TRY_SCENARIO=ember-lts-2.8
-    - EMBER_TRY_SCENARIO=ember-lts-2.12
-    - EMBER_TRY_SCENARIO=ember-lts-2.16
-    - EMBER_TRY_SCENARIO=ember-lts-2.18
-    - EMBER_TRY_SCENARIO=ember-lts-3.4
-    - EMBER_TRY_SCENARIO=ember-lts-3.8
-    - EMBER_TRY_SCENARIO=ember-lts-3.12
-    - EMBER_TRY_SCENARIO=ember-release
-    - EMBER_TRY_SCENARIO=ember-beta
-    - EMBER_TRY_SCENARIO=ember-canary
-    - EMBER_TRY_SCENARIO=ember-default
-    # default = 2.18
 
-matrix:
+branches:
+  only:
+    - master
+    # npm version tags
+    - /^v\d+\.\d+\.\d+/
+
+before_install:
+  - npm --version
+
+jobs:
   fast_finish: true
   allow_failures:
     - env: EMBER_TRY_SCENARIO=ember-canary
 
-before_install:
-  - npm --version
+  include:
+    # runs linting and tests with current locked deps
+    - stage: "Tests"
+      name: "Tests"
+      script:
+        - npm run lint:hbs
+        - npm run lint:js
+        - npm test
+
+    - stage: "Additional Tests"
+      name: "Floating Dependencies"
+      install:
+        - npm install --no-package-lock
+      script:
+        - npm test
+
+    # we recommend new addons test the current and previous LTS
+    # as well as latest stable release (bonus points to beta/canary)
+    - env: EMBER_TRY_SCENARIO=ember-2.4-stack
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.8
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.12
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.16
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.18
+    - env: EMBER_TRY_SCENARIO=ember-lts-3.4
+    - env: EMBER_TRY_SCENARIO=ember-lts-3.8
+    - env: EMBER_TRY_SCENARIO=ember-lts-3.12
+    - env: EMBER_TRY_SCENARIO=ember-lts-3.16
+    - env: EMBER_TRY_SCENARIO=ember-release
+    - env: EMBER_TRY_SCENARIO=ember-beta
+    - env: EMBER_TRY_SCENARIO=ember-canary
+    - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
+    - env: EMBER_TRY_SCENARIO=ember-classic
 
 script:
   - npm run license

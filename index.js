@@ -7,8 +7,8 @@ var writeFile = require('broccoli-file-creator');
 var version = require('./package.json').version;
 
 module.exports = {
-  name: 'ember-pouch',
-  
+  name: require('./package').name,
+
   options: {
     autoImport:{
       webpack: {
@@ -18,7 +18,7 @@ module.exports = {
       },
     },
   },
-  
+
   init: function() {
     this._super.init && this._super.init.apply(this, arguments);
 
