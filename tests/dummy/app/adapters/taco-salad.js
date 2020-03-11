@@ -1,9 +1,9 @@
+import { run } from '@ember/runloop';
+import { assert } from '@ember/debug';
+import { isEmpty } from '@ember/utils';
 import Adapter from 'dummy/adapter';
 import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
-import Ember from 'ember';
-
-const { assert, isEmpty } = Ember;
 
 function createDb() {
   let localDb = config.emberPouch.localDb;
@@ -33,7 +33,7 @@ export default Adapter.extend({
     let store = this.get('store');
     let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
     this.get('db').rel.find(recordTypeName, obj.id).then(function(doc){
-      Ember.run(function() {
+      run(function() {
         store.pushPayload(recordTypeName, doc);
       });
     });

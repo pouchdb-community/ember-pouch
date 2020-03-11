@@ -1,9 +1,9 @@
+import { defer } from 'rsvp';
+import { assert } from '@ember/debug';
+import { isEmpty } from '@ember/utils';
 import Adapter from 'dummy/adapter';
 import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
-import Ember from 'ember';
-
-const { assert, isEmpty } = Ember;
 
 function createDb() {
   let localDb = config.emberPouch.localDb;
@@ -39,13 +39,13 @@ export default Adapter.extend({
   },
   
   waitForChangeWithID(id) {
-    let defer = Ember.RSVP.defer();
+    let defered = defer();
     this.onChangeListenerTest = (c) => {
       if (c.id === id) {
         this.onChangeListenerTest = null;
-        defer.resolve(c);
+        defered.resolve(c);
       }
     }
-    return defer.promise;
+    return defered.promise;
   },
 });

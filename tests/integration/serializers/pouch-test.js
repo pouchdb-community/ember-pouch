@@ -1,13 +1,16 @@
-import { test } from 'qunit';
-import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
+import { Promise } from 'rsvp';
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
 
-import Ember from 'ember';
+import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 /*
  * Tests attachments behavior for an app using the ember-pouch serializer.
  */
 
-moduleForIntegration('Integration | Serializer | Attachments');
+module('Integration | Serializer | Attachments', function(hooks) {
+  setupTest(hooks); 
+  moduleForIntegration(hooks);
 
 let id = 'E';
 let coverImage = {
@@ -31,7 +34,7 @@ test('puts attachments into the `attachments` property when saving', function (a
   assert.expect(11);
 
   var done = assert.async();
-  Ember.RSVP.Promise.resolve().then(() => {
+  Promise.resolve().then(() => {
     var newRecipe = this.store().createRecord('taco-recipe', {
       id,
       coverImage: coverImage,
@@ -87,4 +90,5 @@ test('puts attachments into the `attachments` property when saving', function (a
     assert.ok(false, 'error in test:' + error);
     done();
   });
+});
 });

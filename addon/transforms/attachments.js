@@ -1,11 +1,10 @@
-import Ember from 'ember';
+import { isArray } from '@ember/array';
+import { keys as EmberKeys } from '@ember/polyfills';
+import EmberObject, { get } from '@ember/object';
+import { isNone } from '@ember/utils';
 import DS from 'ember-data';
 
-const {
-  get,
-  isNone
-} = Ember;
-const keys = Object.keys || Ember.keys;
+const keys = Object.keys || EmberKeys;
 
 export default DS.Transform.extend({
   deserialize: function(serialized) {
@@ -13,7 +12,7 @@ export default DS.Transform.extend({
 
     return keys(serialized).map(function (attachmentName) {
       let attachment = serialized[attachmentName];
-      return Ember.Object.create({
+      return EmberObject.create({
         name: attachmentName,
         content_type: attachment.content_type,
         data: attachment.data,
@@ -25,7 +24,7 @@ export default DS.Transform.extend({
   },
 
   serialize: function(deserialized) {
-    if (!Ember.isArray(deserialized)) { return null; }
+    if (!isArray(deserialized)) { return null; }
 
     return deserialized.reduce(function (acc, attachment) {
       const serialized = {

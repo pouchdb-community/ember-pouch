@@ -1,4 +1,4 @@
-import {Adapter} from 'ember-pouch';
+import { Adapter } from 'ember-pouch';
 import config from 'dummy/config/environment';
 
 export default Adapter.extend({

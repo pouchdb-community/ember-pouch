@@ -79,7 +79,7 @@
     "relational-pouch": "^4.0.0"
   },
   "ember": {
-    "edition": "octane"
+    "edition": "classic"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

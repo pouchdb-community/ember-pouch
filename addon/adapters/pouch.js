@@ -1,4 +1,11 @@
-import Ember from 'ember';
+import { assert } from '@ember/debug';
+import { isEmpty } from '@ember/utils';
+import { all, defer } from 'rsvp';
+import { get } from '@ember/object';
+import { getOwner } from '@ember/application';
+import { bind } from '@ember/runloop';
+import { on } from '@ember/object/evented';
+import { classify, camelize } from '@ember/string';
 import DS from 'ember-data';
 import { pluralize } from 'ember-inflector';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
@@ -8,18 +15,6 @@ import {
   shouldSaveRelationship,
   configFlagDisabled
 } from '../utils';
-
-const {
-  getOwner,
-  run: {
-    bind
-  },
-  on,
-  String: {
-    camelize,
-    classify
-  }
-} = Ember;
 
 //BelongsToRelationship.reopen({
 //  findRecord() {
@@ -154,7 +149,13 @@ export default DS.RESTAdapter.extend({
     this._stopChangesListener();
   },
   
-  _indexPromises: [],
+  init() {
+    this._indexPromises = [];
+    this.waitingForConsistency = {};
+    this.createdRecords = {};
+  },
+  
+  _indexPromises: null,
 
   _init: function (store, type, indexPromises) {
     var self = this,
@@ -163,7 +164,7 @@ export default DS.RESTAdapter.extend({
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    if (!Ember.get(type, 'attributes').has('rev')) {
+    if (!get(type, 'attributes').has('rev')) {
       var modelName = classify(recordTypeName);
       throw new Error('Please add a `rev` attribute of type `string`' +
         ' on the ' + modelName + ' model.');
@@ -178,7 +179,7 @@ export default DS.RESTAdapter.extend({
     for (var i = 0, len = this._schema.length; i < len; i++) {
       var currentSchemaDef = this._schema[i];
       if (currentSchemaDef.singular === singular) {
-        return Ember.RSVP.all(this._indexPromises);
+        return all(this._indexPromises);
       }
     }
 
@@ -218,7 +219,7 @@ export default DS.RESTAdapter.extend({
         if (!('options' in rel)) rel.options = {};
         
         if (typeof(rel.options.async) === "undefined") {
-          rel.options.async = config.emberPouch && !Ember.isEmpty(config.emberPouch.async) ? config.emberPouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
+          rel.options.async = config.emberPouch && !isEmpty(config.emberPouch.async) ? config.emberPouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
         }
         let options = Object.create(rel.options);
         if (rel.kind === 'hasMany' && !shouldSaveRelationship(self, rel)) {
@@ -254,7 +255,7 @@ export default DS.RESTAdapter.extend({
     
     if (rootCall) {
       this._indexPromises = this._indexPromises.concat(indexPromises);
-      return Ember.RSVP.all(indexPromises).then(() => {
+      return all(indexPromises).then(() => {
         this._indexPromises = this._indexPromises.filter(x => !indexPromises.includes(x));
       });
     }
@@ -387,15 +388,15 @@ export default DS.RESTAdapter.extend({
       selector: this._buildSelector(query.filter)
     };
 
-    if (!Ember.isEmpty(query.sort)) {
+    if (!isEmpty(query.sort)) {
       queryParams.sort = this._buildSort(query.sort);
     }
 
-    if (!Ember.isEmpty(query.limit)) {
+    if (!isEmpty(query.limit)) {
       queryParams.limit = query.limit;
     }
 
-    if (!Ember.isEmpty(query.skip)) {
+    if (!isEmpty(query.skip)) {
       queryParams.skip = query.skip;
     }
 
@@ -454,11 +455,11 @@ export default DS.RESTAdapter.extend({
   },
 
   //TODO: cleanup promises on destroy or db change?
-  waitingForConsistency: {},
+  waitingForConsistency: null,
   _eventuallyConsistent: function(type, id) {
     let pouchID = this.get('db').rel.makeDocID({type, id});
-    let defer = Ember.RSVP.defer();
-    this.waitingForConsistency[pouchID] = defer;
+    let defered = defer();
+    this.waitingForConsistency[pouchID] = defered;
 
     return this.get('db').rel.isDeleted(type, id).then(deleted => {
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
@@ -466,22 +467,22 @@ export default DS.RESTAdapter.extend({
         delete this.waitingForConsistency[pouchID];
         throw new Error("Document of type '" + type + "' with id '" + id + "' is deleted.");
       } else if (deleted === null) {
-        return defer.promise;
+        return defered.promise;
       } else {
-        Ember.assert('Status should be existing', deleted === false);
+        assert('Status should be existing', deleted === false);
         //TODO: should we reject or resolve the promise? or does JS GC still clean it?
         if (this.waitingForConsistency[pouchID]) {
           delete this.waitingForConsistency[pouchID];
           return this._findRecord(type, id);
         } else {
           //findRecord is already handled by onChange
-          return defer.promise;
+          return defered.promise;
         }
       }
     });
   },
 
-  createdRecords: {},
+  createdRecords: null,
   createRecord: async function(store, type, record) {
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
