@@ -44,8 +44,12 @@ module.exports = async function() {
       },
       {
         name: 'ember-lts-2.12',
+        env: {
+          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
+        },
         npm: {
           devDependencies: {
+            '@ember/jquery': '^0.5.1',
             'ember-data': '2.12.2',
             'ember-inflector': '^1.9.4',
             'ember-source': '2.12.2',
@@ -55,8 +59,12 @@ module.exports = async function() {
       },
       {
         name: 'ember-2.14-stack',
+        env: {
+          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
+        },
         npm: {
           devDependencies: {
+            '@ember/jquery': '^0.5.1',
             'ember-data': '~2.14.0',
             'ember-source': '~2.14.0',
           }
@@ -64,8 +72,12 @@ module.exports = async function() {
       },
       {
         name: 'ember-lts-2.16',
+        env: {
+          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
+        },
         npm: {
           devDependencies: {
+            '@ember/jquery': '^0.5.1',
             'ember-data': '~2.16.0',
             'ember-source': '~2.16.0',
           }
@@ -73,8 +85,12 @@ module.exports = async function() {
       },
       {
         name: 'ember-lts-2.18',
+        env: {
+          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
+        },
         npm: {
           devDependencies: {
+            '@ember/jquery': '^0.5.1',
             'ember-data': '~2.18.0',
             'ember-source': '~2.18.0',
           }
