@@ -80,7 +80,7 @@ module.exports = async function() {
           }
         }
       },
-  {
+      {
         name: 'ember-lts-3.4',
         npm: {
           devDependencies: {
@@ -122,7 +122,8 @@ module.exports = async function() {
           devDependencies: {
             'ember-data': 'latest',
             'ember-source': await getChannelURL('release')
-        }
+          }
+        },
       },
       {
         name: 'ember-beta',

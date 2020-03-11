@@ -1,7 +1,6 @@
 /* eslint-env node */
 'use strict';
 
-var path = require('path');
 var stew = require('broccoli-stew');
 var writeFile = require('broccoli-file-creator');
 var version = require('./package.json').version;
@@ -57,5 +56,5 @@ module.exports = {
         this.ui.writeWarnLine('The `dontsavehasmany` flag is no longer needed in `config/environment.js`');
       }
     }
-  }
+  },
 };
