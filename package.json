@@ -1,6 +1,6 @@
 {
   "name": "ember-pouch",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "description": "PouchDB adapter for Ember Data",
   "author": "Nolan Lawson",
   "directories": {
@@ -19,6 +19,7 @@
   "keywords": [
     "ember-addon",
     "Ember",
+    "Octane",
     "Data",
     "adapter",
     "PouchDB",

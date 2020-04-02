@@ -38,61 +38,61 @@ This provides
 - `import PouchDB from 'ember-pouch/pouchdb';`
 - `import {Model, Adapter, Serializer} from 'ember-pouch'`
 
-`Ember-Pouch` requires you to add a `rev: DS.attr('string')` field to all your models. This is for PouchDB/CouchDB to handle revisions:
+`Ember-Pouch` requires you to add a `@attr('string') rev` field to all your models. This is for PouchDB/CouchDB to handle revisions:
 
-```js
+```javascript
 // app/models/todo.js
 
-import DS from 'ember-data';
+import Model, { attr } from '@ember-data/model';
 
-export default DS.Model.extend({
-  title       : DS.attr('string'),
-  isCompleted : DS.attr('boolean'),
-  rev         : DS.attr('string')    // <-- Add this to all your models
-});
+export default class TodoModel extends Model {
+  @attr('string') title;
+  @attr('boolean') isCompleted;
+  @attr('string') rev;               // <-- Add this to all your models
+}
 ```
 
 If you like, you can also use `Model` from `Ember-Pouch` that ships with the `rev` attribute:
 
-```js
+```javascript
 // app/models/todo.js
 
-import DS from 'ember-data';
+import { attr } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
-export default Model.extend({
-  title       : DS.attr('string'),
-  isCompleted : DS.attr('boolean')
-});
+export default class TodoModel extends Model {
+  @attr('string') title;
+  @attr('boolean') isCompleted;
+}
 ```
 
 ## Configuring /app/adapters/application.js
 
 A local PouchDB that syncs with a remote CouchDB looks like this:
 
-```js
+```javascript
 // app/adapters/application.js
 
-import PouchDB from 'ember-pouch/pouchdb';
+import PouchDB from 'pouchdb';
 import { Adapter } from 'ember-pouch';
 
-var remote = new PouchDB('http://localhost:5984/my_couch');
-var db = new PouchDB('local_pouch');
+let remote = new PouchDB('http://localhost:5984/my_couch');
+let db = new PouchDB('local_pouch');
 
 db.sync(remote, {
    live: true,   // do a live, ongoing sync
    retry: true   // retry if the connection is lost
 });
 
-export default Adapter.extend({
+export default class ApplicationAdapter extends Adapter {
   db: db
-});
+}
 ```
 
 You can also turn on debugging:
 
-```js
-import PouchDB from 'ember-pouch/pouchdb';
+```javascript
+import PouchDB from 'pouchdb';
 
 // For v7.0.0 and newer you must first load the 'pouchdb-debug' plugin
 // see https://github.com/pouchdb/pouchdb/tree/39ac9a7a1f582cf7a8d91c6bf9caa936632283a6/packages/node_modules/pouchdb-debug
@@ -154,32 +154,24 @@ When you do save child ids on the `hasMany` side, you have to follow the directi
 When saving a `hasMany` - `belongsTo` relationship, both sides of the relationship (the child and the parent) must be saved. Note that the parent needs to have been saved at least once prior to adding children to it.
 
 ```javascript
-// app/routes/post/index.js
-import Ember from 'ember';
+// app/controllers/posts/post.js
+import Controller from '@ember/controller';
+import { action } from '@ember/object';
 
-export default Ember.Route.extend({
-  model(params){
-    //We are getting a post that already exists
-    return this.store.findRecord('post',  params.post_id);
-  },
+export default class PostController extends Controller {
 
-  actions:{
-    addComment(comment, author){
-      //Create the comment
-      const comment = this.store.createRecord('comment',{
-        comment: comment,
-        author: author
-      });
-      //Get our post
-      const post = this.controller.get('model');
-      //Add our comment to our existing post
-      post.get('comments').pushObject(comment);
-      //Save the child then the parent
-      comment.save().then(() => post.save());
-    }
+@action addComment(comment, author){
+    //Create the comment
+    const comment = this.store.createRecord('comment',{
+      comment: comment,
+      author: author
+    });
+    //Add our comment to our existing post
+    this.model.comments.pushObject(comment);
+    //Save the child then the parent
+    comment.save().then(() => this.model.save());
   }
-});
-
+}
 ```
 
 #### Removing child ids
@@ -187,32 +179,28 @@ export default Ember.Route.extend({
 When removing a `hasMany` - `belongsTo` relationship, the children must be removed prior to the parent being removed.
 
 ```javascript
-// app/routes/posts/admin/index.js
-import Ember from 'ember';
+// app/controller/posts/admin.js
+import Controller from '@ember/controller';
+import { action } from '@ember/object';
+import { all } from 'rsvp';
 
-export default Ember.Route.extend({
-  model(){
-    //We are getting all posts for some sort of list
-    return this.store.findAll('post');
-  },
+export default class AdminController extends Controller {
 
-  actions:{
-    deletePost(post){
-      //collect the promises for deletion
-      let deletedComments = [];
-      //get and destroy the posts comments
-      post.get('comments').then((comments) => {
-        comments.map((comment) => {
-          deletedComments.push(comment.destroyRecord());
-        });
+@action deletePost(post){
+    //collect the promises for deletion
+    let deletedComments = [];
+    //get and destroy the posts comments
+    post.comments.then((comments) => {
+      comments.map((comment) => {
+        deletedComments.push(comment.destroyRecord());
       });
-      //Wait for comments to be destroyed then destroy the post
-      Ember.RSVP.all(deletedComments).then(() => {
-        post.destroyRecord();
-      });
-    }
+    });
+    //Wait for comments to be destroyed then destroy the post
+    all(deletedComments).then(() => {
+      post.destroyRecord();
+    });
   }
-});
+}
 ```
 
 ### Query and QueryRecord
@@ -245,25 +233,25 @@ function createDb() {
 Find all docs where doc.name === 'Mario'
 
 ```javascript
-// app/routes/smasher/index.js
-import Ember from 'ember';
+// app/routes/smasher.js
+import Route from '@ember/routing/route';
 
-export default Ember.Route.extend({
+export default class SmasherRoute extends Route {
   model() {
     return this.store.query('smasher',  {
       filter: { name: 'Mario' }
     });
   }
-});
+}
 ```
 
 Find all docs where doc.name === 'Mario' and doc.debut > 1990:
 
 ```javascript
-// app/routes/smasher/index.js
-import Ember from 'ember';
+// app/routes/smasher.js
+import Route from '@ember/routing/route';
 
-export default Ember.Route.extend({
+export default class SmasherRoute extends Route {
   model() {
     return this.store.query('smasher',  {
       filter: {
@@ -272,16 +260,16 @@ export default Ember.Route.extend({
       }
     });
   }
-});
+}
 ```
 
 Sorted by doc.debut descending.
 
 ```javascript
-// app/routes/smasher/index.js
-import Ember from 'ember';
+// app/routes/smasher.js
+import Route from '@ember/routing/route';
 
-export default Ember.Route.extend({
+export default class SmasherRoute extends Route {
   model() {
     return this.store.query('smasher',  {
       filter: {
@@ -293,16 +281,16 @@ export default Ember.Route.extend({
       ]
     })
   }
-});
+}
 ```
 
 Limit to 5 documents.
 
 ```javascript
-// app/routes/smasher/index.js
-import Ember from 'ember';
+// app/routes/smasher.js
+import Route from '@ember/routing/route';
 
-export default Ember.Route.extend({
+export default class SmasherRoute extends Route {
   model() {
     return this.store.query('smasher',  {
       filter: {
@@ -315,16 +303,16 @@ export default Ember.Route.extend({
       limit: 5
     })
   }
-});
+}
 ```
 
 Skip the first 5 documents
 
 ```javascript
-// app/routes/smasher/index.js
-import Ember from 'ember';
+// app/routes/smasher.js
+import Route from '@ember/routing/route';
 
-export default Ember.Route.extend({
+export default class SmasherRoute extends Route {
   model() {
     return this.store.query('smasher',  {
       filter: {
@@ -337,7 +325,7 @@ export default Ember.Route.extend({
       skip: 5
     })
   }
-});
+}
 ```
 
 Note that this query would require a custom index including both fields `data.name` and `data.debut`.  Any field in `sort` must also be included in `filter`.  Only `$eq`, `$gt`, `$gte`, `$lt`, and `$lte` can be used when matching a custom index.
@@ -347,16 +335,16 @@ Note that this query would require a custom index including both fields `data.na
 Find one document where doc.name === 'Mario'
 
 ```javascript
-// app/routes/smasher/index.js
-import Ember from 'ember';
+// app/routes/smasher.js
+import Route from '@ember/routing/route';
 
-export default Ember.Route.extend({
+export default class SmasherRoute extends Route {
   model() {
     return this.store.queryRecord('smasher',  {
       filter: { name: 'Mario' }
     });
   }
-});
+}
 ```
 
 ## Attachments
@@ -365,15 +353,18 @@ export default Ember.Route.extend({
 
 Add a `DS.attr('attachments')` field to your model. Provide a default value for it to be an empty array.
 
-```js
+```javascript
 // myapp/models/photo-album.js
-export default DS.Model.extend({
-  photos: DS.attr('attachments', {
+import { attr } from '@ember-data/model';
+import { Model } from 'ember-pouch';
+
+export default class PhotoAlbumModel extends Model {
+  @attr('attachments', {
     defaultValue: function() {
       return [];
     }
-  });
-});
+  }) photos
+}
 ```
 
 Here, instances of `PhotoAlbum` have a `photos` field, which is an array of plain `Ember.Object`s, which have a `.name` and `.content_type`. Non-stubbed attachment also have a `.data` field; and stubbed attachments have a `.stub` instead.
@@ -387,9 +378,9 @@ Here, instances of `PhotoAlbum` have a `photos` field, which is an array of plai
 
 Attach new files by adding an `Ember.Object` with a `.name`, `.content_type` and `.data` to array of attachments.
 
-```js
+```javascript
 // somewhere in your controller/component:
-myAlbum.get('photos').addObject(Ember.Object.create({
+myAlbum.photos.addObject(Ember.Object.create({
   'name': 'kitten.jpg',
   'content_type': 'image/jpg',
   'data': btoa('hello world') // base64-encoded `String`, or a DOM `Blob`, or a `File`
@@ -421,12 +412,11 @@ However, ember-pouch does not automatically load new records that arrive during 
 
 If you have a model or two that you know will always have a small number of records, you can tell ember-data to automatically load them into memory as they arrive. Your PouchAdapter subclass has a method `unloadedDocumentChanged`, which is called when a document is received during sync that has not been loaded into the ember-data store. In your subclass, you can implement the following to load it automatically:
 
-```js
+```javascript
   unloadedDocumentChanged: function(obj) {
-    let store = this.get('store');
-    let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
-    this.get('db').rel.find(recordTypeName, obj.id).then(function(doc) {
-      store.pushPayload(recordTypeName, doc);
+    let recordTypeName = this.getRecordTypeName(this.store.modelFor(obj.type));
+    this.db.rel.find(recordTypeName, obj.id).then((doc) => {
+      this.store.pushPayload(recordTypeName, doc);
     });
   },
 ```
@@ -435,9 +425,13 @@ If you have a model or two that you know will always have a small number of reco
 
 With PouchDB, you also get access to a whole host of [PouchDB plugins](http://pouchdb.com/external.html).
 
-For example, to use the `pouchdb-authentication` plugin, follow the install instructions and import it in your `Brocfile.js`:
-```js
-app.import('bower_components/pouchdb-authentication/dist/pouchdb.authentication.js');
+For example, to use the `pouchdb-authentication` plugin like this using `ember-auto-import`:
+```javascript
+import PouchDB from 'pouchdb';
+import auth from 'pouchdb-authentication';
+
+PouchDB.plugin(auth);
+
 ```
 
 ### Relational Pouch
@@ -495,26 +489,25 @@ Ember-data can be slow to load large numbers of records which have lots of relat
 ```javascript
 // app/models/post.js
 
-import DS from 'ember-data';
+import { attr, belongsTo, hasMany } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
-export default Model.extend({
-    title: DS.attr('string'),
-    text: DS.attr('string'),
+export default class PostModel extends Model {
+  @attr('string') title;
+  @attr('string') text;
 
-    author: DS.belongsTo('author'),
-    comments: DS.hasMany('comments')
-});
-
+  @belongsTo('author') author;
+  @hasMany('comments') comments;
+}
 
 // app/models/post-summary.js
 
-import DS from 'ember-data';
+import { attr } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
-var PostSummary = Model.extend({
-    title: DS.attr('string'),
-});
+export default class PostSummaryModel extends Model {
+  @attr('string') title;
+}
 
 PostSummary.reopenClass({
   documentType: 'post'
@@ -564,7 +557,6 @@ This makes sure that belongsTo relations that have been loaded in an unexpected 
 
 * `git clone` this repository
 * `npm install`
-* `bower install`
 
 ## Running
 
@@ -592,6 +584,7 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 * **7.0.0**
   - Use ember-auto-import and pouchdb-browser to ease the installation process
   - relational-pouch@4.0.0
+  - Use Octane Blueprints
 * **6.0.0**
   - Switch to PouchDB 7.0.0
 * **5.1.0**
