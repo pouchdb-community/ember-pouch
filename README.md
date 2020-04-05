@@ -73,7 +73,7 @@ A local PouchDB that syncs with a remote CouchDB looks like this:
 ```javascript
 // app/adapters/application.js
 
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 import { Adapter } from 'ember-pouch';
 
 let remote = new PouchDB('http://localhost:5984/my_couch');
@@ -92,7 +92,7 @@ export default class ApplicationAdapter extends Adapter {
 You can also turn on debugging:
 
 ```javascript
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 
 // For v7.0.0 and newer you must first load the 'pouchdb-debug' plugin
 // see https://github.com/pouchdb/pouchdb/tree/39ac9a7a1f582cf7a8d91c6bf9caa936632283a6/packages/node_modules/pouchdb-debug
@@ -427,7 +427,7 @@ With PouchDB, you also get access to a whole host of [PouchDB plugins](http://po
 
 For example, to use the `pouchdb-authentication` plugin like this using `ember-auto-import`:
 ```javascript
-import PouchDB from 'pouchdb';
+import PouchDB from 'ember-pouch/pouchdb';
 import auth from 'pouchdb-authentication';
 
 PouchDB.plugin(auth);
