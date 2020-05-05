@@ -300,17 +300,20 @@ export default DS.RESTAdapter.extend({
    * Returns the modified selector key to comform data key
    * Ex: selector: {name: 'Mario'} wil become selector: {'data.name': 'Mario'}
    */
-  _buildSelector: function(selector) {
-    var dataSelector = {};
-    var selectorKeys = [];
-
+  _buildSelector: function(selector, type) {
+    var selectorKeys = new Set();
+    var dataSelector = {
+      '_id': {
+        '$gt': this.db.rel.makeDocID({ type: type }),
+        '$lt': this.db.rel.makeDocID({ type: type, id: {} }),
+      },
+    };
+    
     for (var key in selector) {
-      if(selector.hasOwnProperty(key)){
-        selectorKeys.push(key);
-      }
+      selectorKeys.add(key);
     }
 
-    selectorKeys.forEach(function(key) {
+    selectorKeys.forEach(function (key) {
       var dataKey = this._dataKey(key);
       dataSelector[dataKey] = selector[key];
     }.bind(this));
@@ -385,7 +388,7 @@ export default DS.RESTAdapter.extend({
     var db = this.get('db');
 
     var queryParams = {
-      selector: this._buildSelector(query.filter)
+      selector: this._buildSelector(query.filter, recordTypeName)
     };
 
     if (!isEmpty(query.sort)) {
