@@ -85,7 +85,7 @@ db.sync(remote, {
 });
 
 export default class ApplicationAdapter extends Adapter {
-  db: db
+  db = db;
 }
 ```
 
