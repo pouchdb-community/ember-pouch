@@ -371,6 +371,8 @@ export default DS.RESTAdapter.extend({
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
       return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+    } else if (inverse && inverse.kind === 'hasMany') {
+      return this.db.rel.findHasMany(camelize(rel.type), inverse.name, { "$in": [record.id] });
     } else {
       let result = {};
       result[pluralize(rel.type)] = [];
