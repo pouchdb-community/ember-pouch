@@ -38,7 +38,7 @@ export default DS.RESTAdapter.extend({
     this._startChangesToStoreListener();
   }),
   _startChangesToStoreListener: function() {
-    var db = this.get('db');
+    var db = this.db;
     if (db && !this.changes) { // only run this once
       var onChangeListener = bind(this, 'onChange');
       this.set('onChangeListener', onChangeListener);
@@ -53,7 +53,7 @@ export default DS.RESTAdapter.extend({
 
   _stopChangesListener: function() {
     if (this.changes) {
-      var onChangeListener = this.get('onChangeListener');
+      var onChangeListener = this.onChangeListener;
       this.changes.removeListener('change', onChangeListener);
       this.changes.cancel();
       this.changes = undefined;
@@ -76,9 +76,9 @@ export default DS.RESTAdapter.extend({
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
     // in the store to update.
-    if (!this.get('db').rel) { return; }
+    if (!this.db.rel) { return; }
 
-    var obj = this.get('db').rel.parseDocID(change.id);
+    var obj = this.db.rel.parseDocID(change.id);
     // skip changes for non-relational_pouch docs. E.g., design docs.
     if (!obj.type || !obj.id || obj.type === '') { return; }
 
@@ -160,7 +160,7 @@ export default DS.RESTAdapter.extend({
   _init: function (store, type, indexPromises) {
     var self = this,
         recordTypeName = this.getRecordTypeName(type);
-    if (!this.get('db') || typeof this.get('db') !== 'object') {
+    if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
@@ -251,7 +251,7 @@ export default DS.RESTAdapter.extend({
       }
     }
 
-    this.get('db').setSchema(this._schema);
+    this.db.setSchema(this._schema);
     
     if (rootCall) {
       this._indexPromises = this._indexPromises.concat(indexPromises);
@@ -358,19 +358,19 @@ export default DS.RESTAdapter.extend({
   findAll: async function(store, type /*, sinceToken */) {
     // TODO: use sinceToken
     await this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type));
+    return this.db.rel.find(this.getRecordTypeName(type));
   },
 
   findMany: async function(store, type, ids) {
     await this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type), ids);
+    return this.db.rel.find(this.getRecordTypeName(type), ids);
   },
 
   findHasMany: async function(store, record, link, rel) {
     await this._init(store, record.type);
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
-      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+      return this.db.rel.findHasMany(camelize(rel.type), inverse.name, record.id);
     } else {
       let result = {};
       result[pluralize(rel.type)] = [];
@@ -382,7 +382,7 @@ export default DS.RESTAdapter.extend({
     await this._init(store, type);
 
     var recordTypeName = this.getRecordTypeName(type);
-    var db = this.get('db');
+    var db = this.db;
 
     var queryParams = {
       selector: this._buildSelector(query.filter)
@@ -435,7 +435,7 @@ export default DS.RESTAdapter.extend({
   },
 
   async _findRecord(recordTypeName, id) {
-    let payload = await this.get('db').rel.find(recordTypeName, id);
+    let payload = await this.db.rel.find(recordTypeName, id);
     // Ember Data chokes on empty payload, this function throws
     // an error when the requested data is not found
     if (typeof payload === 'object' && payload !== null) {
@@ -457,11 +457,11 @@ export default DS.RESTAdapter.extend({
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: null,
   _eventuallyConsistent: function(type, id) {
-    let pouchID = this.get('db').rel.makeDocID({type, id});
+    let pouchID = this.db.rel.makeDocID({type, id});
     let defered = defer();
     this.waitingForConsistency[pouchID] = defered;
 
-    return this.get('db').rel.isDeleted(type, id).then(deleted => {
+    return this.db.rel.isDeleted(type, id).then(deleted => {
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
         delete this.waitingForConsistency[pouchID];
@@ -486,7 +486,7 @@ export default DS.RESTAdapter.extend({
   createRecord: async function(store, type, record) {
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
-    let rel = this.get('db').rel;
+    let rel = this.db.rel;
     
     let id = data.id;
     if (!id) {
@@ -511,7 +511,7 @@ export default DS.RESTAdapter.extend({
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
     let typeName = this.getRecordTypeName(type);
-    let saved = await this.get('db').rel.save(typeName, data);
+    let saved = await this.db.rel.save(typeName, data);
     Object.assign(data, saved);//TODO: could only set .rev
     let result = {};
     result[pluralize(typeName)] = [data];
@@ -521,7 +521,7 @@ export default DS.RESTAdapter.extend({
   deleteRecord: async function (store, type, record) {
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.del(this.getRecordTypeName(type), data)
+    return this.db.rel.del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
   }
 });

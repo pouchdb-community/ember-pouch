@@ -30,9 +30,9 @@ export default Adapter.extend({
     this.set('db', createDb());
   },
   unloadedDocumentChanged(obj) {
-    let store = this.get('store');
+    let store = this.store;
     let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
-    this.get('db').rel.find(recordTypeName, obj.id).then(function(doc){
+    this.db.rel.find(recordTypeName, obj.id).then(function(doc){
       run(function() {
         store.pushPayload(recordTypeName, doc);
       });

@@ -7,7 +7,6 @@ var version = require('./package.json').version;
 
 module.exports = {
   name: require('./package').name,
-
   options: {
     autoImport:{
       webpack: {

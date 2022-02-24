@@ -1,4 +1,7 @@
-import { keys as EmberKeys, assign as EmberAssign } from '@ember/polyfills';
+import {
+  keys as EmberKeys,
+  assign as EmberAssign
+} from '@ember/polyfills';
 import { get } from '@ember/object';
 import DS from 'ember-data';
 
