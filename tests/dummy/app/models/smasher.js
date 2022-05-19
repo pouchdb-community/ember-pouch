@@ -6,4 +6,3 @@ export default Model.extend({
   series: DS.attr('string'),
   debut: DS.attr(),
 });
-

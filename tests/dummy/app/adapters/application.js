@@ -13,12 +13,12 @@ function createDb() {
   let db = new PouchDB(localDb);
 
   if (config.emberPouch.remote) {
-      let remoteDb = new PouchDB(config.emberPouch.remoteDb);
+    let remoteDb = new PouchDB(config.emberPouch.remoteDb);
 
-      db.sync(remoteDb, {
-        live: true,
-        retry: true
-      });
+    db.sync(remoteDb, {
+      live: true,
+      retry: true,
+    });
   }
 
   return db;
@@ -29,7 +29,7 @@ export default Adapter.extend({
     this._super(...arguments);
     this.set('db', createDb());
   },
-  
+
   onChangeListenerTest: null,
   onChange() {
     this._super(...arguments);
@@ -37,7 +37,7 @@ export default Adapter.extend({
       this.onChangeListenerTest(...arguments);
     }
   },
-  
+
   waitForChangeWithID(id) {
     let defered = defer();
     this.onChangeListenerTest = (c) => {
@@ -45,7 +45,7 @@ export default Adapter.extend({
         this.onChangeListenerTest = null;
         defered.resolve(c);
       }
-    }
+    };
     return defered.promise;
   },
 });
