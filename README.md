@@ -6,13 +6,11 @@ Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 2.0+. For older Ember Da
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
 
-<<<<<<< HEAD
 What's the point?
-=======
 * Ember.js v3.24 or above
 * Ember CLI v3.24 or above
 * Node.js v12 or above
->>>>>>> a153d1d (v3.16.0...v3.28.5)
+
 
 1. You don't need to write any server-side logic. Just use CouchDB.
 

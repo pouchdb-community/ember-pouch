@@ -8,8 +8,9 @@
 
 ## Linting
 
-* `npm run lint`
-* `npm run lint:fix`
+* `npm run lint:hbs`
+* `npm run lint:js`
+* `npm run lint:js -- --fix`
 
 ## Running tests
 
