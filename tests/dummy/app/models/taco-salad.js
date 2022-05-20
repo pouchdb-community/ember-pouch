@@ -3,5 +3,5 @@ import { Model } from 'ember-pouch';
 
 export default Model.extend({
   flavor: DS.attr('string'),
-  ingredients: DS.hasMany('food-item')
+  ingredients: DS.hasMany('food-item'),
 });

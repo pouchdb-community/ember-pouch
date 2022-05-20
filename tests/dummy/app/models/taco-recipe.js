@@ -3,5 +3,5 @@ import { Model } from 'ember-pouch';
 
 export default Model.extend({
   coverImage: DS.attr('attachment'),
-  photos: DS.attr('attachments')
+  photos: DS.attr('attachments'),
 });

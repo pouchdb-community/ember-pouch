@@ -5,5 +5,5 @@ import { Model } from 'ember-pouch';
 
 export default Model.extend({
   name: DS.attr('string'),
-  soup: DS.belongsTo('taco-soup')
+  soup: DS.belongsTo('taco-soup'),
 });

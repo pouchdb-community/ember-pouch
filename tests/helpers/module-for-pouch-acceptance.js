@@ -1,7 +1,7 @@
 import { Promise, all, resolve } from 'rsvp';
 
-export default function(hooks) {
-  hooks.beforeEach(function() {
+export default function (hooks) {
+  hooks.beforeEach(function () {
     return Promise.resolve().then(() => {
       this.store = function store() {
         return this.owner.lookup('service:store');
@@ -19,18 +19,19 @@ export default function(hooks) {
       };
     });
   });
-  
-  hooks.afterEach(function() {
+
+  hooks.afterEach(function () {
     let db = this.db();
     return all(this.adapter()._indexPromises)
-    .then(() => {
-      return db.getIndexes().then(data => {
-        return all(data.indexes.map(
-          index => {
-            return index.ddoc ? (db.deleteIndex(index)) : (resolve());
-          }
-        ));
-      });
-    }).then(() => db.destroy());
+      .then(() => {
+        return db.getIndexes().then((data) => {
+          return all(
+            data.indexes.map((index) => {
+              return index.ddoc ? db.deleteIndex(index) : resolve();
+            })
+          );
+        });
+      })
+      .then(() => db.destroy());
   });
 }

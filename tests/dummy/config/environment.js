@@ -7,7 +7,7 @@ module.exports = function (environment) {
     environment,
     emberPouch: { localDb: 'ember-pouch-test' },
     rootURL: '/',
-    locationType: 'auto',
+    locationType: 'history',
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build

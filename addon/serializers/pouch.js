@@ -1,24 +1,18 @@
-import {
-  keys as EmberKeys,
-  assign as EmberAssign
-} from '@ember/polyfills';
+import { keys as EmberKeys, assign as EmberAssign } from '@ember/polyfills';
 import { get } from '@ember/object';
 import DS from 'ember-data';
 
-import {
-  shouldSaveRelationship
-} from '../utils';
+import { shouldSaveRelationship } from '../utils';
 
 const keys = Object.keys || EmberKeys;
 const assign = Object.assign || EmberAssign;
 
 var Serializer = DS.RESTSerializer.extend({
-
-  init: function() {
+  init: function () {
     this._super(...arguments);
   },
 
-  shouldSerializeHasMany: function(snapshot, key, relationship) {
+  shouldSerializeHasMany: function (snapshot, key, relationship) {
     let result = shouldSaveRelationship(this, relationship);
     return result;
   },
@@ -26,7 +20,9 @@ var Serializer = DS.RESTSerializer.extend({
   // This fixes a failure in Ember Data 1.13 where an empty hasMany
   // was saving as undefined rather than [].
   serializeHasMany(snapshot, json, relationship) {
-    if (this._shouldSerializeHasMany(snapshot, relationship.key, relationship)) {
+    if (
+      this._shouldSerializeHasMany(snapshot, relationship.key, relationship)
+    ) {
       this._super.apply(this, arguments);
 
       const key = relationship.key;
@@ -68,12 +64,12 @@ var Serializer = DS.RESTSerializer.extend({
   extractAttributes(modelClass, resourceHash) {
     let attributes = this._super(modelClass, resourceHash);
     let modelAttrs = get(modelClass, 'attributes');
-    modelClass.eachTransformedAttribute(key => {
+    modelClass.eachTransformedAttribute((key) => {
       let attribute = modelAttrs.get(key);
       if (this._isAttachment(attribute)) {
         // put the corresponding _attachments entries from the response into the attribute
         let fileNames = keys(attributes[key]);
-        fileNames.forEach(fileName => {
+        fileNames.forEach((fileName) => {
           attributes[key][fileName] = resourceHash.attachments[fileName];
         });
       }
@@ -85,23 +81,26 @@ var Serializer = DS.RESTSerializer.extend({
     let relationships = this._super(...arguments);
 
     modelClass.eachRelationship((key, relationshipMeta) => {
-      if (relationshipMeta.kind === 'hasMany' && !shouldSaveRelationship(this, relationshipMeta) && !!relationshipMeta.options.async) {
+      if (
+        relationshipMeta.kind === 'hasMany' &&
+        !shouldSaveRelationship(this, relationshipMeta) &&
+        !!relationshipMeta.options.async
+      ) {
         relationships[key] = { links: { related: key } };
       }
     });
 
     return relationships;
   },
-
 });
 
 // DEPRECATION: The private method _shouldSerializeHasMany has been promoted to the public API
 // See https://www.emberjs.com/deprecations/ember-data/v2.x/#toc_jsonserializer-shouldserializehasmany
-if( ! DS.JSONSerializer.prototype.shouldSerializeHasMany ) {
+if (!DS.JSONSerializer.prototype.shouldSerializeHasMany) {
   Serializer.reopen({
-    _shouldSerializeHasMany( snapshot, key, relationship ){
-      return this.shouldSerializeHasMany( snapshot, key, relationship );
-    }
+    _shouldSerializeHasMany(snapshot, key, relationship) {
+      return this.shouldSerializeHasMany(snapshot, key, relationship);
+    },
   });
 }
 
