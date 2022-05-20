@@ -1,9 +1,9 @@
-import DS from 'ember-data';
+import { attr, belongsTo } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
 // N.b.: awkward model name is to test getRecordTypeName
 
 export default Model.extend({
-  name: DS.attr('string'),
-  soup: DS.belongsTo('taco-soup'),
+  name: attr('string'),
+  soup: belongsTo('taco-soup'),
 });

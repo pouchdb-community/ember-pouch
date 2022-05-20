@@ -1,13 +1,17 @@
-import { keys as EmberKeys, assign as EmberAssign } from '@ember/polyfills';
+import JSONSerializer from '@ember-data/serializer/json';
+import RESTSerializer from '@ember-data/serializer/rest';
+import {
+  keys as EmberKeys,
+  assign as EmberAssign
+} from '@ember/polyfills';
 import { get } from '@ember/object';
-import DS from 'ember-data';
 
 import { shouldSaveRelationship } from '../utils';
 
 const keys = Object.keys || EmberKeys;
 const assign = Object.assign || EmberAssign;
 
-var Serializer = DS.RESTSerializer.extend({
+var Serializer = RESTSerializer.extend({
   init: function () {
     this._super(...arguments);
   },
@@ -96,7 +100,7 @@ var Serializer = DS.RESTSerializer.extend({
 
 // DEPRECATION: The private method _shouldSerializeHasMany has been promoted to the public API
 // See https://www.emberjs.com/deprecations/ember-data/v2.x/#toc_jsonserializer-shouldserializehasmany
-if (!DS.JSONSerializer.prototype.shouldSerializeHasMany) {
+if (!JSONSerializer.prototype.shouldSerializeHasMany) {
   Serializer.reopen({
     _shouldSerializeHasMany(snapshot, key, relationship) {
       return this.shouldSerializeHasMany(snapshot, key, relationship);

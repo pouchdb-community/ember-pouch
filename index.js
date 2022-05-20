@@ -1,8 +1,8 @@
 /* eslint-env node */
 'use strict';
 
-var stew = require('broccoli-stew');
-var writeFile = require('broccoli-file-creator');
+// var stew = require('broccoli-stew');
+// var writeFile = require('broccoli-file-creator');
 var version = require('./package.json').version;
 
 module.exports = {

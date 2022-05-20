@@ -1,12 +1,12 @@
+import Transform from '@ember-data/serializer/transform';
 import { isArray } from '@ember/array';
 import { keys as EmberKeys } from '@ember/polyfills';
 import EmberObject, { get } from '@ember/object';
 import { isNone } from '@ember/utils';
-import DS from 'ember-data';
 
 const keys = Object.keys || EmberKeys;
 
-export default DS.Transform.extend({
+export default Transform.extend({
   deserialize: function (serialized) {
     if (isNone(serialized)) {
       return [];

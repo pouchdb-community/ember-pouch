@@ -1,3 +1,4 @@
+import RESTAdapter from '@ember-data/adapter/rest';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
 import { all, defer } from 'rsvp';
@@ -6,7 +7,6 @@ import { getOwner } from '@ember/application';
 import { bind } from '@ember/runloop';
 import { on } from '@ember/object/evented';
 import { classify, camelize } from '@ember/string';
-import DS from 'ember-data';
 import { pluralize } from 'ember-inflector';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
@@ -25,7 +25,7 @@ import {
 //  }
 //});
 
-export default DS.RESTAdapter.extend({
+export default RESTAdapter.extend({
   fixDeleteBug: true,
   coalesceFindRequests: false,
 

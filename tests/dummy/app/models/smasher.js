@@ -1,8 +1,8 @@
-import DS from 'ember-data';
+import { attr } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
 export default Model.extend({
-  name: DS.attr('string'),
-  series: DS.attr('string'),
-  debut: DS.attr(),
+  name: attr('string'),
+  series: attr('string'),
+  debut: attr(),
 });

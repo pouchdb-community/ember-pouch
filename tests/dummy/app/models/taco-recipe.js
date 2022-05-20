@@ -1,7 +1,7 @@
-import DS from 'ember-data';
+import { attr } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
 export default Model.extend({
-  coverImage: DS.attr('attachment'),
-  photos: DS.attr('attachments'),
+  coverImage: attr('attachment'),
+  photos: attr('attachments'),
 });
