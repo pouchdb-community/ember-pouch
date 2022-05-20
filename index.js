@@ -20,7 +20,7 @@ module.exports = {
   init: function () {
     this._super.init && this._super.init.apply(this, arguments);
 
-    var bowerDeps = this.project.bowerDependencies();
+    /*var bowerDeps = this.project.bowerDependencies();
 
     if (bowerDeps['pouchdb']) {
       this.ui.writeWarnLine(
@@ -36,19 +36,8 @@ module.exports = {
       this.ui.writeWarnLine(
         'Please remove `pouchdb-find` from `bower.json`. As of ember-pouch 4.2.0, only the NPM package is needed.'
       );
-    }
+    }*/
   },
-
-  // The following is deprecated:
-  /*treeForVendor: function () {
-    var content = "Ember.libraries.register('Ember Pouch', '" + version + "');";
-    var registerVersionTree = writeFile(
-      'ember-pouch/register-version.js',
-      content
-    );
-
-    return stew.find([registerVersionTree]);
-  },*/
 
   included(app) {
     this._super.included.apply(this, arguments);
@@ -57,8 +46,6 @@ module.exports = {
     if (typeof app.import !== 'function' && app.app) {
       app = app.app;
     }
-
-    // app.import('vendor/ember-pouch/register-version.js');
 
     let env = this.project.config(app.env);
     if (env.emberpouch) {
