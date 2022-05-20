@@ -6,7 +6,6 @@ module.exports = async function() {
   return {
     scenarios: [
       {
-<<<<<<< HEAD
         name: 'ember-2.4-stack',
         npm: {
           devDependencies: {

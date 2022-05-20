@@ -40,7 +40,7 @@ module.exports = {
   },
 
   // The following is deprecated:
-  treeForVendor: function () {
+  /*treeForVendor: function () {
     var content = "Ember.libraries.register('Ember Pouch', '" + version + "');";
     var registerVersionTree = writeFile(
       'ember-pouch/register-version.js',
@@ -48,7 +48,7 @@ module.exports = {
     );
 
     return stew.find([registerVersionTree]);
-  },
+  },*/
 
   included(app) {
     this._super.included.apply(this, arguments);
@@ -58,11 +58,11 @@ module.exports = {
       app = app.app;
     }
 
-    app.import('vendor/ember-pouch/register-version.js');
+    // app.import('vendor/ember-pouch/register-version.js');
 
     let env = this.project.config(app.env);
     if (env.emberpouch) {
-      var dontsavehasmany = Object.prototype.hasOwnProperty.call(env.emberpouch, 'dontsavehasmany');
+      let dontsavehasmany = Object.prototype.hasOwnProperty.call(env.emberpouch, 'dontsavehasmany');
       if (dontsavehasmany) {
         this.ui.writeWarnLine(
           'The `dontsavehasmany` flag is no longer needed in `config/environment.js`'
