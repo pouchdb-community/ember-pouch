@@ -7,69 +7,6 @@ module.exports = async function () {
   return {
     scenarios: [
       {
-        name: 'ember-lts-2.12',
-        env: {
-          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
-        },
-        npm: {
-          devDependencies: {
-            '@ember/jquery': '^0.5.1',
-            'ember-data': '2.12.2',
-            'ember-inflector': '^1.9.4',
-            'ember-source': '2.12.2',
-            'ember-cli-shims': '^1.1.0'
-          }
-        }
-      },
-      {
-        name: 'ember-2.14-stack',
-        env: {
-          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
-        },
-        npm: {
-          devDependencies: {
-            '@ember/jquery': '^0.5.1',
-            'ember-data': '~2.14.0',
-            'ember-source': '~2.14.0',
-          }
-        },
-      },
-      {
-        name: 'ember-lts-2.16',
-        env: {
-          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
-        },
-        npm: {
-          devDependencies: {
-            '@ember/jquery': '^0.5.1',
-            'ember-data': '~2.16.0',
-            'ember-source': '~2.16.0',
-          }
-        }
-      },
-      {
-        name: 'ember-lts-2.18',
-        env: {
-          EMBER_OPTIONAL_FEATURES: JSON.stringify({ 'jquery-integration': true }),
-        },
-        npm: {
-          devDependencies: {
-            '@ember/jquery': '^0.5.1',
-            'ember-data': '~2.18.0',
-            'ember-source': '~2.18.0',
-          }
-        }
-      },
-      {
-        name: 'ember-lts-3.4',
-        npm: {
-          devDependencies: {
-            'ember-source': '~3.4.0',
-            'ember-data': '~3.4.0',
-          }
-        }
-      },
-      {
         name: 'ember-lts-3.8',
         npm: {
           devDependencies: {
