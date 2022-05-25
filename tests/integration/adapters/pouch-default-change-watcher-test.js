@@ -4,7 +4,6 @@ import { module, test } from 'qunit';
 import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 import { setupTest } from 'ember-qunit';
 
-import { get } from '@ember/object';
 /*
  * Tests for the default automatic change listener.
  */
@@ -53,7 +52,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
         return this.store().find('taco-soup', 'B');
       })
       .then((soupB) => {
-        assert.equal(
+        assert.strictEqual(
           soupB.get('flavor'),
           'black bean',
           'the loaded instance should reflect the initial test data'
@@ -68,7 +67,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       .then(() => {
         return promiseToRunLater(() => {
           var alreadyLoadedSoupB = this.store().peekRecord('taco-soup', 'B');
-          assert.equal(
+          assert.strictEqual(
             alreadyLoadedSoupB.get('flavor'),
             'carnitas',
             'the loaded instance should automatically reflect the change in the database'
@@ -84,7 +83,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
 
     resolve()
       .then(() => {
-        assert.equal(
+        assert.strictEqual(
           this.store().peekRecord('taco-soup', 'A'),
           null,
           'test setup: record should not be loaded already'
@@ -98,7 +97,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       })
       .then(() => {
         return promiseToRunLater(() => {
-          assert.equal(
+          assert.strictEqual(
             this.store().peekRecord('taco-soup', 'A'),
             null,
             'the corresponding instance should still not be loaded'
@@ -114,7 +113,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
 
     resolve()
       .then(() => {
-        assert.equal(
+        assert.strictEqual(
           this.store().peekRecord('taco-soup', 'C'),
           null,
           'test setup: record should not be loaded already'
@@ -127,7 +126,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       })
       .then(() => {
         return promiseToRunLater(() => {
-          assert.equal(
+          assert.strictEqual(
             this.store().peekRecord('taco-soup', 'C'),
             null,
             'the corresponding instance should still not be loaded'
@@ -149,7 +148,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       })
       .then((soupB) => {
         initialRecord = soupB;
-        assert.equal(
+        assert.strictEqual(
           soupB.get('flavor'),
           'black bean',
           'the loaded instance should reflect the initial test data'
@@ -161,7 +160,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       })
       .then(() => {
         return promiseToRunLater(() => {
-          return assert.ok(
+          assert.ok(
             initialRecord.isDeleted,
             'the corresponding instance should now be deleted '
           );
@@ -249,14 +248,14 @@ module(
           return this.store().find('taco-salad', 'B');
         })
         .then((soupB) => {
-          assert.equal(
+          assert.strictEqual(
             soupB.get('flavor'),
             'black bean',
             'the loaded instance should reflect the initial test data'
           );
         })
         .then(() => {
-          assert.equal(
+          assert.strictEqual(
             this.store().peekRecord('taco-salad', 'C'),
             null,
             'test setup: record should not be loaded already'
@@ -278,7 +277,7 @@ module(
               'the corresponding instance should now be loaded'
             );
             //if (alreadyLoadedSaladC) {
-            assert.equal(
+            assert.strictEqual(
               alreadyLoadedSaladC.get('flavor'),
               'sofritas',
               'the corresponding instance should now be loaded with the right data'

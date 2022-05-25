@@ -80,7 +80,7 @@ module('Integration | Serializer | Attachments', function (hooks) {
           },
           'the attribute contains the file name'
         );
-        assert.equal(
+        assert.strictEqual(
           newDoc.data.cover_image['cover.jpg'].length,
           9,
           'the attribute contains the length to avoid empty length when File objects are ' +
@@ -93,13 +93,13 @@ module('Integration | Serializer | Attachments', function (hooks) {
 
         var recordInStore = this.store().peekRecord('tacoRecipe', 'E');
         let coverAttr = recordInStore.get('coverImage');
-        assert.equal(coverAttr.get('name'), coverImage.name);
-        assert.equal(coverAttr.get('data'), coverImage.data);
+        assert.strictEqual(coverAttr.get('name'), coverImage.name);
+        assert.strictEqual(coverAttr.get('data'), coverImage.data);
 
         let photosAttr = recordInStore.get('photos');
-        assert.equal(photosAttr.length, 2, '2 photos');
-        assert.equal(photosAttr[0].get('name'), photo1.name);
-        assert.equal(photosAttr[0].get('data'), photo1.data);
+        assert.strictEqual(photosAttr.length, 2, '2 photos');
+        assert.strictEqual(photosAttr[0].get('name'), photo1.name);
+        assert.strictEqual(photosAttr[0].get('data'), photo1.data);
 
         done();
       })

@@ -40,23 +40,26 @@ module('Unit | Transform | attachments', function (hooks) {
 
   test('it serializes an attachment', function (assert) {
     let transform = this.owner.lookup('transform:attachments');
-    assert.equal(transform.serialize(null), null);
-    assert.equal(transform.serialize(undefined), null);
+    assert.strictEqual(transform.serialize(null), null);
+    assert.strictEqual(transform.serialize(undefined), null);
     assert.deepEqual(transform.serialize([]), {});
 
     let serializedData = transform.serialize(testDeserializedData);
 
     let hello = testDeserializedData[0].get('name');
-    assert.equal(hello, 'hello.txt');
-    assert.equal(
+    assert.strictEqual(hello, 'hello.txt');
+    assert.strictEqual(
       serializedData[hello].content_type,
       testSerializedData[hello].content_type
     );
-    assert.equal(serializedData[hello].data, testSerializedData[hello].data);
+    assert.strictEqual(
+      serializedData[hello].data,
+      testSerializedData[hello].data
+    );
 
     let stub = testDeserializedData[1].get('name');
-    assert.equal(stub, 'stub.txt');
-    assert.equal(
+    assert.strictEqual(stub, 'stub.txt');
+    assert.strictEqual(
       serializedData[stub].content_type,
       testSerializedData[stub].content_type
     );
@@ -70,37 +73,37 @@ module('Unit | Transform | attachments', function (hooks) {
 
     let deserializedData = transform.deserialize(testSerializedData);
 
-    assert.equal(
+    assert.strictEqual(
       deserializedData[0].get('name'),
       testDeserializedData[0].get('name')
     );
-    assert.equal(
+    assert.strictEqual(
       deserializedData[0].get('content_type'),
       testDeserializedData[0].get('content_type')
     );
-    assert.equal(
+    assert.strictEqual(
       deserializedData[0].get('data'),
       testDeserializedData[0].get('data')
     );
-    assert.equal(
+    assert.strictEqual(
       deserializedData[0].get('digest'),
       testDeserializedData[0].get('digest')
     );
 
-    assert.equal(
+    assert.strictEqual(
       deserializedData[1].get('name'),
       testDeserializedData[1].get('name')
     );
-    assert.equal(
+    assert.strictEqual(
       deserializedData[1].get('content_type'),
       testDeserializedData[1].get('content_type')
     );
     assert.true(deserializedData[1].get('stub'));
-    assert.equal(
+    assert.strictEqual(
       deserializedData[1].get('digest'),
       testDeserializedData[1].get('digest')
     );
-    assert.equal(
+    assert.strictEqual(
       deserializedData[1].get('length'),
       testDeserializedData[1].get('length')
     );

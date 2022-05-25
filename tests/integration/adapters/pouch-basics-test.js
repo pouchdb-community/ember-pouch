@@ -3,7 +3,7 @@ import { Promise, all } from 'rsvp';
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 
-import DS from 'ember-data';
+// import DS from 'ember-data';
 import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 
 import config from 'dummy/config/environment';
@@ -76,7 +76,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           return this.store().findAll('taco-soup');
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('length'),
             2,
             'should have found the two taco soup items only'
@@ -110,7 +110,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           return this.store().find('taco-soup', 'D');
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('id'),
             'D',
             'should have found the requested item'
@@ -172,7 +172,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           });
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('length'),
             5,
             'should returns all the smashers '
@@ -239,7 +239,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           });
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('length'),
             2,
             'should have found the two smashers'
@@ -291,7 +291,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           });
         })
         .then((found) => {
-          assert.equal(found, null, 'should be null');
+          assert.strictEqual(found, null, 'should be null');
           done();
         })
         .catch((error) => {
@@ -322,7 +322,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           });
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('flavor'),
             'al pastor',
             'should have found the requested item'
@@ -352,7 +352,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           });
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('flavor'),
             'al pastor',
             'should have found the requested item'
@@ -386,7 +386,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           return this.store().find('taco-soup', 'C');
         })
         .then((found) => {
-          assert.equal(
+          assert.strictEqual(
             found.get('id'),
             'C',
             'should have found the requested item'
@@ -424,14 +424,14 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           return this.db().get('tacoSoup_2_E');
         })
         .then((newDoc) => {
-          assert.equal(
+          assert.strictEqual(
             newDoc.data.flavor,
             'balsamic',
             'should have saved the attribute'
           );
 
           var recordInStore = this.store().peekRecord('tacoSoup', 'E');
-          assert.equal(
+          assert.strictEqual(
             newDoc._rev,
             recordInStore.get('rev'),
             'should have associated the ember-data record with the rev for the new record'
@@ -486,45 +486,45 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
     // This test fails due to a bug in ember data
     // (https://github.com/emberjs/data/issues/3736)
     // starting with ED v2.0.0-beta.1. It works again with ED v2.1.0.
-    if (!DS.VERSION.match(/^2\.0/)) {
-      test('update an existing record', function (assert) {
-        assert.expect(2);
+    // if (!DS.VERSION.match(/^2\.0/)) {
+    test('update an existing record', function (assert) {
+      assert.expect(2);
 
-        var done = assert.async();
-        Promise.resolve()
-          .then(() => {
-            return this.db().bulkDocs([
-              { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
-              { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
-            ]);
-          })
-          .then(() => {
-            return this.store().find('taco-soup', 'C');
-          })
-          .then((found) => {
-            found.set('flavor', 'pork');
-            return found.save();
-          })
-          .then(() => {
-            return this.db().get('tacoSoup_2_C');
-          })
-          .then((updatedDoc) => {
-            assert.equal(
-              updatedDoc.data.flavor,
-              'pork',
-              'should have updated the attribute'
-            );
+      var done = assert.async();
+      Promise.resolve()
+        .then(() => {
+          return this.db().bulkDocs([
+            { _id: 'tacoSoup_2_C', data: { flavor: 'al pastor' } },
+            { _id: 'tacoSoup_2_D', data: { flavor: 'black bean' } },
+          ]);
+        })
+        .then(() => {
+          return this.store().find('taco-soup', 'C');
+        })
+        .then((found) => {
+          found.set('flavor', 'pork');
+          return found.save();
+        })
+        .then(() => {
+          return this.db().get('tacoSoup_2_C');
+        })
+        .then((updatedDoc) => {
+          assert.strictEqual(
+            updatedDoc.data.flavor,
+            'pork',
+            'should have updated the attribute'
+          );
 
-            var recordInStore = this.store().peekRecord('tacoSoup', 'C');
-            assert.equal(
-              updatedDoc._rev,
-              recordInStore.get('rev'),
-              'should have associated the ember-data record with the updated rev'
-            );
-          })
-          .finally(done);
-      });
-    }
+          var recordInStore = this.store().peekRecord('tacoSoup', 'C');
+          assert.strictEqual(
+            updatedDoc._rev,
+            recordInStore.get('rev'),
+            'should have associated the ember-data record with the updated rev'
+          );
+        })
+        .finally(done);
+    });
+    // }
 
     test('delete an existing record', function (assert) {
       assert.expect(1);
@@ -551,7 +551,11 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
             assert.notOk(doc, 'document should no longer exist');
           },
           (result) => {
-            assert.equal(result.status, 404, 'document should no longer exist');
+            assert.strictEqual(
+              result.status,
+              404,
+              'document should no longer exist'
+            );
           }
         )
         .finally(done);
@@ -573,7 +577,9 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
         .then(() => this.store().findRecord('food-item', 'X'))
         .then((foodItem) => {
           let result = [
-            foodItem.get('soup').then((soup) => assert.equal(soup.id, 'C')),
+            foodItem
+              .get('soup')
+              .then((soup) => assert.strictEqual(soup.id, 'C')),
 
             promiseToRunLater(0).then(() => {
               return this.db().bulkDocs([
@@ -619,7 +625,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
     test('_init should work', function (assert) {
       let db = this.db();
 
-      assert.equal(db.rel, undefined, 'should start without schema');
+      assert.strictEqual(db.rel, undefined, 'should start without schema');
 
       let promises = [];
 
@@ -630,7 +636,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
 
       //this tests _init synchronously by design, as re-entry and infitinite loop detection works this way
       assert.notEqual(db.rel, undefined, '_init should set schema');
-      assert.equal(
+      assert.strictEqual(
         this.adapter()._schema.length,
         2,
         'should have set all relationships on the schema'
@@ -741,7 +747,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
         .then((ingredients) => {
           liveIngredients = ingredients; //save for later
 
-          assert.equal(
+          assert.strictEqual(
             ingredients.length,
             2,
             'should be 2 food items initially'
@@ -760,12 +766,12 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
         })
         .then((found) => found.get('ingredients'))
         .then((ingredients) => {
-          assert.equal(
+          assert.strictEqual(
             ingredients.length,
             1,
             '1 food item should be removed from the relationship'
           );
-          assert.equal(
+          assert.strictEqual(
             liveIngredients.length,
             1,
             '1 food item should be removed from the live relationship'
