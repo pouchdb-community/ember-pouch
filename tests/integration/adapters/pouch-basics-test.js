@@ -259,6 +259,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
     });
 
     test('queryRecord returns null when no record is found', function (assert) {
+      assert.expect(1);
       var done = assert.async();
       Promise.resolve()
         .then(() => {
@@ -547,7 +548,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
         })
         .then(
           (doc) => {
-            assert.ok(!doc, 'document should no longer exist');
+            assert.notOk(doc, 'document should no longer exist');
           },
           (result) => {
             assert.equal(result.status, 404, 'document should no longer exist');
@@ -559,6 +560,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
 
   let asyncTests = function () {
     test('eventually consistency - success', function (assert) {
+      assert.expect(1);
       assert.timeout(5000);
       var done = assert.async();
       Promise.resolve()
@@ -586,6 +588,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
     });
 
     test('eventually consistency - deleted', function (assert) {
+      assert.expect(1);
       assert.timeout(5000);
       var done = assert.async();
       Promise.resolve()
@@ -600,7 +603,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
           let result = [
             foodItem
               .get('soup')
-              .then((soup) => assert.ok(soup === null, 'isDeleted'))
+              .then((soup) => assert.strictEqual(soup, null, 'isDeleted'))
               .catch(() => assert.ok(true, 'isDeleted')),
 
             promiseToRunLater(100).then(() =>
@@ -616,7 +619,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
     test('_init should work', function (assert) {
       let db = this.db();
 
-      assert.ok(db.rel == undefined, 'should start without schema');
+      assert.equal(db.rel, undefined, 'should start without schema');
 
       let promises = [];
 
@@ -626,7 +629,7 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
       );
 
       //this tests _init synchronously by design, as re-entry and infitinite loop detection works this way
-      assert.ok(db.rel != undefined, '_init should set schema');
+      assert.notEqual(db.rel, undefined, '_init should set schema');
       assert.equal(
         this.adapter()._schema.length,
         2,
@@ -784,8 +787,8 @@ module('Integration | Adapter | Basic CRUD Ops', {}, function (hooks) {
       function () {
         test('not found', function (assert) {
           assert.expect(2);
-          assert.ok(
-            config.emberPouch.eventuallyConsistent == false,
+          assert.false(
+            config.emberPouch.eventuallyConsistent,
             'eventuallyConsistent is false'
           );
           let done = assert.async();

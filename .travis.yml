@@ -50,7 +50,6 @@ jobs:
 
     # we recommend new addons test the current and previous LTS
     # as well as latest stable release (bonus points to beta/canary)
-<<<<<<< HEAD
     - env: EMBER_TRY_SCENARIO=ember-2.4-stack
     - env: EMBER_TRY_SCENARIO=ember-lts-2.8
     - env: EMBER_TRY_SCENARIO=ember-lts-2.12
@@ -60,10 +59,8 @@ jobs:
     - env: EMBER_TRY_SCENARIO=ember-lts-3.8
     - env: EMBER_TRY_SCENARIO=ember-lts-3.12
     - env: EMBER_TRY_SCENARIO=ember-lts-3.16
-=======
     - env: EMBER_TRY_SCENARIO=ember-lts-3.24
     - env: EMBER_TRY_SCENARIO=ember-lts-3.28
->>>>>>> a153d1d (v3.16.0...v3.28.5)
     - env: EMBER_TRY_SCENARIO=ember-release
     - env: EMBER_TRY_SCENARIO=ember-beta
     - env: EMBER_TRY_SCENARIO=ember-canary

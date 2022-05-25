@@ -1,7 +1,7 @@
 import Transform from '@ember-data/serializer/transform';
 import { isArray } from '@ember/array';
 import { keys as EmberKeys } from '@ember/polyfills';
-import EmberObject, { get } from '@ember/object';
+import EmberObject from '@ember/object';
 import { isNone } from '@ember/utils';
 
 const keys = Object.keys || EmberKeys;
@@ -32,17 +32,17 @@ export default Transform.extend({
 
     return deserialized.reduce(function (acc, attachment) {
       const serialized = {
-        content_type: get(attachment, 'content_type'),
+        content_type: attachment.content_type,
       };
-      if (get(attachment, 'stub')) {
+      if (attachment.stub) {
         serialized.stub = true;
-        serialized.length = get(attachment, 'length');
-        serialized.digest = get(attachment, 'digest');
+        serialized.length = attachment.length;
+        serialized.digest = attachment.digest;
       } else {
-        serialized.data = get(attachment, 'data');
-        serialized.length = get(attachment, 'length');
+        serialized.data = attachment.data;
+        serialized.length = attachment.length;
       }
-      acc[get(attachment, 'name')] = serialized;
+      acc[attachment.name] = serialized;
       return acc;
     }, {});
   },

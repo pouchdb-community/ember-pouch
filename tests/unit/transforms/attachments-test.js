@@ -60,7 +60,7 @@ module('Unit | Transform | attachments', function (hooks) {
       serializedData[stub].content_type,
       testSerializedData[stub].content_type
     );
-    assert.equal(serializedData[stub].stub, true);
+    assert.true(serializedData[stub].stub);
   });
 
   test('it deserializes an attachment', function (assert) {
@@ -95,7 +95,7 @@ module('Unit | Transform | attachments', function (hooks) {
       deserializedData[1].get('content_type'),
       testDeserializedData[1].get('content_type')
     );
-    assert.equal(deserializedData[1].get('stub'), true);
+    assert.true(deserializedData[1].get('stub'));
     assert.equal(
       deserializedData[1].get('digest'),
       testDeserializedData[1].get('digest')

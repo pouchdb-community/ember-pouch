@@ -2,7 +2,6 @@ import RESTAdapter from '@ember-data/adapter/rest';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
 import { all, defer } from 'rsvp';
-import { get } from '@ember/object';
 import { getOwner } from '@ember/application';
 import { bind } from '@ember/runloop';
 import { on } from '@ember/object/evented';
@@ -177,7 +176,7 @@ export default RESTAdapter.extend({
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    if (!get(type, 'attributes').has('rev')) {
+    if (!type.attributes.has('rev')) {
       var modelName = classify(recordTypeName);
       throw new Error(
         'Please add a `rev` attribute of type `string`' +
@@ -327,7 +326,7 @@ export default RESTAdapter.extend({
     var selectorKeys = [];
 
     for (var key in selector) {
-      if (selector.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(selector, key)) {
         selectorKeys.push(key);
       }
     }
@@ -353,7 +352,7 @@ export default RESTAdapter.extend({
         var sortKey = {};
         if (typeof value === 'object' && value !== null) {
           for (var key in value) {
-            if (value.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(value, key)) {
               sortKey[this._dataKey(key)] = value[key];
             }
           }

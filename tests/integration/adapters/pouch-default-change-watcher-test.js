@@ -4,6 +4,7 @@ import { module, test } from 'qunit';
 import moduleForIntegration from '../../helpers/module-for-pouch-acceptance';
 import { setupTest } from 'ember-qunit';
 
+import { get } from '@ember/object';
 /*
  * Tests for the default automatic change listener.
  */
@@ -53,8 +54,8 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       })
       .then((soupB) => {
         assert.equal(
-          'black bean',
           soupB.get('flavor'),
+          'black bean',
           'the loaded instance should reflect the initial test data'
         );
 
@@ -84,8 +85,8 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
     resolve()
       .then(() => {
         assert.equal(
-          null,
           this.store().peekRecord('taco-soup', 'A'),
+          null,
           'test setup: record should not be loaded already'
         );
 
@@ -98,8 +99,8 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       .then(() => {
         return promiseToRunLater(() => {
           assert.equal(
-            null,
             this.store().peekRecord('taco-soup', 'A'),
+            null,
             'the corresponding instance should still not be loaded'
           );
         }, 15);
@@ -114,8 +115,8 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
     resolve()
       .then(() => {
         assert.equal(
-          null,
           this.store().peekRecord('taco-soup', 'C'),
+          null,
           'test setup: record should not be loaded already'
         );
 
@@ -127,8 +128,8 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       .then(() => {
         return promiseToRunLater(() => {
           assert.equal(
-            null,
             this.store().peekRecord('taco-soup', 'C'),
+            null,
             'the corresponding instance should still not be loaded'
           );
         }, 15);
@@ -149,11 +150,10 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       .then((soupB) => {
         initialRecord = soupB;
         assert.equal(
-          'black bean',
           soupB.get('flavor'),
+          'black bean',
           'the loaded instance should reflect the initial test data'
         );
-
         return this.db().get('tacoSoup_2_B');
       })
       .then((soupBRecord) => {
@@ -161,9 +161,9 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       })
       .then(() => {
         return promiseToRunLater(() => {
-          assert.ok(
-            initialRecord.get('isDeleted'),
-            'the corresponding instance should now be deleted'
+          return assert.ok(
+            initialRecord.isDeleted,
+            'the corresponding instance should now be deleted '
           );
         }, 100);
       })
@@ -250,15 +250,15 @@ module(
         })
         .then((soupB) => {
           assert.equal(
-            'black bean',
             soupB.get('flavor'),
+            'black bean',
             'the loaded instance should reflect the initial test data'
           );
         })
         .then(() => {
           assert.equal(
-            null,
             this.store().peekRecord('taco-salad', 'C'),
+            null,
             'test setup: record should not be loaded already'
           );
 
@@ -277,13 +277,13 @@ module(
               alreadyLoadedSaladC,
               'the corresponding instance should now be loaded'
             );
-            if (alreadyLoadedSaladC) {
-              assert.equal(
-                alreadyLoadedSaladC.get('flavor'),
-                'sofritas',
-                'the corresponding instance should now be loaded with the right data'
-              );
-            }
+            //if (alreadyLoadedSaladC) {
+            assert.equal(
+              alreadyLoadedSaladC.get('flavor'),
+              'sofritas',
+              'the corresponding instance should now be loaded with the right data'
+            );
+            //}
           }, 15);
         })
         .finally(done);

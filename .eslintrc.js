@@ -19,7 +19,11 @@ module.exports = {
   env: {
     browser: true,
   },
-  rules: {},
+  rules: {
+    'qunit/resolve-async': 0,
+    'ember/no-test-module-for': 0,
+    'ember/no-classic-classes': 0,
+  },
   overrides: [
     // node files
     {
@@ -59,6 +63,13 @@ module.exports = {
       // Test files:
       files: ['tests/**/*-test.{js,ts}'],
       extends: ['plugin:qunit/recommended'],
+      rules: {
+        'qunit/resolve-async': 0,
+        'qunit/no-assert-logical-expression': 0,
+        'qunit/no-ok-equality': 0,
+        'qunit/no-negated-ok': 0,
+        // 'qunit/require-expect': 0,
+      },
     },
   ],
 };

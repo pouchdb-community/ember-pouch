@@ -67,9 +67,8 @@ module('Integration | Serializer | Attachments', function (hooks) {
           [coverImage.name, photo1.name, photo2.name].sort(),
           'all attachments are included in the _attachments property of the doc'
         );
-        assert.equal(
+        assert.true(
           'cover_image' in newDoc.data,
-          true,
           'respects the mapping provided by the serializer `attrs`'
         );
         assert.deepEqual(

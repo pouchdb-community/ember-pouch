@@ -1,10 +1,6 @@
 import JSONSerializer from '@ember-data/serializer/json';
 import RESTSerializer from '@ember-data/serializer/rest';
-import {
-  keys as EmberKeys,
-  assign as EmberAssign
-} from '@ember/polyfills';
-import { get } from '@ember/object';
+import { keys as EmberKeys, assign as EmberAssign } from '@ember/polyfills';
 
 import { shouldSaveRelationship } from '../utils';
 
@@ -67,7 +63,7 @@ var Serializer = RESTSerializer.extend({
 
   extractAttributes(modelClass, resourceHash) {
     let attributes = this._super(modelClass, resourceHash);
-    let modelAttrs = get(modelClass, 'attributes');
+    let modelAttrs = modelClass.attributes;
     modelClass.eachTransformedAttribute((key) => {
       let attribute = modelAttrs.get(key);
       if (this._isAttachment(attribute)) {
