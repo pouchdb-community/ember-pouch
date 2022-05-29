@@ -19,7 +19,8 @@
 /npm-debug.log*
 /testem.log
 /yarn-error.log
-/package-lock.json
+
+package-lock.json
 
 # ember-try
 /.node_modules.ember-try/
