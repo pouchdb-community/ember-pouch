@@ -47,7 +47,7 @@ module.exports = async function () {
         npm: {
           devDependencies: {
             'ember-source': '~3.28.0',
-            'ember-data': '~3.27.1',
+            'ember-data': '~3.28.7',
           },
         },
       },

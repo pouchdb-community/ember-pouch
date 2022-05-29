@@ -1,11 +1,10 @@
 import JSONSerializer from '@ember-data/serializer/json';
 import RESTSerializer from '@ember-data/serializer/rest';
-import { keys as EmberKeys, assign as EmberAssign } from '@ember/polyfills';
+import { keys as EmberKeys } from '@ember/polyfills';
 
 import { shouldSaveRelationship } from '../utils';
 
 const keys = Object.keys || EmberKeys;
-const assign = Object.assign || EmberAssign;
 
 var Serializer = RESTSerializer.extend({
   init: function () {
@@ -51,9 +50,13 @@ var Serializer = RESTSerializer.extend({
       // of the document.
       // This will conflict with any 'attachments' attr in the model. Suggest that
       // #toRawDoc in relational-pouch should allow _attachments to be specified
-      json.attachments = assign({}, json.attachments || {}, json[payloadKey]); // jshint ignore:line
+      json.attachments = Object.assign(
+        {},
+        json.attachments || {},
+        json[payloadKey]
+      ); // jshint ignore:line
       json[payloadKey] = keys(json[payloadKey]).reduce((attr, fileName) => {
-        attr[fileName] = assign({}, json[payloadKey][fileName]); // jshint ignore:line
+        attr[fileName] = Object.assign({}, json[payloadKey][fileName]); // jshint ignore:line
         delete attr[fileName].data;
         delete attr[fileName].content_type;
         return attr;

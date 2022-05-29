@@ -161,7 +161,7 @@ module('Integration | Adapter | Default Change Watcher', function (hooks) {
       .then(() => {
         return promiseToRunLater(() => {
           assert.ok(
-            initialRecord.isDeleted,
+            initialRecord.get('isDeleted'),
             'the corresponding instance should now be deleted '
           );
         }, 100);
