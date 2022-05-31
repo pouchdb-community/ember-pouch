@@ -135,7 +135,10 @@ export default RESTAdapter.extend({
 
     if (change.deleted) {
       if (this.fixDeleteBug) {
-        if (recordInStore._internalModel._recordData && recordInStore._internalModel._recordData.setIsDeleted) {
+        if (
+          recordInStore._internalModel._recordData &&
+          recordInStore._internalModel._recordData.setIsDeleted
+        ) {
           recordInStore._internalModel._recordData.setIsDeleted(true);
         }
         recordInStore._internalModel.transitionTo('deleted.saved'); //work around ember-data bug
