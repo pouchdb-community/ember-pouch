@@ -9,7 +9,7 @@ export default class DummyAdapter extends Adapter {
         rel.options.save = config.emberPouch.saveHasMany;
       }
     });
-    if (super.onChange) {
+    if (super._init) {
       return super._init(...arguments);
     }
   }
