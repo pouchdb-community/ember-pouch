@@ -1,7 +1,7 @@
 import { run } from '@ember/runloop';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
-import Adapter from 'dummy/adapter';
+import DummyAdapter from 'dummy/adapter';
 import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
 
@@ -24,11 +24,13 @@ function createDb() {
   return db;
 }
 
-export default Adapter.extend({
-  init() {
-    this._super(...arguments);
-    this.set('db', createDb());
-  },
+export default class TacoSaladAdapter extends DummyAdapter{
+  
+  constructor(owner, args) {
+    super(owner, args);
+    this.db = createDb();
+  }
+  
   unloadedDocumentChanged(obj) {
     let store = this.store;
     let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
@@ -37,5 +39,5 @@ export default Adapter.extend({
         store.pushPayload(recordTypeName, doc);
       });
     });
-  },
-});
+  }
+}

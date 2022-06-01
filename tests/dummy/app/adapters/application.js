@@ -1,7 +1,7 @@
 import { defer } from 'rsvp';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
-import Adapter from 'dummy/adapter';
+import DummyAdapter from 'dummy/adapter';
 import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
 
@@ -24,19 +24,22 @@ function createDb() {
   return db;
 }
 
-export default Adapter.extend({
-  init() {
-    this._super(...arguments);
-    this.set('db', createDb());
-  },
+export default class ApplicationAdapter extends DummyAdapter{
+  
+  constructor(owner, args) {
+    super(owner, args);
+    this.db = createDb();
+  }
 
-  onChangeListenerTest: null,
+  onChangeListenerTest = null;
   onChange() {
-    this._super(...arguments);
+    if (super.onChange) {
+      super.onChange(...arguments);
+    }
     if (this.onChangeListenerTest) {
       this.onChangeListenerTest(...arguments);
     }
-  },
+  }
 
   waitForChangeWithID(id) {
     let defered = defer();
@@ -47,5 +50,5 @@ export default Adapter.extend({
       }
     };
     return defered.promise;
-  },
-});
+  }
+}

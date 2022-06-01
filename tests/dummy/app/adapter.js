@@ -1,7 +1,7 @@
 import { Adapter } from 'ember-pouch';
 import config from 'dummy/config/environment';
 
-export default Adapter.extend({
+export default class DummyAdapter extends Adapter{
   _init(store, type) {
     type.eachRelationship((name, rel) => {
       rel.options.async = config.emberPouch.async;
@@ -9,6 +9,8 @@ export default Adapter.extend({
         rel.options.save = config.emberPouch.saveHasMany;
       }
     });
-    return this._super(...arguments);
-  },
-});
+    if (super.onChange) {
+      return super._init(...arguments);
+    } 
+  }
+}
