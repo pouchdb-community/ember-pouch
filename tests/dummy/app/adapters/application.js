@@ -24,8 +24,7 @@ function createDb() {
   return db;
 }
 
-export default class ApplicationAdapter extends DummyAdapter{
-  
+export default class ApplicationAdapter extends DummyAdapter {
   constructor(owner, args) {
     super(owner, args);
     this.db = createDb();

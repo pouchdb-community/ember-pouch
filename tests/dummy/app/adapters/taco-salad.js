@@ -24,13 +24,12 @@ function createDb() {
   return db;
 }
 
-export default class TacoSaladAdapter extends DummyAdapter{
-  
+export default class TacoSaladAdapter extends DummyAdapter {
   constructor(owner, args) {
     super(owner, args);
     this.db = createDb();
   }
-  
+
   unloadedDocumentChanged(obj) {
     let store = this.store;
     let recordTypeName = this.getRecordTypeName(store.modelFor(obj.type));
