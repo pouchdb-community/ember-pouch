@@ -83,7 +83,14 @@ jobs:
         with:
           node-version: 12.x
           cache: npm
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: |
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
       - name: Run Tests
         run: ./node_modules/.bin/ember try:one ${{ matrix.try-scenario }}
