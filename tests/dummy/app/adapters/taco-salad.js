@@ -1,7 +1,7 @@
 import { run } from '@ember/runloop';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
-import DummyAdapter from 'dummy/adapter';
+import { Adapter } from 'ember-pouch';
 import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
 
@@ -24,10 +24,22 @@ function createDb() {
   return db;
 }
 
-export default class TacoSaladAdapter extends DummyAdapter {
+export default class TacoSaladAdapter extends Adapter {
   constructor(owner, args) {
     super(owner, args);
     this.db = createDb();
+  }
+  
+  _init(store, type) {
+    type.eachRelationship((name, rel) => {
+      rel.options.async = config.emberPouch.async;
+      if (rel.kind === 'hasMany') {
+        rel.options.save = config.emberPouch.saveHasMany;
+      }
+    });
+    if (super._init) {
+      return super._init(...arguments);
+    }
   }
 
   unloadedDocumentChanged(obj) {
