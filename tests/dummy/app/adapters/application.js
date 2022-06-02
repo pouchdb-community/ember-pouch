@@ -29,7 +29,7 @@ export default class ApplicationAdapter extends Adapter {
     super(owner, args);
     this.db = createDb();
   }
-  
+
   _init(store, type) {
     type.eachRelationship((name, rel) => {
       rel.options.async = config.emberPouch.async;
