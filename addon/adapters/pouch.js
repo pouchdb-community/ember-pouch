@@ -24,7 +24,7 @@ import {
 //  }
 //});
 
-export default RESTAdapter.extend({
+export default class PouchAdapter extends RESTAdapter.extend({
   fixDeleteBug: true,
   coalesceFindRequests: false,
 
@@ -45,7 +45,7 @@ export default RESTAdapter.extend({
     if (db && !this.changes) {
       // only run this once
       var onChangeListener = bind(this, 'onChange');
-      this.set('onChangeListener', onChangeListener);
+      this.onChangeListener = onChangeListener;
       this.changes = db.changes({
         since: 'now',
         live: true,
@@ -74,7 +74,7 @@ export default RESTAdapter.extend({
     }
 
     this._schema = null;
-    this.set('db', db);
+    this.db = db;
     this._startChangesToStoreListener();
   },
   onChange: function (change) {
@@ -567,4 +567,4 @@ export default RESTAdapter.extend({
       .del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
   },
-});
+}) {}
