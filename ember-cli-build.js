@@ -12,6 +12,15 @@ const IS_EMBROIDER_ENABLED = Boolean(process.env.EMBROIDER_TEST_SETUP_OPTIONS);
 module.exports = function (defaults) {
   let app = new EmberAddon(defaults, {
     // Add options here
+    autoImport: {
+    /* eslint-disable prettier/prettier */
+      webpack: IS_EMBROIDER_ENABLED === false ? {} : {
+        node: {
+          global: true,
+        },
+      },
+    /* eslint-disable prettier/prettier */      
+    }
   });
 
   /*
@@ -28,19 +37,13 @@ module.exports = function (defaults) {
       },
     ],
     /* eslint-disable prettier/prettier */
-    packagerOptions: {
+    /*packagerOptions: {
       webpackConfig: IS_EMBROIDER_ENABLED === false ? {} : {
         node: {
           global: true,
         },
-        /*resolve: {
-          fallback: {
-            // `stream-browserify` is added for the Embroider tests, see `config/ember-try.js`.
-            stream: require.resolve('stream-browserify') // eslint-disable-line
-          },
-        },*/
       },
-    },
+    },*/
     /* eslint-disable prettier/prettier */
   });
 };
