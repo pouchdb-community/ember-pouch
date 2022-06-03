@@ -2,7 +2,7 @@
 
 [**Changelog**](#changelog)
 
-Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 2.0+. For older Ember Data versions use Ember Pouch version 3.2.2.
+Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 3.16+. For older Ember Data versions down to 2.0+ use Ember Pouch version 7.3.0. For Ember Data versions lower than 2.0+ use Ember Pouch version 3.2.2.
 
 With Ember Pouch, all of your app's data is automatically saved on the client-side using IndexedDB or WebSQL, and you just keep using the regular [Ember Data `store` API](http://emberjs.com/api/data/classes/DS.Store.html#method_all). This data may be automatically synced to a remote CouchDB (or compatible servers) using PouchDB replication.
 
@@ -573,6 +573,10 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 ## Changelog
 
+- **8.0.0-beta.1**
+  - Updated to support latest Ember Data 4.x (fixed isDeleted issues)
+  - Using latest pouchdb code (waiting for release).
+  - Embroider safe and compatible scenarios supported. Ember Pouch works fine with Ember 4.x projects.
 - **7.0.0**
   - Use ember-auto-import and pouchdb-browser to ease the installation process
   - relational-pouch@4.0.0
