@@ -9215,7 +9215,7 @@
   dependencies:
     "buffer-from" "1.1.2"
 
-"pouchdb-browser@*":
+"pouchdb-browser@^7.3.0":
   "integrity" "sha512-reuVLKEiTBlhQKQPqlr/4k0QMalV9sVITZixEgut+aAhUrSJoBdQLC5GFRvGiocJXraOb78aqvVs7iztlr3qnQ=="
   "resolved" "https://registry.npmjs.org/pouchdb-browser/-/pouchdb-browser-7.3.0.tgz"
   "version" "7.3.0"
@@ -9253,7 +9253,7 @@
     "fetch-cookie" "0.11.0"
     "node-fetch" "2.6.7"
 
-"pouchdb-find@*", "pouchdb-find@^7.1.0":
+"pouchdb-find@^7.1.0", "pouchdb-find@^7.3.0":
   "integrity" "sha512-EwhnfyxCAkKf8PG4tfndTTygEmtuz+o1LiZkxfPrflfXA3m1jo1ithib0hwBYtEwEYWuZxH6B8pRZutbLoQCGA=="
   "resolved" "https://registry.npmjs.org/pouchdb-find/-/pouchdb-find-7.3.0.tgz"
   "version" "7.3.0"
