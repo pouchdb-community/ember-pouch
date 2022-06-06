@@ -1,19 +1,18 @@
+import RESTAdapter from '@ember-data/adapter/rest';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
 import { all, defer } from 'rsvp';
-import { get } from '@ember/object';
 import { getOwner } from '@ember/application';
 import { bind } from '@ember/runloop';
 import { on } from '@ember/object/evented';
 import { classify, camelize } from '@ember/string';
-import DS from 'ember-data';
 import { pluralize } from 'ember-inflector';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
   extractDeleteRecord,
   shouldSaveRelationship,
-  configFlagDisabled
+  configFlagDisabled,
 } from '../utils';
 
 //BelongsToRelationship.reopen({
@@ -25,41 +24,46 @@ import {
 //  }
 //});
 
-export default DS.RESTAdapter.extend({
+export default class PouchAdapter extends RESTAdapter.extend({
   fixDeleteBug: true,
   coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date
   // when the data in the database changes. This makes ember-data 2.0's record
   // reloading redundant.
-  shouldReloadRecord: function () { return false; },
-  shouldBackgroundReloadRecord: function () { return false; },
-  _onInit : on('init', function()  {
+  shouldReloadRecord: function () {
+    return false;
+  },
+  shouldBackgroundReloadRecord: function () {
+    return false;
+  },
+  _onInit: on('init', function () {
     this._startChangesToStoreListener();
   }),
-  _startChangesToStoreListener: function() {
-    var db = this.get('db');
-    if (db && !this.changes) { // only run this once
+  _startChangesToStoreListener: function () {
+    var db = this.db;
+    if (db && !this.changes) {
+      // only run this once
       var onChangeListener = bind(this, 'onChange');
-      this.set('onChangeListener', onChangeListener);
+      this.onChangeListener = onChangeListener;
       this.changes = db.changes({
         since: 'now',
         live: true,
-        returnDocs: false
+        returnDocs: false,
       });
       this.changes.on('change', onChangeListener);
     }
   },
 
-  _stopChangesListener: function() {
+  _stopChangesListener: function () {
     if (this.changes) {
-      var onChangeListener = this.get('onChangeListener');
+      var onChangeListener = this.onChangeListener;
       this.changes.removeListener('change', onChangeListener);
       this.changes.cancel();
       this.changes = undefined;
     }
   },
-  changeDb: function(db) {
+  changeDb: function (db) {
     this._stopChangesListener();
 
     var store = this.store;
@@ -70,17 +74,21 @@ export default DS.RESTAdapter.extend({
     }
 
     this._schema = null;
-    this.set('db', db);
+    this.db = db;
     this._startChangesToStoreListener();
   },
   onChange: function (change) {
     // If relational_pouch isn't initialized yet, there can't be any records
     // in the store to update.
-    if (!this.get('db').rel) { return; }
+    if (!this.db.rel) {
+      return;
+    }
 
-    var obj = this.get('db').rel.parseDocID(change.id);
+    var obj = this.db.rel.parseDocID(change.id);
     // skip changes for non-relational_pouch docs. E.g., design docs.
-    if (!obj.type || !obj.id || obj.type === '') { return; }
+    if (!obj.type || !obj.id || obj.type === '') {
+      return;
+    }
 
     var store = this.store;
 
@@ -88,7 +96,7 @@ export default DS.RESTAdapter.extend({
       let promise = this.waitingForConsistency[change.id];
       delete this.waitingForConsistency[change.id];
       if (change.deleted) {
-        promise.reject("deleted");
+        promise.reject('deleted');
       } else {
         promise.resolve(this._findRecord(obj.type, obj.id));
       }
@@ -113,7 +121,11 @@ export default DS.RESTAdapter.extend({
       }
       return;
     }
-    if (!recordInStore.get('isLoaded') || recordInStore.get('rev') === change.changes[0].rev || recordInStore.get('hasDirtyAttributes')) {
+    if (
+      !recordInStore.get('isLoaded') ||
+      recordInStore.get('rev') === change.changes[0].rev ||
+      recordInStore.get('hasDirtyAttributes')
+    ) {
       // The record either hasn't loaded yet or has unpersisted local changes.
       // In either case, we don't want to refresh it in the store
       // (and for some substates, attempting to do so will result in an error).
@@ -123,7 +135,13 @@ export default DS.RESTAdapter.extend({
 
     if (change.deleted) {
       if (this.fixDeleteBug) {
-        recordInStore._internalModel.transitionTo('deleted.saved');//work around ember-data bug
+        if (
+          recordInStore._internalModel._recordData &&
+          recordInStore._internalModel._recordData.setIsDeleted
+        ) {
+          recordInStore._internalModel._recordData.setIsDeleted(true);
+        }
+        recordInStore._internalModel.transitionTo('deleted.saved'); //work around ember-data bug
       } else {
         store.unloadRecord(recordInStore);
       }
@@ -132,7 +150,7 @@ export default DS.RESTAdapter.extend({
     }
   },
 
-  unloadedDocumentChanged: function(/* obj */) {
+  unloadedDocumentChanged: function (/* obj */) {
     /*
      * For performance purposes, we don't load records into the store that haven't previously been loaded.
      * If you want to change this, subclass this method, and push the data into the store. e.g.
@@ -145,29 +163,33 @@ export default DS.RESTAdapter.extend({
      */
   },
 
-  willDestroy: function() {
+  willDestroy: function () {
     this._stopChangesListener();
   },
-  
+
   init() {
     this._indexPromises = [];
     this.waitingForConsistency = {};
     this.createdRecords = {};
   },
-  
+
   _indexPromises: null,
 
   _init: function (store, type, indexPromises) {
     var self = this,
-        recordTypeName = this.getRecordTypeName(type);
-    if (!this.get('db') || typeof this.get('db') !== 'object') {
+      recordTypeName = this.getRecordTypeName(type);
+    if (!this.db || typeof this.db !== 'object') {
       throw new Error('Please set the `db` property on the adapter.');
     }
 
-    if (!get(type, 'attributes').has('rev')) {
+    if (!type.attributes.has('rev')) {
       var modelName = classify(recordTypeName);
-      throw new Error('Please add a `rev` attribute of type `string`' +
-        ' on the ' + modelName + ' model.');
+      throw new Error(
+        'Please add a `rev` attribute of type `string`' +
+          ' on the ' +
+          modelName +
+          ' model.'
+      );
     }
 
     this._schema = this._schema || [];
@@ -185,7 +207,7 @@ export default DS.RESTAdapter.extend({
 
     var schemaDef = {
       singular: singular,
-      plural: plural
+      plural: plural,
     };
 
     if (type.documentType) {
@@ -198,35 +220,43 @@ export default DS.RESTAdapter.extend({
     // check all the subtypes
     // We check the type of `rel.type`because with ember-data beta 19
     // `rel.type` switched from DS.Model to string
-    
-    var rels = [];//extra array is needed since type.relationships/byName return a Map that is not iterable
+
+    var rels = []; //extra array is needed since type.relationships/byName return a Map that is not iterable
     type.eachRelationship((_relName, rel) => rels.push(rel));
-    
+
     let rootCall = indexPromises == undefined;
     if (rootCall) {
       indexPromises = [];
     }
-    
+
     for (let rel of rels) {
       if (rel.kind !== 'belongsTo' && rel.kind !== 'hasMany') {
         // TODO: support inverse as well
         continue; // skip
       }
       var relDef = {},
-          relModel = (typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type);
+        relModel =
+          typeof rel.type === 'string' ? store.modelFor(rel.type) : rel.type;
       if (relModel) {
         let includeRel = true;
         if (!('options' in rel)) rel.options = {};
-        
-        if (typeof(rel.options.async) === "undefined") {
-          rel.options.async = config.emberPouch && !isEmpty(config.emberPouch.async) ? config.emberPouch.async : true;//default true from https://github.com/emberjs/data/pull/3366
+
+        if (typeof rel.options.async === 'undefined') {
+          rel.options.async =
+            config.emberPouch && !isEmpty(config.emberPouch.async)
+              ? config.emberPouch.async
+              : true; //default true from https://github.com/emberjs/data/pull/3366
         }
         let options = Object.create(rel.options);
         if (rel.kind === 'hasMany' && !shouldSaveRelationship(self, rel)) {
           let inverse = type.inverseFor(rel.key, store);
           if (inverse) {
             if (inverse.kind === 'belongsTo') {
-              indexPromises.push(self.get('db').createIndex({index: { fields: ['data.' + inverse.name, '_id'] }}));
+              indexPromises.push(
+                self.get('db').createIndex({
+                  index: { fields: ['data.' + inverse.name, '_id'] },
+                })
+              );
               if (options.async) {
                 includeRel = false;
               } else {
@@ -239,24 +269,26 @@ export default DS.RESTAdapter.extend({
         if (includeRel) {
           relDef[rel.kind] = {
             type: self.getRecordTypeName(relModel),
-            options: options
+            options: options,
           };
           if (!schemaDef.relations) {
             schemaDef.relations = {};
           }
           schemaDef.relations[rel.key] = relDef;
         }
-        
+
         self._init(store, relModel, indexPromises);
       }
     }
 
-    this.get('db').setSchema(this._schema);
-    
+    this.db.setSchema(this._schema);
+
     if (rootCall) {
       this._indexPromises = this._indexPromises.concat(indexPromises);
       return all(indexPromises).then(() => {
-        this._indexPromises = this._indexPromises.filter(x => !indexPromises.includes(x));
+        this._indexPromises = this._indexPromises.filter(
+          (x) => !indexPromises.includes(x)
+        );
       });
     }
   },
@@ -270,12 +302,7 @@ export default DS.RESTAdapter.extend({
     var serializerKey = camelize(modelName);
     var serializer = store.serializerFor(modelName);
 
-    serializer.serializeIntoHash(
-      data,
-      type,
-      record,
-      {includeId: true}
-    );
+    serializer.serializeIntoHash(data, type, record, { includeId: true });
 
     data = data[serializerKey];
 
@@ -291,29 +318,31 @@ export default DS.RESTAdapter.extend({
    * Return key that conform to data adapter
    * ex: 'name' become 'data.name'
    */
-  _dataKey: function(key) {
-    var dataKey ='data.' + key;
-    return ""+ dataKey + "";
+  _dataKey: function (key) {
+    var dataKey = 'data.' + key;
+    return '' + dataKey + '';
   },
 
   /**
    * Returns the modified selector key to comform data key
    * Ex: selector: {name: 'Mario'} wil become selector: {'data.name': 'Mario'}
    */
-  _buildSelector: function(selector) {
+  _buildSelector: function (selector) {
     var dataSelector = {};
     var selectorKeys = [];
 
     for (var key in selector) {
-      if(selector.hasOwnProperty(key)){
+      if (Object.prototype.hasOwnProperty.call(selector, key)) {
         selectorKeys.push(key);
       }
     }
 
-    selectorKeys.forEach(function(key) {
-      var dataKey = this._dataKey(key);
-      dataSelector[dataKey] = selector[key];
-    }.bind(this));
+    selectorKeys.forEach(
+      function (key) {
+        var dataKey = this._dataKey(key);
+        dataSelector[dataKey] = selector[key];
+      }.bind(this)
+    );
 
     return dataSelector;
   },
@@ -323,20 +352,22 @@ export default DS.RESTAdapter.extend({
    * Ex: sort: ['series'] will become ['data.series']
    * Ex: sort: [{series: 'desc'}] will became [{'data.series': 'desc'}]
    */
-  _buildSort: function(sort) {
-    return sort.map(function (value) {
-      var sortKey = {};
-      if (typeof value === 'object' && value !== null) {
-        for (var key in value) {
-          if(value.hasOwnProperty(key)){
-            sortKey[this._dataKey(key)] = value[key];
+  _buildSort: function (sort) {
+    return sort.map(
+      function (value) {
+        var sortKey = {};
+        if (typeof value === 'object' && value !== null) {
+          for (var key in value) {
+            if (Object.prototype.hasOwnProperty.call(value, key)) {
+              sortKey[this._dataKey(key)] = value[key];
+            }
           }
+        } else {
+          return this._dataKey(value);
         }
-      } else {
-        return this._dataKey(value);
-      }
-      return sortKey;
-    }.bind(this));
+        return sortKey;
+      }.bind(this)
+    );
   },
 
   /**
@@ -355,22 +386,26 @@ export default DS.RESTAdapter.extend({
     return camelize(type.modelName);
   },
 
-  findAll: async function(store, type /*, sinceToken */) {
+  findAll: async function (store, type /*, sinceToken */) {
     // TODO: use sinceToken
     await this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type));
+    return this.db.rel.find(this.getRecordTypeName(type));
   },
 
-  findMany: async function(store, type, ids) {
+  findMany: async function (store, type, ids) {
     await this._init(store, type);
-    return this.get('db').rel.find(this.getRecordTypeName(type), ids);
+    return this.db.rel.find(this.getRecordTypeName(type), ids);
   },
 
-  findHasMany: async function(store, record, link, rel) {
+  findHasMany: async function (store, record, link, rel) {
     await this._init(store, record.type);
     let inverse = record.type.inverseFor(rel.key, store);
     if (inverse && inverse.kind === 'belongsTo') {
-      return this.get('db').rel.findHasMany(camelize(rel.type), inverse.name, record.id);
+      return this.db.rel.findHasMany(
+        camelize(rel.type),
+        inverse.name,
+        record.id
+      );
     } else {
       let result = {};
       result[pluralize(rel.type)] = [];
@@ -378,14 +413,14 @@ export default DS.RESTAdapter.extend({
     }
   },
 
-  query: async function(store, type, query) {
+  query: async function (store, type, query) {
     await this._init(store, type);
 
     var recordTypeName = this.getRecordTypeName(type);
-    var db = this.get('db');
+    var db = this.db;
 
     var queryParams = {
-      selector: this._buildSelector(query.filter)
+      selector: this._buildSelector(query.filter),
     };
 
     if (!isEmpty(query.sort)) {
@@ -404,11 +439,11 @@ export default DS.RESTAdapter.extend({
     return db.rel.parseRelDocs(recordTypeName, pouchRes.docs);
   },
 
-  queryRecord: async function(store, type, query) {
+  queryRecord: async function (store, type, query) {
     let results = await this.query(store, type, query);
     let recordType = this.getRecordTypeName(type);
     let recordTypePlural = pluralize(recordType);
-    if(results[recordTypePlural].length > 0){
+    if (results[recordTypePlural].length > 0) {
       results[recordType] = results[recordTypePlural][0];
     } else {
       results[recordType] = null;
@@ -423,8 +458,8 @@ export default DS.RESTAdapter.extend({
    * We keep the method for backward compatibility and forward calls to
    * `findRecord`. This can be removed when the library drops support
    * for deprecated methods.
-  */
-  find: function (store, type, id) {  
+   */
+  find: function (store, type, id) {
     return this.findRecord(store, type, id);
   },
 
@@ -435,7 +470,7 @@ export default DS.RESTAdapter.extend({
   },
 
   async _findRecord(recordTypeName, id) {
-    let payload = await this.get('db').rel.find(recordTypeName, id);
+    let payload = await this.db.rel.find(recordTypeName, id);
     // Ember Data chokes on empty payload, this function throws
     // an error when the requested data is not found
     if (typeof payload === 'object' && payload !== null) {
@@ -449,23 +484,30 @@ export default DS.RESTAdapter.extend({
     }
 
     if (configFlagDisabled(this, 'eventuallyConsistent'))
-      throw new Error("Document of type '" + recordTypeName + "' with id '" + id + "' not found.");
-    else
-      return this._eventuallyConsistent(recordTypeName, id);
+      throw new Error(
+        "Document of type '" +
+          recordTypeName +
+          "' with id '" +
+          id +
+          "' not found."
+      );
+    else return this._eventuallyConsistent(recordTypeName, id);
   },
 
   //TODO: cleanup promises on destroy or db change?
   waitingForConsistency: null,
-  _eventuallyConsistent: function(type, id) {
-    let pouchID = this.get('db').rel.makeDocID({type, id});
+  _eventuallyConsistent: function (type, id) {
+    let pouchID = this.db.rel.makeDocID({ type, id });
     let defered = defer();
     this.waitingForConsistency[pouchID] = defered;
 
-    return this.get('db').rel.isDeleted(type, id).then(deleted => {
+    return this.db.rel.isDeleted(type, id).then((deleted) => {
       //TODO: should we test the status of the promise here? Could it be handled in onChange already?
       if (deleted) {
         delete this.waitingForConsistency[pouchID];
-        throw new Error("Document of type '" + type + "' with id '" + id + "' is deleted.");
+        throw new Error(
+          "Document of type '" + type + "' with id '" + id + "' is deleted."
+        );
       } else if (deleted === null) {
         return defered.promise;
       } else {
@@ -483,17 +525,17 @@ export default DS.RESTAdapter.extend({
   },
 
   createdRecords: null,
-  createRecord: async function(store, type, record) {
+  createRecord: async function (store, type, record) {
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
-    let rel = this.get('db').rel;
-    
+    let rel = this.db.rel;
+
     let id = data.id;
     if (!id) {
       id = data.id = rel.uuid();
     }
     this.createdRecords[id] = true;
-    
+
     let typeName = this.getRecordTypeName(type);
     try {
       let saved = await rel.save(typeName, data);
@@ -501,7 +543,7 @@ export default DS.RESTAdapter.extend({
       let result = {};
       result[pluralize(typeName)] = [data];
       return result;
-    } catch(e) {
+    } catch (e) {
       delete this.createdRecords[id];
       throw e;
     }
@@ -511,8 +553,8 @@ export default DS.RESTAdapter.extend({
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
     let typeName = this.getRecordTypeName(type);
-    let saved = await this.get('db').rel.save(typeName, data);
-    Object.assign(data, saved);//TODO: could only set .rev
+    let saved = await this.db.rel.save(typeName, data);
+    Object.assign(data, saved); //TODO: could only set .rev
     let result = {};
     result[pluralize(typeName)] = [data];
     return result;
@@ -521,7 +563,8 @@ export default DS.RESTAdapter.extend({
   deleteRecord: async function (store, type, record) {
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
-    return this.get('db').rel.del(this.getRecordTypeName(type), data)
+    return this.db.rel
+      .del(this.getRecordTypeName(type), data)
       .then(extractDeleteRecord);
-  }
-});
+  },
+}) {}

@@ -1,7 +1,7 @@
-import DS from 'ember-data';
+import { attr, hasMany } from '@ember-data/model';
 import { Model } from 'ember-pouch';
 
 export default Model.extend({
-  flavor: DS.attr('string'),
-  ingredients: DS.hasMany('food-item')
+  flavor: attr('string'),
+  ingredients: hasMany('food-item'),
 });

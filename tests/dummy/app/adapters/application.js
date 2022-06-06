@@ -1,7 +1,7 @@
 import { defer } from 'rsvp';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
-import Adapter from 'dummy/adapter';
+import { Adapter } from 'ember-pouch';
 import PouchDB from 'ember-pouch/pouchdb';
 import config from 'dummy/config/environment';
 
@@ -13,31 +13,45 @@ function createDb() {
   let db = new PouchDB(localDb);
 
   if (config.emberPouch.remote) {
-      let remoteDb = new PouchDB(config.emberPouch.remoteDb);
+    let remoteDb = new PouchDB(config.emberPouch.remoteDb);
 
-      db.sync(remoteDb, {
-        live: true,
-        retry: true
-      });
+    db.sync(remoteDb, {
+      live: true,
+      retry: true,
+    });
   }
 
   return db;
 }
 
-export default Adapter.extend({
-  init() {
-    this._super(...arguments);
-    this.set('db', createDb());
-  },
-  
-  onChangeListenerTest: null,
+export default class ApplicationAdapter extends Adapter {
+  constructor(owner, args) {
+    super(owner, args);
+    this.db = createDb();
+  }
+
+  _init(store, type) {
+    type.eachRelationship((name, rel) => {
+      rel.options.async = config.emberPouch.async;
+      if (rel.kind === 'hasMany') {
+        rel.options.save = config.emberPouch.saveHasMany;
+      }
+    });
+    if (super._init) {
+      return super._init(...arguments);
+    }
+  }
+
+  onChangeListenerTest = null;
   onChange() {
-    this._super(...arguments);
+    if (super.onChange) {
+      super.onChange(...arguments);
+    }
     if (this.onChangeListenerTest) {
       this.onChangeListenerTest(...arguments);
     }
-  },
-  
+  }
+
   waitForChangeWithID(id) {
     let defered = defer();
     this.onChangeListenerTest = (c) => {
@@ -45,7 +59,7 @@ export default Adapter.extend({
         this.onChangeListenerTest = null;
         defered.resolve(c);
       }
-    }
+    };
     return defered.promise;
-  },
-});
+  }
+}
