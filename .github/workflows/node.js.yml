@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 12.x
-          cache: npm
+          # cache: npm
       - name: Install dependencies
         run: |
           if [ -e yarn.lock ]; then
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 12.x
-          cache: npm
+          # cache: npm
       - name: Install Dependencies
         run: npm install --no-shrinkwrap
       - name: Run Tests
@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 12.x
-          cache: npm
+          # cache: npm
       - name: Install dependencies
         run: |
           if [ -e yarn.lock ]; then
