@@ -575,7 +575,7 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
 
 - **8.0.0-beta.1**
   - Updated to support latest Ember 4.x (fixed isDeleted issues)
-  - Using latest pouchdb code (waiting for release).
+  - Switch to PouchDB 7.3.0.
   - Embroider safe and compatible scenarios supported. Ember Pouch works fine with Ember 4.x projects.
   - Update application adapter example to use class property #262
   - Fix Adapter Blueprint for Ember Octane #257
