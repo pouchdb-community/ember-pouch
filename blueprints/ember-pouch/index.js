@@ -1,16 +1,15 @@
-
 const path = require('path');
 
 module.exports = {
   normalizeEntityName() {
     return 'application';
   },
-  
+
   filesPath() {
     return path.join(this.path, '../pouch-adapter/files');
   },
 
-  afterInstall: function(options) {
+  afterInstall(/*options*/) {
     this.addPackagesToProject([
       { name: 'pouchdb-core' },
       { name: 'pouchdb-adapter-indexeddb' },

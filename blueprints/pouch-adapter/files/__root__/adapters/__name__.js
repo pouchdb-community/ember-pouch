@@ -11,14 +11,12 @@ import HttpPouch from 'pouchdb-adapter-http';
 import mapreduce from 'pouchdb-mapreduce';
 import replication from 'pouchdb-replication';
 
-PouchDB
-  .plugin(PouchDBFind)
+PouchDB.plugin(PouchDBFind)
   .plugin(PouchDBRelational)
   .plugin(indexeddb)
   .plugin(HttpPouch)
   .plugin(mapreduce)
-  .plugin(replication)
-  ;
+  .plugin(replication);
 
 export default class ApplicationAdapter extends Adapter {
 
