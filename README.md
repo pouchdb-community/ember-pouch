@@ -1,6 +1,7 @@
 # Ember Pouch [![Build Status](https://travis-ci.org/pouchdb-community/ember-pouch.svg)](https://travis-ci.org/pouchdb-community/ember-pouch) [![GitHub version](https://badge.fury.io/gh/pouchdb-community%2Fember-pouch.svg)](https://badge.fury.io/gh/pouchdb-community%2Fember-pouch) [![Ember Observer Score](https://emberobserver.com/badges/ember-pouch.svg)](https://emberobserver.com/addons/ember-pouch)
 
-[**Changelog**](#changelog)
+-  [**Changelog**](#changelog)
+-  [**Upgrading**](#upgrading)
 
 Ember Pouch is a PouchDB/CouchDB adapter for Ember Data 3.16+. For older Ember Data versions down to 2.0+ use Ember Pouch version 7.0 For Ember Data versions lower than 2.0+ use Ember Pouch version 3.2.2.
 
@@ -36,7 +37,6 @@ npm install ember-pouch@3.2.2 --save-dev
 
 This provides
 
-- `import PouchDB from 'ember-pouch/pouchdb';`
 - `import {Model, Adapter, Serializer} from 'ember-pouch'`
 
 `Ember-Pouch` requires you to add a `@attr('string') rev` field to all your models. This is for PouchDB/CouchDB to handle revisions:
@@ -66,6 +66,9 @@ export default class TodoModel extends Model {
   @attr('boolean') isCompleted;
 }
 ```
+
+The installation creates a file `adapters/application.js` that you can use by default to setup the database connection. Look at the [Adapter blueprint](#adapter) section to see the settings that you have to set in your config file to work with this adapter.  
+It also installs the required packages.
 
 ## Configuring /app/adapters/application.js
 
@@ -119,10 +122,10 @@ Replace `<model-name>` with the name of your model and the file will automatical
 
 ### Adapter
 
-You can now create an adapter using ember-cli's blueprint functionality. Once you've installed `ember-pouch` into your ember-cli app you can run the following command to automatically generate an application adapter.
+You can now create an adapter using ember-cli's blueprint functionality. Once you've installed `ember-pouch` into your ember-cli app you can run the following command to automatically generate an adapter.
 
 ```
-ember g pouch-adapter application
+ember g pouch-adapter foo
 ```
 
 Now you can store your localDb and remoteDb names in your ember-cli's config. Just add the following keys to the `ENV` object:
@@ -131,6 +134,10 @@ Now you can store your localDb and remoteDb names in your ember-cli's config. Ju
 ENV.emberPouch.localDb = 'test';
 ENV.emberPouch.remoteDb = 'http://localhost:5984/my_couch';
 ```
+
+This blueprint is run on installation for the `application` adapter.
+
+You can use multiple adapters, but be warned that doing the `.plugin` calls in multiple adapter files will result in errors: `TypeError: Cannot redefine property: replicate`. In this case it is better to move the `PouchDB.plugin` calls to a separate file.
 
 ## Relationships
 
@@ -544,6 +551,18 @@ Following the CouchDB consistency model, we have introduced `ENV.emberPouch.even
 `findRecord` now returns a long running Promise if the record is not found. It only rejects the promise if a deletion of the record is found. Otherwise this promise will wait for eternity to resolve.
 This makes sure that belongsTo relations that have been loaded in an unexpected order will still resolve correctly. This makes sure that ember-data does not set the belongsTo to null if the Pouch replicate would have loaded the related object later on. (This only works for async belongsTo, sync versions will need this to be implemented in relational-pouch)
 
+## Upgrading
+
+### Version 8
+
+Version 8 introduces the custom PouchDB setup in the adapter instead of having a default setup in `addon/pouchdb.js`. So if you used `import PouchDB from 'ember-pouch/pouchdb'` in your files, you now have to make your own 'PouchDB bundle' in the same way we do it in the default adapter blueprint. The simplest way to do this is to run the blueprint by doing `ember g ember-pouch` (which will overwrite your application adapter, so make sure to commit that file first) and take the `import PouchDB from...` until the final `.plugin(...)` line and put that into your original adapter (or a separate file if you use more than one adapter).
+You can also copy the lines from [the blueprint file in git](https://github.com/pouchdb-community/ember-pouch/blob/master/blueprints/pouch-adapter/files/__root__/adapters/__name__.js)
+
+We also removed the pouchdb-browser package and relational-pouch as a package.json dependency, so you will have to install the packages since the lines above depend upon.  
+`npm install pouchdb-core pouchdb-adapter-indexeddb pouchdb-adapter-http pouchdb-mapreduce pouchdb-replication pouchdb-find relational-pouch --save-dev`
+
+This way you can now decide for yourself which PouchDB plugins you want to use. You can even remove the http or indexeddb ones if you just want to work offline or online.
+
 ## Installation
 
 - `git clone` this repository
@@ -572,7 +591,10 @@ This project was originally based on the [ember-data-hal-adapter](https://github
 And of course thanks to all our wonderful contributors, [here](https://github.com/pouchdb-community/ember-pouch/graphs/contributors) and [in Relational Pouch](https://github.com/pouchdb-community/relational-pouch/graphs/contributors)!
 
 ## Changelog
-
+- **8.0.0-beta.2**
+  - Set PouchDb indexeddb adapter as default instead of idb adapter to use native views
+  - Generate adapters/application.js at installation
+  - move package.json dependencies to default blueprint
 - **8.0.0-beta.1**
   - Updated to support latest Ember 4.x (fixed isDeleted issues)
   - Switch to PouchDB 7.3.0. Getting ready to use the indexeddb-adapter
