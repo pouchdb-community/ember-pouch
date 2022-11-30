@@ -135,13 +135,22 @@ export default class PouchAdapter extends RESTAdapter.extend({
 
     if (change.deleted) {
       if (this.fixDeleteBug) {
-        if (
-          recordInStore._internalModel._recordData &&
-          recordInStore._internalModel._recordData.setIsDeleted
-        ) {
-          recordInStore._internalModel._recordData.setIsDeleted(true);
+        if (recordInStore._internalModel) {
+          if (
+            recordInStore._internalModel._recordData &&
+            recordInStore._internalModel._recordData.setIsDeleted
+          ) {
+            recordInStore._internalModel._recordData.setIsDeleted(true);
+          }
+          recordInStore._internalModel.transitionTo('deleted.saved'); //work around ember-data bug
+        } else if (recordInStore.___recordState &&
+                   recordInStore.___recordState.recordData &&
+                   recordInStore.___recordState.recordData.setIsDeleted &&
+                   recordInStore.store._join) {
+          recordInStore.___recordState.recordData.setIsDeleted(true);
+          
+          recordInStore.store._join(() => recordInStore.___recordState.recordData.didCommit(null));
         }
-        recordInStore._internalModel.transitionTo('deleted.saved'); //work around ember-data bug
       } else {
         store.unloadRecord(recordInStore);
       }
