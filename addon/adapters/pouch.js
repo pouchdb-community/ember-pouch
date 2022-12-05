@@ -134,9 +134,11 @@ export default class PouchAdapter extends RESTAdapter.extend({
     }
 
     if (change.deleted) {
-      recordInStore.destroyRecord({ adapterOptions: { serverPush: true } });
+      return recordInStore.destroyRecord({
+        adapterOptions: { serverPush: true },
+      });
     } else {
-      recordInStore.reload();
+      return recordInStore.reload();
     }
   },
 
@@ -551,7 +553,7 @@ export default class PouchAdapter extends RESTAdapter.extend({
   },
 
   deleteRecord: async function (store, type, record) {
-    if (record.adapterOptions.serverPush) return;
+    if (record.adapterOptions && record.adapterOptions.serverPush) return;
 
     await this._init(store, type);
     var data = this._recordToData(store, type, record);

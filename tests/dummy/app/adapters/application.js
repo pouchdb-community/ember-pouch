@@ -43,9 +43,9 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   onChangeListenerTest = null;
-  onChange() {
+  async onChange() {
     if (super.onChange) {
-      super.onChange(...arguments);
+      await super.onChange(...arguments);
     }
     if (this.onChangeListenerTest) {
       this.onChangeListenerTest(...arguments);
