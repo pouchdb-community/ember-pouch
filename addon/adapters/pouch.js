@@ -25,7 +25,6 @@ import {
 //});
 
 export default class PouchAdapter extends RESTAdapter.extend({
-  fixDeleteBug: true,
   coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date
@@ -134,19 +133,12 @@ export default class PouchAdapter extends RESTAdapter.extend({
     }
 
     if (change.deleted) {
-      if (this.fixDeleteBug) {
-        if (
-          recordInStore._internalModel._recordData &&
-          recordInStore._internalModel._recordData.setIsDeleted
-        ) {
-          recordInStore._internalModel._recordData.setIsDeleted(true);
-        }
-        recordInStore._internalModel.transitionTo('deleted.saved'); //work around ember-data bug
-      } else {
-        store.unloadRecord(recordInStore);
-      }
+      if (!recordInStore.isSaving && !recordInStore.isDeleted)
+        return recordInStore.destroyRecord({
+          adapterOptions: { serverPush: true },
+        });
     } else {
-      recordInStore.reload();
+      return recordInStore.reload();
     }
   },
 
@@ -561,6 +553,8 @@ export default class PouchAdapter extends RESTAdapter.extend({
   },
 
   deleteRecord: async function (store, type, record) {
+    if (record.adapterOptions && record.adapterOptions.serverPush) return;
+
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
     return this.db.rel

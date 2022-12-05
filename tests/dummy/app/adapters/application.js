@@ -2,7 +2,7 @@ import { defer } from 'rsvp';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
 import { Adapter } from 'ember-pouch';
-import PouchDB from 'ember-pouch/pouchdb';
+import PouchDB from 'dummy/pouchdb';
 import config from 'dummy/config/environment';
 
 function createDb() {
@@ -43,9 +43,9 @@ export default class ApplicationAdapter extends Adapter {
   }
 
   onChangeListenerTest = null;
-  onChange() {
+  async onChange() {
     if (super.onChange) {
-      super.onChange(...arguments);
+      await super.onChange(...arguments);
     }
     if (this.onChangeListenerTest) {
       this.onChangeListenerTest(...arguments);

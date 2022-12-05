@@ -2,7 +2,7 @@ import { run } from '@ember/runloop';
 import { assert } from '@ember/debug';
 import { isEmpty } from '@ember/utils';
 import { Adapter } from 'ember-pouch';
-import PouchDB from 'ember-pouch/pouchdb';
+import PouchDB from 'dummy/pouchdb';
 import config from 'dummy/config/environment';
 
 function createDb() {

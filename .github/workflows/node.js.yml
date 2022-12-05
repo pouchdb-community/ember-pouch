@@ -23,7 +23,7 @@ jobs:
       - name: Install Nod
         uses: actions/setup-node@v3
         with:
-          node-version: 12.x
+          node-version: 14.x
           # cache: npm
       - name: Install dependencies
         run: |
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 12.x
+          node-version: 14.x
           # cache: npm
       - name: Install Dependencies
         run: npm install --no-shrinkwrap
@@ -66,6 +66,7 @@ jobs:
           - ember-lts-3.16
           - ember-lts-3.24
           - ember-lts-3.28
+          - ember-lts-4.4
           - ember-release
           - ember-beta
           - ember-canary
@@ -78,7 +79,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v3
         with:
-          node-version: 12.x
+          node-version: 14.x
           # cache: npm
       - name: Install dependencies
         run: |
