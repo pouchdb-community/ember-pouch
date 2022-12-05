@@ -134,9 +134,10 @@ export default class PouchAdapter extends RESTAdapter.extend({
     }
 
     if (change.deleted) {
-      return recordInStore.destroyRecord({
-        adapterOptions: { serverPush: true },
-      });
+      if (!recordInStore.isSaving && !recordInStore.isDeleted)
+        return recordInStore.destroyRecord({
+          adapterOptions: { serverPush: true },
+        });
     } else {
       return recordInStore.reload();
     }
