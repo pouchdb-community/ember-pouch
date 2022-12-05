@@ -134,30 +134,7 @@ export default class PouchAdapter extends RESTAdapter.extend({
     }
 
     if (change.deleted) {
-      if (this.fixDeleteBug) {
-        if (recordInStore._internalModel) {
-          if (
-            recordInStore._internalModel._recordData &&
-            recordInStore._internalModel._recordData.setIsDeleted
-          ) {
-            recordInStore._internalModel._recordData.setIsDeleted(true);
-          }
-          recordInStore._internalModel.transitionTo('deleted.saved'); //work around ember-data bug
-        } else if (
-          recordInStore.___recordState &&
-          recordInStore.___recordState.recordData &&
-          recordInStore.___recordState.recordData.setIsDeleted &&
-          recordInStore.store._join
-        ) {
-          recordInStore.___recordState.recordData.setIsDeleted(true);
-
-          recordInStore.store._join(() =>
-            recordInStore.___recordState.recordData.didCommit(null)
-          );
-        }
-      } else {
-        store.unloadRecord(recordInStore);
-      }
+      recordInStore.destroyRecord({adapterOptions: { serverPush: true }});
     } else {
       recordInStore.reload();
     }
@@ -574,6 +551,8 @@ export default class PouchAdapter extends RESTAdapter.extend({
   },
 
   deleteRecord: async function (store, type, record) {
+    if (record.adapterOptions.serverPush) return;
+    
     await this._init(store, type);
     var data = this._recordToData(store, type, record);
     return this.db.rel
