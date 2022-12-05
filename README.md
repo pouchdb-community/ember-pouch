@@ -595,6 +595,7 @@ And of course thanks to all our wonderful contributors, [here](https://github.co
   - Set PouchDb indexeddb adapter as default instead of idb adapter to use native views
   - Generate adapters/application.js at installation
   - move package.json dependencies to default blueprint
+  - removed Adapter `fixDeleteBug` flag. We now do a client side `destroyRecord` with custom `adapterOptions` to signal to the ember-data store that the record is deleted. So no more hacking ember-data is needed in the addon to support the server pushed deletes.
 - **8.0.0-beta.1**
   - Updated to support latest Ember 4.x (fixed isDeleted issues)
   - Switch to PouchDB 7.3.0. Getting ready to use the indexeddb-adapter

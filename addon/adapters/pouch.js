@@ -25,7 +25,6 @@ import {
 //});
 
 export default class PouchAdapter extends RESTAdapter.extend({
-  fixDeleteBug: true,
   coalesceFindRequests: false,
 
   // The change listener ensures that individual records are kept up to date

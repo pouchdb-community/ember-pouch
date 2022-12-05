@@ -50,7 +50,6 @@
     "@glimmer/tracking": "^1.0.4",
     "babel-eslint": "^10.1.0",
     "broccoli-asset-rev": "^3.0.0",
-    "ember-auto-import": "~2.4.2",
     "ember-cli": "~4.3.0",
     "ember-cli-app-version": "~5.0.0",
     "ember-cli-dependency-checker": "^3.2.0",
