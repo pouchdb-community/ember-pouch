@@ -7,6 +7,7 @@ import { bind } from '@ember/runloop';
 import { on } from '@ember/object/evented';
 import { classify, camelize } from '@ember/string';
 import { pluralize } from 'ember-inflector';
+import { v4 } from 'uuid';
 //import BelongsToRelationship from 'ember-data/-private/system/relationships/state/belongs-to';
 
 import {
@@ -14,6 +15,22 @@ import {
   shouldSaveRelationship,
   configFlagDisabled,
 } from '../utils';
+
+function getRevFromSaveResult(records) {
+  let rev = null;
+  try {
+    rev = records[Object.keys(records)[0]][0].rev;
+    if (!rev || Object.keys(records).length > 1) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `getRevFromSaveResult going to return ${rev}, but that may not be correct`
+      );
+    }
+  } catch (e) {
+    throw Error(`Could not determine rev`);
+  }
+  return rev;
+}
 
 //BelongsToRelationship.reopen({
 //  findRecord() {
@@ -516,29 +533,60 @@ export default class PouchAdapter extends RESTAdapter.extend({
     });
   },
 
+  generateIdForRecord: function (/* store, type, inputProperties */) {
+    return v4();
+  },
+
   createdRecords: null,
-  createRecord: async function (store, type, record) {
-    await this._init(store, type);
-    var data = this._recordToData(store, type, record);
+  createRecord: async function (store, type, snapshot) {
+    const record = snapshot.record;
+    if (record._emberPouchSavePromise) {
+      console.log('found save promise');
+      const changes = record.changedAttributes();
+      record._emberPouchSavePromise = record._emberPouchSavePromise.then(
+        (records) => {
+          // If there have been changes since the document was created then we should update the record now
+          if (Object.keys(changes).length > 0) {
+            // Include latest rev to indicate that we're aware that data has changed since original request
+            // (otherwise a document update conflict error would be thrown by the DB)
+            snapshot._attributes.rev = getRevFromSaveResult(records);
+            return this.updateRecord(store, type, snapshot);
+          }
+          return records;
+        }
+      );
+      return record._emberPouchSavePromise;
+    }
+
+    this._init(store, type);
+    var data = this._recordToData(store, type, snapshot);
     let rel = this.db.rel;
 
     let id = data.id;
-    if (!id) {
-      id = data.id = rel.uuid();
-    }
     this.createdRecords[id] = true;
 
     let typeName = this.getRecordTypeName(type);
-    try {
-      let saved = await rel.save(typeName, data);
-      Object.assign(data, saved);
-      let result = {};
-      result[pluralize(typeName)] = [data];
-      return result;
-    } catch (e) {
-      delete this.createdRecords[id];
-      throw e;
-    }
+
+    Object.defineProperty(record, '_emberPouchSavePromise', {
+      enumerable: false,
+      writable: true,
+      value: rel
+        .save(typeName, data)
+        .then((saved) => {
+          Object.assign(data, saved);
+          let result = {};
+          result[pluralize(typeName)] = [data];
+          console.log('saved, result', saved, result);
+          return result;
+        })
+        .catch((e) => {
+          console.log('catch', e);
+          delete this.createdRecords[id];
+          throw e;
+        }),
+    });
+
+    return record._emberPouchSavePromise;
   },
 
   updateRecord: async function (store, type, record) {
